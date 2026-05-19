@@ -429,15 +429,25 @@ body {
   .sidebar {
     transform: translateX(-100%);
     box-shadow: none;
+    z-index: 200;
   }
 
   .sidebar.open {
     transform: translateX(0);
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+    z-index: 200;
   }
 
   .sidebar.collapsed {
     transform: translateX(-100%);
+  }
+
+  .sidebar-header {
+    padding: 20px 16px;
+  }
+
+  .sidebar-title {
+    font-size: 1.25rem;
   }
 
   .main-content {
@@ -450,10 +460,12 @@ body {
 
   .mobile-menu-btn {
     display: flex;
+    z-index: 150;
   }
 
   .sidebar-overlay.active {
     display: block;
+    z-index: 199;
   }
 
   .markdown-body {
