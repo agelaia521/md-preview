@@ -431,6 +431,7 @@ body {
 
   .main-content {
     margin-left: 0;
+    overflow-x: hidden;
   }
 
   .mobile-menu-btn {
@@ -445,6 +446,25 @@ body {
 
   .markdown-body {
     padding: 80px 24px 100px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .markdown-body pre {
+    overflow-x: auto;
+    max-width: 100%;
+    white-space: pre;
+  }
+
+  .markdown-body code {
+    word-break: break-all;
+    word-wrap: break-word;
+  }
+
+  .markdown-body table {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
   }
 
   .reading-progress {
