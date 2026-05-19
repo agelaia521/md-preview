@@ -157,7 +157,7 @@
       updateProgress(60);
       const markdown = await response.text();
       updateProgress(100);
-      renderMarkdown(markdown);
+      renderMarkdown(markdown, path);
     } catch (error) {
       console.error('Error loading markdown:', error);
       markdownContent.innerHTML = '<div class="welcome-state"><p class="welcome-text">无法加载文件</p></div>';
@@ -165,17 +165,77 @@
     }
   }
   
-  function renderMarkdown(markdown) {
+  function renderMarkdown(markdown, currentPath = '') {
     const html = marked.parse(markdown, {
       breaks: true,
       gfm: true
     });
     markdownContent.innerHTML = html;
     
+    // 处理代码块复制
     document.querySelectorAll('.markdown-body pre').forEach(pre => {
       pre.addEventListener('click', () => {
         copyCodeToClipboard(pre);
       });
+    });
+    
+    // 拦截 Markdown 中的链接
+    interceptLinks(currentPath);
+  }
+  
+  function interceptLinks(currentPath) {
+    document.querySelectorAll('.markdown-body a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        if (!href) return;
+        
+        // 检查是否是指向 .md 文件的链接
+        if (href.endsWith('.md')) {
+          e.preventDefault();
+          
+          // 处理相对路径
+          let targetPath = href;
+          if (!href.startsWith('/') && currentPath) {
+            // 获取当前文件所在文件夹
+            const currentDir = currentPath.split('/').slice(0, -1).join('/');
+            targetPath = currentDir ? `${currentDir}/${href}` : href;
+            // 简化路径，处理 .. 和 .
+            targetPath = simplifyPath(targetPath);
+          }
+          
+          // 移除开头的 /
+          if (targetPath.startsWith('/')) {
+            targetPath = targetPath.substring(1);
+          }
+          
+          loadMarkdownFile(targetPath);
+          // 尝试在侧边栏高亮对应的文件
+          highlightFileInSidebar(targetPath);
+        }
+      });
+    });
+  }
+  
+  function simplifyPath(path) {
+    const parts = path.split('/');
+    const result = [];
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (part === '..') {
+        result.pop();
+      } else if (part !== '.' && part !== '') {
+        result.push(part);
+      }
+    }
+    return result.join('/');
+  }
+  
+  function highlightFileInSidebar(path) {
+    const fileItems = document.querySelectorAll('.file-item');
+    fileItems.forEach(el => {
+      if (el.dataset.path === path) {
+        setActiveFile(el);
+      }
     });
   }
   
