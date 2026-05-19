@@ -85,18 +85,6 @@ body {
   transition: var(--transition-smooth);
 }
 
-.sidebar.collapsed {
-  transform: translateX(calc(-100% + 48px));
-}
-
-.sidebar.collapsed .sidebar-header {
-  transform: translateX(calc(var(--sidebar-width) - 48px));
-}
-
-.sidebar.collapsed .file-tree {
-  display: none;
-}
-
 .sidebar-header {
   padding: 24px 20px;
   border-bottom: 1px solid var(--color-border);
@@ -133,10 +121,6 @@ body {
 .sidebar-toggle:hover {
   border-color: var(--color-accent-purple);
   color: var(--color-accent-purple-deep);
-}
-
-.sidebar.collapsed .sidebar-toggle {
-  transform: rotate(180deg);
 }
 
 .file-tree {
@@ -215,10 +199,6 @@ body {
   min-height: 100vh;
   position: relative;
   transition: var(--transition-smooth);
-}
-
-.sidebar.collapsed + .main-content {
-  margin-left: 48px;
 }
 
 .mobile-menu-btn {
@@ -401,10 +381,6 @@ body {
   transition: var(--transition-smooth);
 }
 
-.sidebar.collapsed ~ .main-content .reading-progress {
-  left: 48px;
-}
-
 .reading-progress-bar {
   height: 100%;
   width: 0%;
@@ -425,6 +401,32 @@ body {
   backdrop-filter: blur(2px);
 }
 
+@media (min-width: 769px) {
+  .sidebar.collapsed {
+    transform: translateX(calc(-100% + 48px));
+  }
+
+  .sidebar.collapsed .sidebar-header {
+    transform: translateX(calc(var(--sidebar-width) - 48px));
+  }
+
+  .sidebar.collapsed .file-tree {
+    display: none;
+  }
+
+  .sidebar.collapsed .sidebar-toggle {
+    transform: rotate(180deg);
+  }
+
+  .sidebar.collapsed + .main-content {
+    margin-left: 48px;
+  }
+
+  .sidebar.collapsed ~ .main-content .reading-progress {
+    left: 48px;
+  }
+}
+
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
@@ -438,10 +440,6 @@ body {
     z-index: 200;
   }
 
-  .sidebar.collapsed {
-    transform: translateX(-100%);
-  }
-
   .sidebar-header {
     padding: 20px 16px;
   }
@@ -451,10 +449,6 @@ body {
   }
 
   .main-content {
-    margin-left: 0;
-  }
-
-  .sidebar.collapsed + .main-content {
     margin-left: 0;
   }
 
@@ -473,10 +467,6 @@ body {
   }
 
   .reading-progress {
-    left: 0;
-  }
-
-  .sidebar.collapsed ~ .main-content .reading-progress {
     left: 0;
   }
 
