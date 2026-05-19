@@ -8,6 +8,11 @@
   const progressBar = document.getElementById('progressBar');
   const readingProgressBar = document.querySelector('.reading-progress-bar');
   
+  const CONFIG = {
+    owner: 'theforeveriris',
+    repo: 'md-preview'
+  };
+  
   let fileTreeData = [];
   
   function init() {
@@ -16,30 +21,13 @@
     setupScrollProgress();
   }
   
-  function getRepoInfo() {
-    const urlParts = window.location.pathname.split('/');
-    if (urlParts.length >= 3) {
-      return {
-        owner: urlParts[1],
-        repo: urlParts[2]
-      };
-    }
-    const defaultConfig = {
-      owner: 'theforeveriris',
-      repo: 'md-preview'
-    };
-    console.log('Using default repo config:', defaultConfig);
-    return defaultConfig;
-  }
-  
   async function loadFileTree() {
     try {
-      const { owner, repo } = getRepoInfo();
-      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/main?recursive=1`;
+      const apiUrl = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/git/trees/main?recursive=1`;
       const response = await fetch(apiUrl);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch file tree from GitHub API');
+        throw new Error(`Failed to fetch file tree from GitHub API: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
