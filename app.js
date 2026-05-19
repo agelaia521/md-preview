@@ -8,80 +8,6 @@
   const progressBar = document.getElementById('progressBar');
   const readingProgressBar = document.querySelector('.reading-progress-bar');
   
-  const CONFIG = {
-    files: [
-      {
-        name: 'README.md',
-        type: 'file',
-        path: 'README.md'
-      },
-      {
-        name: 'docs',
-        type: 'folder',
-        children: [
-          {
-            name: 'getting-started.md',
-            type: 'file',
-            path: 'docs/getting-started.md'
-          },
-          {
-            name: 'guide.md',
-            type: 'file',
-            path: 'docs/guide.md'
-          },
-          {
-            name: 'advanced',
-            type: 'folder',
-            children: [
-              {
-                name: 'configuration.md',
-                type: 'file',
-                path: 'docs/advanced/configuration.md'
-              },
-              {
-                name: 'deployment.md',
-                type: 'file',
-                path: 'docs/advanced/deployment.md'
-              }
-            ]
-          },
-          {
-            name: 'examples',
-            type: 'folder',
-            children: [
-              {
-                name: 'basic-usage.md',
-                type: 'file',
-                path: 'docs/examples/basic-usage.md'
-              },
-              {
-                name: 'markdown-syntax.md',
-                type: 'file',
-                path: 'docs/examples/markdown-syntax.md'
-              }
-            ]
-          },
-          {
-            name: 'api',
-            type: 'folder',
-            children: [
-              {
-                name: 'configuration.md',
-                type: 'file',
-                path: 'docs/api/configuration.md'
-              },
-              {
-                name: 'events.md',
-                type: 'file',
-                path: 'docs/api/events.md'
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  };
-  
   let fileTreeData = [];
   
   function init() {
@@ -90,14 +16,93 @@
     setupScrollProgress();
   }
   
+  function getRepoInfo() {
+    const urlParts = window.location.pathname.split('/');
+    if (urlParts.length >= 3) {
+      return {
+        owner: urlParts[1],
+        repo: urlParts[2]
+      };
+    }
+    const defaultConfig = {
+      owner: 'theforeveriris',
+      repo: 'md-preview'
+    };
+    console.log('Using default repo config:', defaultConfig);
+    return defaultConfig;
+  }
+  
   async function loadFileTree() {
     try {
-      fileTreeData = CONFIG.files;
+      const { owner, repo } = getRepoInfo();
+      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/main?recursive=1`;
+      const response = await fetch(apiUrl);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch file tree from GitHub API');
+      }
+      
+      const data = await response.json();
+      fileTreeData = buildTreeFromFlatList(data.tree);
       renderFileTree(fileTreeData);
     } catch (error) {
       console.error('Error loading file tree:', error);
-      fileTree.innerHTML = '<div class="file-item" style="color: var(--color-text-muted);">无法加载文件列表</div>';
+      fileTree.innerHTML = '<div class="file-item" style="color: var(--color-text-muted);">无法加载文件列表，请检查网络或手动配置</div>';
     }
+  }
+  
+  function buildTreeFromFlatList(tree) {
+    const root = [];
+    const map = {};
+    
+    tree.forEach(item => {
+      if (item.type === 'blob' && item.path.endsWith('.md')) {
+        const parts = item.path.split('/');
+        let currentLevel = root;
+        let pathSoFar = '';
+        
+        for (let i = 0; i < parts.length; i++) {
+          const part = parts[i];
+          if (i === parts.length - 1) {
+            currentLevel.push({
+              name: part,
+              type: 'file',
+              path: item.path
+            });
+          } else {
+            pathSoFar = pathSoFar ? `${pathSoFar}/${part}`.replace(/^\//, '');
+            let existingFolder = map[pathSoFar];
+            if (!existingFolder) {
+              existingFolder = {
+                name: part,
+                type: 'folder',
+                children: []
+              };
+              map[pathSoFar] = existingFolder;
+              currentLevel.push(existingFolder);
+            }
+            currentLevel = existingFolder.children;
+          }
+        }
+      }
+    });
+    
+    function sortTree(items) {
+      items.sort((a, b) => {
+        if (a.type !== b.type) {
+          return a.type === 'folder' ? -1 : 1;
+        }
+        return a.name.localeCompare(b.name);
+      });
+      
+      items.forEach(item => {
+        if (item.type === 'folder' && item.children) {
+          sortTree(item.children);
+        }
+      });
+    }
+    sortTree(root);
+    return root;
   }
   
   function renderFileTree(files, container = fileTree, level = 0) {
