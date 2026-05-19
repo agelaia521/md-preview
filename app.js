@@ -7,6 +7,9 @@
   const sidebarOverlay = document.getElementById('sidebarOverlay');
   const progressBar = document.getElementById('progressBar');
   const readingProgressBar = document.querySelector('.reading-progress-bar');
+  const modeFiles = document.getElementById('modeFiles');
+  const modeIndex = document.getElementById('modeIndex');
+  const indexTree = document.getElementById('indexTree');
   
   const CONFIG = {
     owner: 'theforeveriris',
@@ -14,6 +17,9 @@
   };
   
   let fileTreeData = [];
+  let currentMode = 'files';
+  let currentFilePath = '';
+  let currentHeadings = [];
   
   function init() {
     loadFileTree();
@@ -157,7 +163,9 @@
       updateProgress(60);
       const markdown = await response.text();
       updateProgress(100);
+      currentFilePath = path;
       renderMarkdown(markdown, path);
+      extractAndRenderIndex(markdown);
     } catch (error) {
       console.error('Error loading markdown:', error);
       markdownContent.innerHTML = '<div class="welcome-state"><p class="welcome-text">无法加载文件</p></div>';
@@ -172,14 +180,18 @@
     });
     markdownContent.innerHTML = html;
     
-    // 处理代码块复制
+    document.querySelectorAll('.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6').forEach(heading => {
+      const text = heading.textContent;
+      const id = text.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-').replace(/^-|-$/g, '');
+      heading.id = id;
+    });
+    
     document.querySelectorAll('.markdown-body pre').forEach(pre => {
       pre.addEventListener('click', () => {
         copyCodeToClipboard(pre);
       });
     });
     
-    // 拦截 Markdown 中的链接
     interceptLinks(currentPath);
   }
   
@@ -230,6 +242,66 @@
     return result.join('/');
   }
   
+  function extractAndRenderIndex(markdown) {
+    currentHeadings = [];
+    const headingRegex = /^(#{1,6})\s+(.+)$/gm;
+    let match;
+    
+    while ((match = headingRegex.exec(markdown)) !== null) {
+      const level = match[1].length;
+      const text = match[2].trim();
+      const id = text.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-').replace(/^-|-$/g, '');
+      currentHeadings.push({ level, text, id });
+    }
+    
+    renderIndex();
+  }
+  
+  function renderIndex() {
+    indexTree.innerHTML = '';
+    
+    if (currentHeadings.length === 0) {
+      indexTree.innerHTML = '<div class="index-item" style="color: var(--color-text-muted);">当前文件无目录</div>';
+      return;
+    }
+    
+    currentHeadings.forEach((heading, index) => {
+      const item = document.createElement('a');
+      item.className = 'index-item';
+      item.href = '#' + heading.id;
+      item.textContent = heading.text;
+      item.style.paddingLeft = (20 + (heading.level - 1) * 16) + 'px';
+      item.dataset.id = heading.id;
+      
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.getElementById(heading.id);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        setActiveIndexItem(item);
+      });
+      
+      indexTree.appendChild(item);
+    });
+  }
+  
+  function setActiveIndexItem(item) {
+    document.querySelectorAll('.index-item.active').forEach(el => {
+      el.classList.remove('active');
+    });
+    item.classList.add('active');
+  }
+  
+  function switchMode(mode) {
+    currentMode = mode;
+    
+    modeFiles.classList.toggle('active', mode === 'files');
+    modeIndex.classList.toggle('active', mode === 'index');
+    fileTree.classList.toggle('hidden', mode !== 'files');
+    indexTree.classList.toggle('hidden', mode !== 'index');
+  }
+  
   function highlightFileInSidebar(path) {
     const fileItems = document.querySelectorAll('.file-item');
     fileItems.forEach(el => {
@@ -274,6 +346,9 @@
   function setupEventListeners() {
     mobileMenuBtn.addEventListener('click', toggleSidebar);
     sidebarOverlay.addEventListener('click', closeSidebar);
+    
+    modeFiles.addEventListener('click', () => switchMode('files'));
+    modeIndex.addEventListener('click', () => switchMode('index'));
     
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {

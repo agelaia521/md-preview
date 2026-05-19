@@ -124,6 +124,66 @@ body {
   color: var(--color-accent-purple-deep);
 }
 
+.mode-toggle {
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-weight: 400;
+  transition: var(--transition-smooth);
+  user-select: none;
+}
+
+.mode-toggle:hover {
+  color: var(--color-accent-purple);
+}
+
+.mode-toggle.active {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.mode-divider {
+  color: var(--color-text-muted);
+  font-weight: 400;
+  margin: 0 2px;
+}
+
+.index-tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 0;
+}
+
+.index-tree.hidden {
+  display: none;
+}
+
+.file-tree.hidden {
+  display: none;
+}
+
+.index-item {
+  display: block;
+  padding: 10px 20px;
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 400;
+  border-left: 2px solid transparent;
+  transition: var(--transition-smooth);
+  cursor: pointer;
+}
+
+.index-item:hover {
+  background: rgba(212, 165, 201, 0.1);
+  border-left-color: var(--color-accent-purple);
+}
+
+.index-item.active {
+  background: rgba(242, 196, 206, 0.15);
+  border-left-color: var(--color-accent-pink);
+  color: var(--color-accent-purple-deep);
+}
+
 @media (min-width: 769px) {
   .sidebar-toggle {
     display: none;
