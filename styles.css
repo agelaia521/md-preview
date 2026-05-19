@@ -123,6 +123,12 @@ body {
   color: var(--color-accent-purple-deep);
 }
 
+@media (min-width: 769px) {
+  .sidebar-toggle {
+    display: none;
+  }
+}
+
 .file-tree {
   flex: 1;
   overflow-y: auto;
@@ -399,28 +405,6 @@ body {
   background: rgba(0, 0, 0, 0.2);
   z-index: 99;
   backdrop-filter: blur(2px);
-}
-
-@media (min-width: 769px) {
-  .sidebar.collapsed {
-    transform: translateX(calc(-100% + 48px));
-  }
-
-  .sidebar.collapsed .sidebar-header {
-    transform: translateX(calc(var(--sidebar-width) - 48px));
-  }
-
-  .sidebar.collapsed .file-tree {
-    display: none;
-  }
-
-  .sidebar.collapsed + .main-content {
-    margin-left: 48px;
-  }
-
-  .sidebar.collapsed ~ .main-content .reading-progress {
-    left: 48px;
-  }
 }
 
 @media (max-width: 768px) {

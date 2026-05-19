@@ -211,8 +211,7 @@
   }
   
   function setupEventListeners() {
-    sidebarToggle.addEventListener('click', toggleSidebarDesktop);
-    mobileMenuBtn.addEventListener('click', toggleSidebarMobile);
+    mobileMenuBtn.addEventListener('click', toggleSidebar);
     sidebarOverlay.addEventListener('click', closeSidebar);
     
     document.addEventListener('keydown', (e) => {
@@ -222,18 +221,13 @@
     });
   }
   
-  function toggleSidebarDesktop() {
-    sidebar.classList.toggle('collapsed');
-  }
-  
-  function toggleSidebarMobile() {
+  function toggleSidebar() {
     sidebar.classList.toggle('open');
     sidebarOverlay.classList.toggle('active');
   }
   
   function closeSidebar() {
     sidebar.classList.remove('open');
-    sidebar.classList.remove('collapsed');
     sidebarOverlay.classList.remove('active');
   }
   
