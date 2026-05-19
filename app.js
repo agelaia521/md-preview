@@ -58,7 +58,7 @@
               path: item.path
             });
           } else {
-            pathSoFar = pathSoFar ? `${pathSoFar}/${part}`.replace(/^\//, '');
+            pathSoFar = pathSoFar ? `${pathSoFar}/${part}` : part;
             let existingFolder = map[pathSoFar];
             if (!existingFolder) {
               existingFolder = {
