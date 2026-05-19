@@ -346,6 +346,18 @@ body {
   margin-bottom: 1.25em;
 }
 
+.markdown-body strong,
+.markdown-body b {
+  color: var(--color-accent-purple-deep);
+  font-weight: 600;
+}
+
+.markdown-body em,
+.markdown-body i {
+  color: var(--color-accent-purple);
+  font-style: italic;
+}
+
 .markdown-body a {
   color: var(--color-accent-purple-deep);
   text-decoration: none;
