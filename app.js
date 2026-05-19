@@ -20,9 +20,62 @@
         type: 'folder',
         children: [
           {
+            name: 'getting-started.md',
+            type: 'file',
+            path: 'docs/getting-started.md'
+          },
+          {
             name: 'guide.md',
             type: 'file',
             path: 'docs/guide.md'
+          },
+          {
+            name: 'advanced',
+            type: 'folder',
+            children: [
+              {
+                name: 'configuration.md',
+                type: 'file',
+                path: 'docs/advanced/configuration.md'
+              },
+              {
+                name: 'deployment.md',
+                type: 'file',
+                path: 'docs/advanced/deployment.md'
+              }
+            ]
+          },
+          {
+            name: 'examples',
+            type: 'folder',
+            children: [
+              {
+                name: 'basic-usage.md',
+                type: 'file',
+                path: 'docs/examples/basic-usage.md'
+              },
+              {
+                name: 'markdown-syntax.md',
+                type: 'file',
+                path: 'docs/examples/markdown-syntax.md'
+              }
+            ]
+          },
+          {
+            name: 'api',
+            type: 'folder',
+            children: [
+              {
+                name: 'configuration.md',
+                type: 'file',
+                path: 'docs/api/configuration.md'
+              },
+              {
+                name: 'events.md',
+                type: 'file',
+                path: 'docs/api/events.md'
+              }
+            ]
           }
         ]
       }
