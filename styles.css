@@ -414,10 +414,6 @@ body {
     display: none;
   }
 
-  .sidebar.collapsed .sidebar-toggle {
-    transform: rotate(180deg);
-  }
-
   .sidebar.collapsed + .main-content {
     margin-left: 48px;
   }
