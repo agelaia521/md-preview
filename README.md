@@ -64,6 +64,49 @@ Animal <|-- Dog
 @enduml
 ```
 
+### 外部服务嵌入
+
+支持通过 iframe 嵌入多种外部服务：
+
+**视频平台：**
+- YouTube
+- Bilibili
+- Vimeo
+
+**设计稿：**
+- Figma
+- Canva
+
+**代码演示：**
+- CodePen
+- JSFiddle
+- StackBlitz
+- Replit
+
+**地图：**
+- Google Maps
+- OpenStreetMap
+
+**办公文档：**
+- Google Docs/Sheets/Slides
+- Office Online
+
+**社交媒体：**
+- Twitter/X 卡片
+- GitHub Gist
+
+**徽章/状态：**
+- Shields.io
+- Badgen
+
+使用示例：
+```markdown
+@[youtube](dQw4w9WgXcQ)
+@[bilibili](BV1xx411c7mZ)
+@[codepen](https://codepen.io/username/pen/example)
+@[figma](https://www.figma.com/file/example)
+```
+
 ## 快速开始
 
 ### 在 GitHub Pages 上使用：
