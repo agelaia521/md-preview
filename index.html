@@ -53,6 +53,36 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#d4a5c9',
+        primaryTextColor: '#333333',
+        primaryBorderColor: '#d4a5c9',
+        lineColor: '#888888',
+        secondaryColor: '#f2c4ce',
+        tertiaryColor: '#f8f8f8',
+        background: '#ffffff',
+        mainBkg: '#ffffff',
+        nodeBorder: '#d4a5c9',
+        clusterBkg: '#f8f8f8',
+        titleColor: '#333333',
+        edgeLabelBackground: '#ffffff'
+      },
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      },
+      sequence: {
+        useMaxWidth: true,
+        diagramMarginX: 20,
+        diagramMarginY: 20
+      }
+    });
+  </script>
   <script src="app.js"></script>
 </body>
 </html>

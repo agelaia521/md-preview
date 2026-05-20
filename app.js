@@ -20,44 +20,8 @@
   let currentMode = 'files';
   let currentFilePath = '';
   let currentHeadings = [];
-  let mermaidInitialized = false;
-  
-  function initMermaid() {
-    if (typeof mermaid !== 'undefined' && !mermaidInitialized) {
-      mermaid.initialize({
-        startOnLoad: false,
-        theme: 'base',
-        themeVariables: {
-          primaryColor: '#d4a5c9',
-          primaryTextColor: '#333333',
-          primaryBorderColor: '#d4a5c9',
-          lineColor: '#888888',
-          secondaryColor: '#f2c4ce',
-          tertiaryColor: '#f8f8f8',
-          background: '#ffffff',
-          mainBkg: '#ffffff',
-          nodeBorder: '#d4a5c9',
-          clusterBkg: '#f8f8f8',
-          titleColor: '#333333',
-          edgeLabelBackground: '#ffffff'
-        },
-        flowchart: {
-          useMaxWidth: true,
-          htmlLabels: true,
-          curve: 'basis'
-        },
-        sequence: {
-          useMaxWidth: true,
-          diagramMarginX: 20,
-          diagramMarginY: 20
-        }
-      });
-      mermaidInitialized = true;
-    }
-  }
   
   function init() {
-    initMermaid();
     loadFileTree();
     setupEventListeners();
     setupScrollProgress();
@@ -241,32 +205,35 @@
       return;
     }
     
-    if (!mermaidInitialized) {
-      initMermaid();
-    }
+    const allPres = document.querySelectorAll('.markdown-body pre');
     
-    const mermaidBlocks = document.querySelectorAll('.markdown-body pre code.language-mermaid');
-    
-    for (let i = 0; i < mermaidBlocks.length; i++) {
-      const codeElement = mermaidBlocks[i];
-      const preElement = codeElement.closest('pre');
+    for (let i = 0; i < allPres.length; i++) {
+      const pre = allPres[i];
+      const codeElement = pre.querySelector('code');
       
-      if (!preElement) continue;
+      if (!codeElement) continue;
+      
+      const classList = codeElement.className;
+      if (!classList || !classList.includes('language-mermaid')) continue;
       
       const mermaidCode = codeElement.textContent.trim();
-      const id = 'mermaid-diagram-' + Date.now() + '-' + i;
+      const id = 'mermaid-' + Date.now() + '-' + i;
       
       try {
         const { svg } = await mermaid.render(id, mermaidCode);
         const container = document.createElement('div');
         container.className = 'mermaid-diagram';
         container.innerHTML = svg;
-        
-        preElement.replaceWith(container);
+        pre.replaceWith(container);
       } catch (error) {
         console.error('Mermaid rendering error:', error);
-        preElement.style.borderColor = '#ff6b6b';
-        preElement.title = 'Mermaid 渲染错误: ' + error.message;
+        const errorDiv = document.createElement('div');
+        errorDiv.style.color = '#ff6b6b';
+        errorDiv.style.padding = '10px';
+        errorDiv.style.border = '1px solid #ff6b6b';
+        errorDiv.style.borderRadius = '4px';
+        errorDiv.textContent = 'Mermaid 渲染错误: ' + error.message;
+        pre.replaceWith(errorDiv);
       }
     }
   }
