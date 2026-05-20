@@ -29,6 +29,28 @@
   
   async function loadFileTree() {
     try {
+      // 首先尝试加载预构建的文件树
+      const prebuiltUrl = './data/file-tree.json';
+      let response = await fetch(prebuiltUrl);
+      
+      if (response.ok) {
+        console.log('✅ 使用预构建的文件树');
+        fileTreeData = await response.json();
+        renderFileTree(fileTreeData);
+        return;
+      } else {
+        console.log('⚠️ 预构建文件不存在，使用 GitHub API');
+        // 回退到 GitHub API
+        await loadFileTreeFromGitHubAPI();
+      }
+    } catch (error) {
+      console.error('⚠️ 加载预构建文件树失败，使用 GitHub API:', error);
+      await loadFileTreeFromGitHubAPI();
+    }
+  }
+  
+  async function loadFileTreeFromGitHubAPI() {
+    try {
       const apiUrl = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/git/trees/main?recursive=1`;
       const response = await fetch(apiUrl);
       

@@ -4,6 +4,44 @@
 
 ---
 
+## 0. 部署说明
+
+### 0.1 GitHub Pages 部署（推荐）
+
+项目使用 GitHub Action 自动构建和部署，完全避免 GitHub API 限流问题。
+
+#### 0.1.1 部署流程
+
+1. **Fork 仓库**
+2. **配置仓库
+   - 进入 Settings → Pages
+   - 源选择 GitHub Actions
+3. **自定义配置
+   - 修改 `app.js` 中的 `CONFIG.owner` 和 `CONFIG.repo`
+4. **推送代码，自动部署
+
+#### 0.1.2 工作原理
+
+```
+代码推送 → GitHub Action 触发
+       → 运行 build-file-tree.js 扫描 .md 文件
+       → 生成 data/file-tree.json
+       → 部署到 GitHub Pages
+       → 前端优先从预构建文件读取，无 API 限制
+```
+
+#### 0.1.3 本地测试
+
+```bash
+node scripts/build-file-tree.js
+```
+
+### 0.2 回退机制
+
+如果预构建文件不存在，系统会自动回退到 GitHub API（有限制）。
+
+---
+
 ## 1. 项目架构总览
 
 ### 1.1 技术栈
@@ -13,6 +51,8 @@
 | **HTML5** | 页面结构，语义化标签 |
 | **CSS3** | 样式系统，响应式设计，CSS 变量 |
 | **Vanilla JavaScript** | 核心功能，无框架依赖 |
+| **Node.js (仅构建)** | 文件树预构建 |
+| **GitHub Actions** | 自动 CI/CD |
 | **Marked.js** | Markdown 解析 |
 | **Mermaid.js** | 流程图、时序图等图表渲染 |
 | **PlantUML** | 多种 UML 和非 UML 图 |
@@ -31,12 +71,20 @@ md-preview/
 ├── app.js             # 核心业务逻辑，所有功能实现
 ├── styles.css         # 完整样式系统
 ├── README.md          # 用户文档
-└── readme-dev.md     # 本文档（开发者文档）
+├── readme-dev.md     # 本文档（开发者文档）
+├── scripts/
+│   └── build-file-tree.js  # 文件树预构建脚本
+├── data/
+│   └── file-tree.json      # 预构建的文件树（由 Action 生成）
+└── .github/
+    └── workflows/
+        └── build-and-deploy.yml  # GitHub Action 配置
 ```
 
 ### 1.3 架构特点
 
 - **纯前端架构**：无需后端，所有逻辑在浏览器运行
+- **预构建优化**：文件树预部署，避免 GitHub API 限流
 - **模块化设计**：使用 IIFE 模式避免全局污染
 - **事件驱动**：通过事件委托处理用户交互
 - **异步渲染**：Markdown 解析和内容渲染分离
@@ -97,12 +145,36 @@ md-preview/
 
 ### 2.2 核心模块详解
 
-#### 2.2.1 GitHub API 集成 (`loadFileTree`)
+#### 2.2.1 文件树加载 (`loadFileTree`)
 
-**功能**：通过 GitHub API 获取仓库文件树
+**功能**：双重策略加载文件树
+1. **优先使用预构建文件** - 无 API 限制，性能最佳
+2. **回退到 GitHub API** - 作为备用方案
 
 ```javascript
 async function loadFileTree() {
+  try {
+    // 首先尝试加载预构建的文件树
+    const prebuiltUrl = './data/file-tree.json';
+    let response = await fetch(prebuiltUrl);
+    
+    if (response.ok) {
+      console.log('✅ 使用预构建的文件树');
+      fileTreeData = await response.json();
+      renderFileTree(fileTreeData);
+      return;
+    } else {
+      console.log('⚠️ 预构建文件不存在，使用 GitHub API');
+      await loadFileTreeFromGitHubAPI();
+    }
+  } catch (error) {
+    console.error('⚠️ 加载预构建文件树失败，使用 GitHub API:', error);
+    await loadFileTreeFromGitHubAPI();
+  }
+}
+
+async function loadFileTreeFromGitHubAPI() {
+  // GitHub API 回退方案
   const apiUrl = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/git/trees/main?recursive=1`;
   const response = await fetch(apiUrl);
   const data = await response.json();
@@ -112,11 +184,13 @@ async function loadFileTree() {
 ```
 
 **特点**：
+- 预构建优先，完全避免 API 限流
+- 自动回退，保持兼容性
 - 使用 `recursive=1` 获取完整树结构
 - 自动过滤 `.md` 文件
 - 递归构建目录结构
 
-#### 2.2.2 目录树构建算法 (`buildTreeFromFlatList`)
+#### 2.2.2 目录树构建算法 (`buildTreeFromFlatList` / `buildTreeFromDirectory`)
 
 **输入**：GitHub API 返回的扁平文件列表
 

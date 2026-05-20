@@ -1,0 +1,9 @@
+# 预构建的文件树
+data/
+
+# Node modules
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
