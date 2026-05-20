@@ -572,6 +572,11 @@
   }
   
   function renderMusicNotation() {
+    console.log('Checking music libraries...');
+    console.log('  - abcjs:', typeof ABCJS !== 'undefined' ? 'loaded' : 'not loaded');
+    console.log('  - verovio:', typeof verovio !== 'undefined' || typeof Verovio !== 'undefined' ? 'loaded' : 'not loaded');
+    console.log('  - opensheetmusicdisplay:', (typeof opensheetmusicdisplay !== 'undefined' || typeof OpenSheetMusicDisplay !== 'undefined') ? 'loaded' : 'not loaded');
+    
     const allPres = Array.from(document.querySelectorAll('.markdown-body pre'));
     
     // 反向遍历，避免 DOM 修改影响索引
@@ -645,7 +650,9 @@
   }
   
   function renderMusicXML(code, container, pre) {
-    if (typeof verovio === 'undefined') {
+    // 尝试多种可能的全局命名空间
+    const verovioLib = window.verovio || window.Verovio;
+    if (typeof verovioLib === 'undefined') {
       console.error('Verovio library is not loaded');
       const errorDiv = document.createElement('div');
       errorDiv.style.color = '#ff6b6b';
@@ -659,7 +666,9 @@
     }
     
     try {
-      const tk = new verovio.toolkit();
+      // 获取 toolkit 构造函数
+      const ToolkitClass = verovioLib.toolkit || verovioLib.Toolkit || verovioLib;
+      const tk = new ToolkitClass();
       
       const formattedCode = code
         .replace(/<!DOCTYPE[^>]*>/i, '')
@@ -693,14 +702,18 @@
   }
   
   function renderOSMD(code, container, pre) {
-    if (typeof opensheetmusicdisplay === 'undefined') {
+    // 尝试多种可能的全局命名空间
+    const osmdLib = window.opensheetmusicdisplay || window.OpenSheetMusicDisplay;
+    if (typeof osmdLib === 'undefined') {
       console.error('OSMD library is not loaded');
       const errorDiv = document.createElement('div');
       errorDiv.style.color = '#ff6b6b';
       errorDiv.style.padding = '10px';
       errorDiv.textContent = 'OSMD 库未加载';
       container.appendChild(errorDiv);
-      pre.parentNode.replaceChild(container, pre);
+      if (pre.parentNode) {
+        pre.parentNode.replaceChild(container, pre);
+      }
       return;
     }
     
@@ -720,7 +733,9 @@
         pre.parentNode.replaceChild(container, pre);
       }
       
-      const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(div, {
+      // 正确获取构造函数
+      const OSMDClass = osmdLib.OpenSheetMusicDisplay || osmdLib;
+      const osmd = new OSMDClass(div, {
         autoResize: true,
         backend: 'svg',
         drawTitle: true,
