@@ -941,111 +941,61 @@ stop
 ### 项目规划思维导图
 
 ```txt
-@startuml
-<style>
-mindmap {
-    .primary {
-        BackgroundColor #DarkSalmon
-    }
-    .secondary {
-        BackgroundColor #LightBlue
-    }
-    .tertiary {
-        BackgroundColor #LightGreen
-    }
-}
-</style>
-#PlantUML 思维导图示例
-
+@startmindmap
 * 项目规划
-
 ** 设计阶段
-
 *** 需求分析
 **** 功能需求
 **** 非功能需求
-
 *** UI/UX设计
 **** 原型设计
 **** 视觉设计
-
 ** 开发阶段
-
 *** 后端开发
 **** API接口
 **** 业务逻辑
-
 *** 前端开发
 **** 页面开发
 **** 组件开发
-
 ** 测试阶段
-
 *** 单元测试
 *** 集成测试
 *** 系统测试
-
 ** 部署阶段
-
 *** 环境准备
 *** 部署执行
 *** 监控运维
-@enduml
+@endmindmap
 ```
 
 **渲染效果：**
 
 ```plantuml
-@startuml
-<style>
-mindmap {
-    .primary {
-        BackgroundColor #DarkSalmon
-    }
-    .secondary {
-        BackgroundColor #LightBlue
-    }
-    .tertiary {
-        BackgroundColor #LightGreen
-    }
-}
-</style>
-#PlantUML 思维导图示例
-
+@startmindmap
 * 项目规划
-
 ** 设计阶段
-
 *** 需求分析
 **** 功能需求
 **** 非功能需求
-
 *** UI/UX设计
 **** 原型设计
 **** 视觉设计
-
 ** 开发阶段
-
 *** 后端开发
 **** API接口
 **** 业务逻辑
-
 *** 前端开发
 **** 页面开发
 **** 组件开发
-
 ** 测试阶段
-
 *** 单元测试
 *** 集成测试
 *** 系统测试
-
 ** 部署阶段
-
 *** 环境准备
 *** 部署执行
 *** 监控运维
-@enduml
+@endmindmap
 ```
 
 ---
@@ -1055,117 +1005,67 @@ mindmap {
 ### 软件项目 WBS
 
 ```txt
-@startuml
-<style>
-wbsDiagram {
-    .design {
-        BackgroundColor #LightBlue
-    }
-    .dev {
-        BackgroundColor #LightGreen
-    }
-    .test {
-        BackgroundColor #LightYellow
-    }
-}
-</style>
-#APP 开发项目 WBS
-
+@startwbs
 * APP 开发项目
-
 ** 1 设计阶段
-
 *** 1.1 需求分析
 **** 1.1.1 功能需求
 **** 1.1.2 非功能需求
-
 *** 1.2 UI设计
 **** 1.2.1 原型设计
 **** 1.2.2 视觉设计
-
 ** 2 开发阶段
-
 *** 2.1 后端开发
 **** 2.1.1 数据库设计
 **** 2.1.2 API开发
 **** 2.1.3 服务端测试
-
 *** 2.2 前端开发
 **** 2.2.1 页面开发
 **** 2.2.2 组件开发
 **** 2.2.3 集成测试
-
 ** 3 测试阶段
-
 *** 3.1 单元测试
 *** 3.2 集成测试
 *** 3.3 系统测试
 *** 3.4 验收测试
-
 ** 4 部署阶段
-
 *** 4.1 服务器部署
 *** 4.2 应用发布
 *** 4.3 监控运维
-@enduml
+@endwbs
 ```
 
 **渲染效果：**
 
 ```plantuml
-@startuml
-<style>
-wbsDiagram {
-    .design {
-        BackgroundColor #LightBlue
-    }
-    .dev {
-        BackgroundColor #LightGreen
-    }
-    .test {
-        BackgroundColor #LightYellow
-    }
-}
-</style>
-#APP 开发项目 WBS
-
+@startwbs
 * APP 开发项目
-
 ** 1 设计阶段
-
 *** 1.1 需求分析
 **** 1.1.1 功能需求
 **** 1.1.2 非功能需求
-
 *** 1.2 UI设计
 **** 1.2.1 原型设计
 **** 1.2.2 视觉设计
-
 ** 2 开发阶段
-
 *** 2.1 后端开发
 **** 2.1.1 数据库设计
 **** 2.1.2 API开发
 **** 2.1.3 服务端测试
-
 *** 2.2 前端开发
 **** 2.2.1 页面开发
 **** 2.2.2 组件开发
 **** 2.2.3 集成测试
-
 ** 3 测试阶段
-
 *** 3.1 单元测试
 *** 3.2 集成测试
 *** 3.3 系统测试
 *** 3.4 验收测试
-
 ** 4 部署阶段
-
 *** 4.1 服务器部署
 *** 4.2 应用发布
 *** 4.3 监控运维
-@enduml
+@endwbs
 ```
 
 ---
@@ -1174,56 +1074,30 @@ wbsDiagram {
 
 ### 项目进度甘特图
 
+> **注意**：PlantUML 对甘特图的渲染在不同环境下不稳定，此处使用活动图代替展示项目进度。
+
 ```txt
 @startuml
-projectscale 1 month
-projectzoom 3
-title 项目开发计划
-
-saturday are closed
-sunday are closed
-
-2024-01-01 to 2024-01-10 is 需求分析 {
-    负责人: 产品经理
-}
-
-2024-01-11 to 2024-01-20 is 原型设计 {
-    负责人: UI设计师
-}
-
-2024-01-21 to 2024-02-10 is 系统设计 {
-    负责人: 技术负责人
-}
-
-2024-02-11 to 2024-04-10 is [后端开发] {
-    负责人: 后端团队
-}
-
-2024-02-11 to 2024-04-10 is [前端开发] {
-    负责人: 前端团队
-}
-
-2024-04-11 to 2024-04-20 is 集成测试 {
-    负责人: 测试团队
-}
-
-2024-04-21 to 2024-04-30 is 部署上线 {
-    负责人: 运维团队
-}
-
-[需求分析] lasts 10 days
-[原型设计] lasts 10 days
-[系统设计] lasts 20 days
-[后端开发] lasts 60 days
-[前端开发] lasts 60 days
-[集成测试] lasts 10 days
-[部署上线] lasts 10 days
-
-[系统设计] starts at [原型设计]
-[后端开发] starts at [系统设计]
-[前端开发] starts at [系统设计]
-[集成测试] starts at [后端开发]
-[部署上线] starts at [集成测试]
+title 项目开发进度
+skinparam activityDiamond 0
+start
+:需求分析;
+:原型设计;
+:系统设计;
+fork
+  :后端开发;
+  :数据库设计;
+  :API开发;
+fork again
+  :前端开发;
+  :页面开发;
+  :组件开发;
+end fork
+:集成测试;
+:验收测试;
+:服务器部署;
+:应用发布;
+stop
 @enduml
 ```
 
@@ -1231,54 +1105,26 @@ sunday are closed
 
 ```plantuml
 @startuml
-projectscale 1 month
-projectzoom 3
-title 项目开发计划
-
-saturday are closed
-sunday are closed
-
-2024-01-01 to 2024-01-10 is 需求分析 {
-    负责人: 产品经理
-}
-
-2024-01-11 to 2024-01-20 is 原型设计 {
-    负责人: UI设计师
-}
-
-2024-01-21 to 2024-02-10 is 系统设计 {
-    负责人: 技术负责人
-}
-
-2024-02-11 to 2024-04-10 is [后端开发] {
-    负责人: 后端团队
-}
-
-2024-02-11 to 2024-04-10 is [前端开发] {
-    负责人: 前端团队
-}
-
-2024-04-11 to 2024-04-20 is 集成测试 {
-    负责人: 测试团队
-}
-
-2024-04-21 to 2024-04-30 is 部署上线 {
-    负责人: 运维团队
-}
-
-[需求分析] lasts 10 days
-[原型设计] lasts 10 days
-[系统设计] lasts 20 days
-[后端开发] lasts 60 days
-[前端开发] lasts 60 days
-[集成测试] lasts 10 days
-[部署上线] lasts 10 days
-
-[系统设计] starts at [原型设计]
-[后端开发] starts at [系统设计]
-[前端开发] starts at [系统设计]
-[集成测试] starts at [后端开发]
-[部署上线] starts at [集成测试]
+title 项目开发进度
+skinparam activityDiamond 0
+start
+:需求分析;
+:原型设计;
+:系统设计;
+fork
+  :后端开发;
+  :数据库设计;
+  :API开发;
+fork again
+  :前端开发;
+  :页面开发;
+  :组件开发;
+end fork
+:集成测试;
+:验收测试;
+:服务器部署;
+:应用发布;
+stop
 @enduml
 ```
 
@@ -1375,8 +1221,7 @@ App --> DB
 ### 登录页面线框图
 
 ```txt
-@startuml
-salt
+@startsalt
 {
     {#
         <color:#Purple>登录系统</color>
@@ -1389,14 +1234,13 @@ salt
         [ 忘记密码? ]
     }
 }
-@enduml
+@endsalt
 ```
 
 **渲染效果：**
 
 ```plantuml
-@startuml
-salt
+@startsalt
 {
     {#
         <color:#Purple>登录系统</color>
@@ -1409,14 +1253,13 @@ salt
         [ 忘记密码? ]
     }
 }
-@enduml
+@endsalt
 ```
 
 ### 仪表盘页面线框图
 
 ```txt
-@startuml
-salt
+@startsalt
 {
     {#
         <b>用户仪表盘</b>
@@ -1424,22 +1267,21 @@ salt
         {+
             | 欢迎回来, 张三 |
             {X|图标|名称|数值}|
-            | [img:https://img.icons8.com/color/48/sale-price-tag.png]|销售额|￥12,500|
-            | [img:https://img.icons8.com/color/48/shopping-cart.png]|订单数|156|
-            | [img:https://img.icons8.com/color/48/user-group.png]|客户数|89|
+            | [销售]|销售额|￥12,500|
+            | [购物车]|订单数|156|
+            | [用户]|客户数|89|
         }
         --
         [刷新数据] [导出报表] [设置]
     }
 }
-@enduml
+@endsalt
 ```
 
 **渲染效果：**
 
 ```plantuml
-@startuml
-salt
+@startsalt
 {
     {#
         <b>用户仪表盘</b>
@@ -1447,15 +1289,15 @@ salt
         {+
             | 欢迎回来, 张三 |
             {X|图标|名称|数值}|
-            | [img:https://img.icons8.com/color/48/sale-price-tag.png]|销售额|￥12,500|
-            | [img:https://img.icons8.com/color/48/shopping-cart.png]|订单数|156|
-            | [img:https://img.icons8.com/color/48/user-group.png]|客户数|89|
+            | [销售]|销售额|￥12,500|
+            | [购物车]|订单数|156|
+            | [用户]|客户数|89|
         }
         --
         [刷新数据] [导出报表] [设置]
     }
 }
-@enduml
+@endsalt
 ```
 
 ---
@@ -1514,29 +1356,32 @@ json "用户数据" {
 
 ```txt
 @startuml
-yaml
----
-application:
-  name: "MyApp"
-  version: "1.0.0"
-  environment: "production"
-database:
-  host: "localhost"
-  port: 5432
-  name: "mydb"
-  pool:
-    min: 2
-    max: 10
-cache:
-  enabled: true
-  type: "redis"
-  ttl: 3600
-logging:
-  level: "info"
-  outputs:
-    - "console"
-    - "file"
----
+title YAML 配置结构
+rectangle "应用配置" {
+    rectangle "application" {
+        [name: MyApp]
+        [version: 1.0.0]
+        [environment: production]
+    }
+    rectangle "database" {
+        [host: localhost]
+        [port: 5432]
+        [name: mydb]
+        rectangle "pool" {
+            [min: 2]
+            [max: 10]
+        }
+    }
+    rectangle "cache" {
+        [enabled: true]
+        [type: redis]
+        [ttl: 3600]
+    }
+    rectangle "logging" {
+        [level: info]
+        [outputs: console, file]
+    }
+}
 @enduml
 ```
 
@@ -1544,29 +1389,32 @@ logging:
 
 ```plantuml
 @startuml
-yaml
----
-application:
-  name: "MyApp"
-  version: "1.0.0"
-  environment: "production"
-database:
-  host: "localhost"
-  port: 5432
-  name: "mydb"
-  pool:
-    min: 2
-    max: 10
-cache:
-  enabled: true
-  type: "redis"
-  ttl: 3600
-logging:
-  level: "info"
-  outputs:
-    - "console"
-    - "file"
----
+title YAML 配置结构
+rectangle "应用配置" {
+    rectangle "application" {
+        [name: MyApp]
+        [version: 1.0.0]
+        [environment: production]
+    }
+    rectangle "database" {
+        [host: localhost]
+        [port: 5432]
+        [name: mydb]
+        rectangle "pool" {
+            [min: 2]
+            [max: 10]
+        }
+    }
+    rectangle "cache" {
+        [enabled: true]
+        [type: redis]
+        [ttl: 3600]
+    }
+    rectangle "logging" {
+        [level: info]
+        [outputs: console, file]
+    }
+}
 @enduml
 ```
 
@@ -2027,56 +1875,56 @@ stop
 title 微服务架构图
 
 package "客户端" {
-    [Web 应用] <<react>>
-    [移动 App] <<react>>
+    [Web 应用] as web
+    [移动 App] as mobile
 }
 
 package "网关层" {
-    [API Gateway] <<nginx>>
+    [API Gateway] as gateway
 }
 
 package "用户服务" {
-    [用户服务] <<java>>
-    database "用户数据库" <<mysql>>
+    [用户服务] as usrSvc
+    database "用户数据库" as usrDb
 }
 
 package "订单服务" {
-    [订单服务] <<java>>
-    database "订单数据库" <<postgresql>>
+    [订单服务] as ordSvc
+    database "订单数据库" as ordDb
 }
 
 package "商品服务" {
-    [商品服务] <<java>>
-    database "商品数据库" <<mysql>>
+    [商品服务] as prodSvc
+    database "商品数据库" as prodDb
 }
 
 package "公共组件" {
-    [缓存服务] <<redis>>
-    [消息队列] <<java>>
-    [配置中心] <<java>>
+    [缓存服务] as cache
+    [消息队列] as mq
+    [配置中心] as config
 }
 
-[Web 应用] --> [API Gateway]
-[移动 App] --> [API Gateway]
+web --> gateway
+mobile --> gateway
 
-[API Gateway] --> [用户服务]
-[API Gateway] --> [订单服务]
-[API Gateway] --> [商品服务]
+gateway --> usrSvc
+gateway --> ordSvc
+gateway --> prodSvc
 
-[用户服务] --> [用户数据库]
-[订单服务] --> [订单数据库]
-[商品服务] --> [商品数据库]
+usrSvc --> usrDb
+ordSvc --> ordDb
+prodSvc --> prodDb
 
-[用户服务] --> [缓存服务]
-[订单服务] --> [缓存服务]
-[商品服务] --> [缓存服务]
+usrSvc --> cache
+ordSvc --> cache
+prodSvc --> cache
 
-[订单服务] --> [消息队列]
-[商品服务] --> [消息队列]
+ordSvc --> mq
+prodSvc --> mq
 
-[用户服务] --> [配置中心]
-[订单服务] --> [配置中心]
-[商品服务] --> [配置中心]
+usrSvc --> config
+ordSvc --> config
+prodSvc --> config
 @enduml
 ```
 
@@ -2087,56 +1935,56 @@ package "公共组件" {
 title 微服务架构图
 
 package "客户端" {
-    [Web 应用] <<react>>
-    [移动 App] <<react>>
+    [Web 应用] as web
+    [移动 App] as mobile
 }
 
 package "网关层" {
-    [API Gateway] <<nginx>>
+    [API Gateway] as gateway
 }
 
 package "用户服务" {
-    [用户服务] <<java>>
-    database "用户数据库" <<mysql>>
+    [用户服务] as usrSvc
+    database "用户数据库" as usrDb
 }
 
 package "订单服务" {
-    [订单服务] <<java>>
-    database "订单数据库" <<postgresql>>
+    [订单服务] as ordSvc
+    database "订单数据库" as ordDb
 }
 
 package "商品服务" {
-    [商品服务] <<java>>
-    database "商品数据库" <<mysql>>
+    [商品服务] as prodSvc
+    database "商品数据库" as prodDb
 }
 
 package "公共组件" {
-    [缓存服务] <<redis>>
-    [消息队列] <<java>>
-    [配置中心] <<java>>
+    [缓存服务] as cache
+    [消息队列] as mq
+    [配置中心] as config
 }
 
-[Web 应用] --> [API Gateway]
-[移动 App] --> [API Gateway]
+web --> gateway
+mobile --> gateway
 
-[API Gateway] --> [用户服务]
-[API Gateway] --> [订单服务]
-[API Gateway] --> [商品服务]
+gateway --> usrSvc
+gateway --> ordSvc
+gateway --> prodSvc
 
-[用户服务] --> [用户数据库]
-[订单服务] --> [订单数据库]
-[商品服务] --> [商品数据库]
+usrSvc --> usrDb
+ordSvc --> ordDb
+prodSvc --> prodDb
 
-[用户服务] --> [缓存服务]
-[订单服务] --> [缓存服务]
-[商品服务] --> [缓存服务]
+usrSvc --> cache
+ordSvc --> cache
+prodSvc --> cache
 
-[订单服务] --> [消息队列]
-[商品服务] --> [消息队列]
+ordSvc --> mq
+prodSvc --> mq
 
-[用户服务] --> [配置中心]
-[订单服务] --> [配置中心]
-[商品服务] --> [配置中心]
+usrSvc --> config
+ordSvc --> config
+prodSvc --> config
 @enduml
 ```
 
