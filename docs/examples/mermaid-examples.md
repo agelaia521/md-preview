@@ -31,15 +31,13 @@ flowchart TD
 
 ### 水平流程图 (Left to Right)
 
-```markdown
-```mermaid
+```txt
 flowchart LR
     A[用户输入] --> B[验证]
     B --> C{有效?}
     C -->|是| D[处理]
     C -->|否| E[提示错误]
     D --> F[保存结果]
-```
 ```
 
 **渲染效果：**
@@ -55,8 +53,7 @@ flowchart LR
 
 ### 复杂流程图 (包含子图)
 
-```markdown
-```mermaid
+```txt
 flowchart TB
     subgraph Frontend
         A[Web 页面]
@@ -78,7 +75,6 @@ flowchart TB
     C --> D
     D --> E
     D <--> F
-```
 ```
 
 **渲染效果：**
@@ -113,8 +109,7 @@ flowchart TB
 
 ### 基础时序图
 
-```markdown
-```mermaid
+```txt
 sequenceDiagram
     participant User
     participant Client
@@ -131,7 +126,6 @@ sequenceDiagram
     Server-->>Client: 响应成功
     deactivate Server
     Client-->>User: 显示结果
-```
 ```
 
 **渲染效果：**
@@ -157,8 +151,7 @@ sequenceDiagram
 
 ### 循环与条件
 
-```markdown
-```mermaid
+```txt
 sequenceDiagram
     User->>App: 请求分页数据
     loop 每一页
@@ -168,7 +161,6 @@ sequenceDiagram
         API-->>App: 数据 + total
         App-->>User: 显示第n页
     end
-```
 ```
 
 **渲染效果：**
@@ -191,8 +183,7 @@ sequenceDiagram
 
 ### 基础类图
 
-```markdown
-```mermaid
+```txt
 classDiagram
     class Animal {
         +String name
@@ -213,7 +204,6 @@ classDiagram
     
     Animal <|-- Dog : 继承
     Animal <|-- Cat : 继承
-```
 ```
 
 **渲染效果：**
@@ -243,8 +233,7 @@ classDiagram
 
 ### 复杂类关系
 
-```markdown
-```mermaid
+```txt
 classDiagram
     class User {
         +String id
@@ -276,7 +265,6 @@ classDiagram
     User "1" --> "*" Order : 创建
     Order "1" --> "*" OrderItem : 包含
     OrderItem "*" --> "1" Product : 对应
-```
 ```
 
 **渲染效果：**
@@ -321,8 +309,7 @@ classDiagram
 
 ### 基础状态图
 
-```markdown
-```mermaid
+```txt
 stateDiagram-v2
     [*] --> 草稿
     草稿 --> 审核中: 提交审核
@@ -330,7 +317,6 @@ stateDiagram-v2
     审核中 --> 已拒绝: 审核不通过
     已拒绝 --> 草稿: 修改后重提
     已发布 --> [*]
-```
 ```
 
 **渲染效果：**
@@ -347,8 +333,7 @@ stateDiagram-v2
 
 ### 带选择的状态图
 
-```markdown
-```mermaid
+```txt
 stateDiagram-v2
     [*] --> 空闲
     
@@ -361,7 +346,6 @@ stateDiagram-v2
     空闲 --> 错误: 异常发生
     错误 --> 空闲: 恢复
     错误 --> [*]
-```
 ```
 
 **渲染效果：**
@@ -387,8 +371,7 @@ stateDiagram-v2
 
 ### 基础 ER 图
 
-```markdown
-```mermaid
+```txt
 erDiagram
     CUSTOMER ||--o{ ORDER : places
     ORDER ||--|{ LINE-ITEM : contains
@@ -416,7 +399,6 @@ erDiagram
         float price
         int stock
     }
-```
 ```
 
 **渲染效果：**
@@ -457,8 +439,7 @@ erDiagram
 
 ### 项目计划甘特图
 
-```markdown
-```mermaid
+```txt
 gantt
     title 项目开发计划
     dateFormat  YYYY-MM-DD
@@ -477,7 +458,6 @@ gantt
     section 部署
     预发布         :d1, after c3, 3d
     正式发布       :d2, after d1, 2d
-```
 ```
 
 **渲染效果：**
@@ -509,14 +489,12 @@ gantt
 
 ### 饼图
 
-```markdown
-```mermaid
+```txt
 pie title 编程语言使用统计
     "JavaScript" : 45
     "Python" : 30
     "Java" : 15
     "Go" : 10
-```
 ```
 
 **渲染效果：**
@@ -531,14 +509,12 @@ pie title 编程语言使用统计
 
 ### 预算分配 (甜甜圈图效果)
 
-```markdown
-```mermaid
+```txt
 pie title 项目预算分配
     "人力资源" : 50
     "基础设施" : 25
     "市场营销" : 15
     "研发工具" : 10
-```
 ```
 
 **渲染效果：**
@@ -557,8 +533,7 @@ pie title 项目预算分配
 
 ### 基础 Git 分支图
 
-```markdown
-```mermaid
+```txt
 gitGraph
     commit id: "Initial commit"
     branch feature/login
@@ -574,7 +549,6 @@ gitGraph
     checkout main
     merge hotfix id: "Apply hotfix"
     commit id: "Release v1.0"
-```
 ```
 
 **渲染效果：**
@@ -603,8 +577,7 @@ gitGraph
 
 ### 购物流程用户旅程
 
-```markdown
-```mermaid
+```txt
 journey
     title 用户购物流程
     section 浏览商品
@@ -624,7 +597,6 @@ journey
       申请退换: 1: 用户
       客服处理: 3: 客服
       完成退换: 4: 用户
-```
 ```
 
 **渲染效果：**
@@ -657,8 +629,7 @@ journey
 
 ### 项目规划思维导图
 
-```markdown
-```mermaid
+```txt
 mindmap
   root((项目规划))
     设计阶段
@@ -689,7 +660,6 @@ mindmap
       环境准备
       部署执行
       监控运维
-```
 ```
 
 **渲染效果：**
@@ -733,8 +703,7 @@ mindmap
 
 ### 技术发展时间线
 
-```markdown
-```mermaid
+```txt
 timeline
     title 技术发展历程
     2000-2010 : Web 1.0 时代
@@ -753,7 +722,6 @@ timeline
         大语言模型
         智能应用
         云原生技术
-```
 ```
 
 **渲染效果：**
@@ -785,8 +753,7 @@ timeline
 
 ### 项目优先级矩阵
 
-```markdown
-```mermaid
+```txt
 quadrantChart
     title 项目优先级矩阵
     x-axis 低影响 --> 高影响
@@ -800,7 +767,6 @@ quadrantChart
     功能C: [0.2, 0.3]
     功能D: [0.8, 0.4]
     功能E: [0.5, 0.5]
-```
 ```
 
 **渲染效果：**
@@ -827,8 +793,7 @@ quadrantChart
 
 ### 系统架构块图
 
-```markdown
-```mermaid
+```txt
 block-beta
     columns 3
     
@@ -850,7 +815,6 @@ block-beta
     app --> cache
     app --> db
     app --> queue
-```
 ```
 
 **渲染效果：**
@@ -885,8 +849,7 @@ block-beta
 
 ### C4 系统上下文图
 
-```markdown
-```mermaid
+```txt
 C4Context
     title 系统上下文图
     
@@ -898,7 +861,6 @@ C4Context
     Rel(user, web, "使用浏览器访问")
     Rel(web, api, "调用 API")
     Rel(api, database, "读写数据")
-```
 ```
 
 **渲染效果：**
@@ -923,15 +885,13 @@ C4Context
 
 ### 销售数据趋势图
 
-```markdown
-```mermaid
+```txt
 xychart-beta
     title "月度销售额统计"
     x-axis [1月, 2月, 3月, 4月, 5月, 6月, 7月, 8月, 9月, 10月, 11月, 12月]
     y-axis "销售额 (万元)" 0 --> 200
     bar [30, 45, 42, 55, 70, 65, 80, 85, 90, 120, 150, 180]
     line [30, 45, 42, 55, 70, 65, 80, 85, 90, 120, 150, 180]
-```
 ```
 
 **渲染效果：**
@@ -951,8 +911,7 @@ xychart-beta
 
 ### 企业网络拓扑
 
-```markdown
-```mermaid
+```txt
 flowchart TB
     subgraph Internet
         User1([用户A])
@@ -994,7 +953,6 @@ flowchart TB
     DB --> DBSlave
     App1 --> Storage
     App2 --> Storage
-```
 ```
 
 **渲染效果：**
@@ -1049,8 +1007,7 @@ flowchart TB
 
 ### 任务看板
 
-```markdown
-```mermaid
+```txt
 flowchart LR
     subgraph Backlog["📋 待办"]
         Task1["🔴 紧急任务"]
@@ -1079,7 +1036,6 @@ flowchart LR
     Task5 --> Task7
     Task6 --> Task8
     Task7 --> Task9
-```
 ```
 
 **渲染效果：**
@@ -1121,8 +1077,7 @@ flowchart LR
 
 ### 软件需求图
 
-```markdown
-```mermaid
+```txt
 flowchart TB
     subgraph 业务需求
         BR1["BR1: 提高用户体验"]
@@ -1151,7 +1106,6 @@ flowchart TB
     UR3 --> FR3
     UR1 --> FR4
     UR3 --> FR4
-```
 ```
 
 **渲染效果：**
