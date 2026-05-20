@@ -782,6 +782,10 @@
   }
   
   function renderDiff() {
+    console.log('Checking diff2html libraries...');
+    console.log('  - Diff2Html:', typeof Diff2Html !== 'undefined' ? 'loaded' : 'not loaded');
+    console.log('  - Diff2HtmlUI:', typeof Diff2HtmlUI !== 'undefined' ? 'loaded' : 'not loaded');
+    
     const allPres = Array.from(document.querySelectorAll('.markdown-body pre'));
     
     // 反向遍历，避免 DOM 修改影响索引
@@ -808,23 +812,32 @@
         pre.parentNode.replaceChild(container, pre);
         
         // 使用 diff2html 渲染
-        if (typeof Diff2HtmlUI !== 'undefined') {
-          const diff2htmlUi = new Diff2HtmlUI(diffTarget, diffCode, {
+        if (typeof Diff2Html !== 'undefined' && typeof Diff2HtmlUI !== 'undefined') {
+          const configuration = {
             drawFileList: true,
             fileListToggle: true,
             outputFormat: 'line-by-line',
             matching: 'lines',
             synchronisedScroll: true,
             highlight: true
-          });
-          diff2htmlUi.draw();
+          };
+          
+          // 先解析 diff
+          const diffJson = Diff2Html.parse(diffCode);
+          // 生成 HTML
+          const diffHtml = Diff2Html.html(diffJson, configuration);
+          // 插入 HTML
+          diffTarget.innerHTML = diffHtml;
+          
+          // 初始化 UI
+          const diff2htmlUi = new Diff2HtmlUI(diffTarget, diffCode, configuration);
           diff2htmlUi.highlightCode();
         } else {
-          console.error('Diff2HtmlUI library is not loaded');
+          console.error('Diff2Html or Diff2HtmlUI library is not loaded');
           const errorDiv = document.createElement('div');
           errorDiv.style.color = '#ff6b6b';
           errorDiv.style.padding = '10px';
-          errorDiv.textContent = 'Diff2HtmlUI 库未加载';
+          errorDiv.textContent = 'Diff2Html 库未加载';
           container.appendChild(errorDiv);
         }
       } catch (error) {
