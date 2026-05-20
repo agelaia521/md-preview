@@ -196,6 +196,7 @@
     
     setTimeout(() => {
       renderMermaidDiagrams();
+      renderPlantUMLDiagrams();
     }, 100);
   }
   
@@ -413,6 +414,49 @@
   function closeSidebarOnMobile() {
     if (window.innerWidth <= 768) {
       closeSidebar();
+    }
+  }
+
+  function encodePlantUML(source) {
+    const encoded = pako.deflateRaw(source);
+    return btoa(String.fromCharCode.apply(null, encoded));
+  }
+
+  async function renderPlantUMLDiagrams() {
+    if (typeof pako === 'undefined') {
+      console.error('Pako library is not loaded');
+      return;
+    }
+    
+    const allPres = document.querySelectorAll('.markdown-body pre');
+    
+    for (let i = 0; i < allPres.length; i++) {
+      const pre = allPres[i];
+      const codeElement = pre.querySelector('code');
+      
+      if (!codeElement) continue;
+      
+      const classList = codeElement.className;
+      if (!classList || !classList.includes('language-plantuml')) continue;
+      
+      const plantumlCode = codeElement.textContent.trim();
+      
+      try {
+        const encoded = encodePlantUML(plantumlCode);
+        const container = document.createElement('div');
+        container.className = 'plantuml-diagram';
+        container.innerHTML = `<img src="https://www.plantuml.com/plantuml/svg/${encoded}" alt="PlantUML 图" loading="lazy">`;
+        pre.replaceWith(container);
+      } catch (error) {
+        console.error('PlantUML encoding error:', error);
+        const errorDiv = document.createElement('div');
+        errorDiv.style.color = '#ff6b6b';
+        errorDiv.style.padding = '10px';
+        errorDiv.style.border = '1px solid #ff6b6b';
+        errorDiv.style.borderRadius = '4px';
+        errorDiv.textContent = 'PlantUML 渲染错误: ' + error.message;
+        pre.replaceWith(errorDiv);
+      }
     }
   }
   
