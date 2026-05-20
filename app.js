@@ -8,6 +8,9 @@
     if (window.MarkdownPreview.search && window.MarkdownPreview.search.init) {
       window.MarkdownPreview.search.init();
     }
+    if (window.MarkdownPreview.router && window.MarkdownPreview.router.init) {
+      window.MarkdownPreview.router.init();
+    }
   }
   
   if (document.readyState === 'loading') {

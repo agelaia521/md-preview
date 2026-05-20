@@ -1,7 +1,7 @@
 (function() {
   window.MarkdownPreview = window.MarkdownPreview || {};
   
-  const { dom, state, CONFIG } = window.MarkdownPreview;
+  const { dom, state, CONFIG, router } = window.MarkdownPreview;
   
   async function loadMarkdownFile(path) {
     try {
@@ -17,6 +17,7 @@
       renderMarkdown(markdown, path);
       extractAndRenderIndex(markdown);
       updateEditButton(path);
+      if (router && router.updateHash) router.updateHash(path);
     } catch (error) {
       console.error('Error loading markdown:', error);
       dom.markdownContent.innerHTML = '<div class="welcome-state"><p class="welcome-text">无法加载文件</p></div>';
