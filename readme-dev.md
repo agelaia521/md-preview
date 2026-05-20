@@ -17,7 +17,7 @@
    - 进入 Settings → Pages
    - 源选择 GitHub Actions
 3. **自定义配置
-   - 修改 `app.js` 中的 `CONFIG.owner` 和 `CONFIG.repo`
+   - 修改 `js/config.js` 中的 `CONFIG.owner` 和 `CONFIG.repo`
 4. **推送代码，自动部署
 
 #### 0.1.2 工作原理
@@ -68,10 +68,25 @@ node scripts/build-file-tree.js
 ```
 md-preview/
 ├── index.html          # 主页面结构，库依赖声明
-├── app.js             # 核心业务逻辑，所有功能实现
+├── app.js             # 入口文件，初始化应用
 ├── styles.css         # 完整样式系统
 ├── README.md          # 用户文档
 ├── readme-dev.md     # 本文档（开发者文档）
+├── js/                # 核心模块目录
+│   ├── config.js      # 配置文件
+│   ├── state.js       # 状态管理
+│   ├── dom.js         # DOM 元素引用
+│   ├── ui.js          # UI 工具函数
+│   ├── file-tree.js   # 文件树加载和渲染
+│   ├── markdown.js    # Markdown 渲染和处理
+│   └── renderers/     # 扩展功能渲染器
+│       ├── mermaid.js
+│       ├── plantuml.js
+│       ├── apexcharts.js
+│       ├── music-notation.js
+│       ├── diff.js
+│       ├── geo.js
+│       └── embedded.js
 ├── scripts/
 │   └── build-file-tree.js  # 文件树预构建脚本
 ├── data/
@@ -91,61 +106,92 @@ md-preview/
 
 ---
 
-## 2. app.js 核心代码分析
+## 2. 模块化架构分析
 
-### 2.1 代码结构
+### 2.1 模块结构
 
-```javascript
-(function() {
-  // 1. DOM 元素缓存
-  const elements = {};
-  
-  // 2. 全局配置
-  const CONFIG = {};
-  
-  // 3. 应用状态
-  let state = {};
-  
-  // 4. 初始化函数
-  function init() {}
-  
-  // 5. 文件系统功能
-  function loadFileTree() {}
-  function buildTreeFromFlatList() {}
-  function renderFileTree() {}
-  
-  // 6. Markdown 渲染功能
-  function loadMarkdownFile() {}
-  function renderMarkdown() {}
-  
-  // 7. 扩展功能渲染器
-  function renderMermaidDiagrams() {}
-  function renderPlantUMLDiagrams() {}
-  function renderApexCharts() {}
-  function renderMusicNotation() {}
-  function renderDiff() {}
-  function renderGeoData() {}
-  function renderEmbeddedServices() {}
-  
-  // 8. UI 辅助功能
-  function setActiveFile() {}
-  function switchMode() {}
-  function copyCodeToClipboard() {}
-  function updateProgress() {}
-  function setupScrollProgress() {}
-  
-  // 9. 启动应用
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-})();
+项目采用 IIFE（立即调用函数表达式）模式，将功能拆分为独立模块，通过 `window.MarkdownPreview` 全局对象进行通信。
+
+```
+模块依赖关系：
+┌─────────────────────────────────────────────────────────┐
+│                     app.js (入口)                       │
+│  初始化：fileTree.loadFileTree() + ui.setupEventListeners() │
+└────────────────────┬────────────────────────────────────┘
+                     │
+         ┌───────────┴───────────┐
+         │                       │
+         ▼                       ▼
+┌──────────────────┐    ┌──────────────────┐
+│  file-tree.js    │    │    ui.js         │
+│  - 文件树加载    │    │  - UI 工具       │
+│  - 目录渲染      │    │  - 事件监听      │
+└────────┬─────────┘    └────────┬─────────┘
+         │                       │
+         └──────────┬────────────┘
+                    ▼
+         ┌──────────────────┐
+         │   markdown.js    │
+         │  - Markdown 渲染 │
+         │  - 链接拦截      │
+         │  - 目录生成      │
+         └────────┬─────────┘
+                  │
+         ┌────────┴────────┐
+         ▼                 ▼
+   ┌──────────┐    ┌──────────────┐
+   │ renderers│    │  dom.js      │
+   │  目录    │    │  DOM 引用    │
+   └────┬─────┘    └──────┬───────┘
+        │                 │
+   ┌────┴─────┐    ┌──────┴───────┐
+   │          │    │              │
+   ▼          ▼    ▼              ▼
+mermaid   plantuml  state.js    config.js
+(其他渲染器...)
 ```
 
 ### 2.2 核心模块详解
 
-#### 2.2.1 文件树加载 (`loadFileTree`)
+#### 2.2.1 配置模块 (`js/config.js`)
+
+**功能**：集中管理项目配置
+```javascript
+window.MarkdownPreview.CONFIG = {
+  owner: 'theforeveriris',
+  repo: 'md-preview'
+};
+```
+
+**特点**：
+- 独立配置，易于修改
+- 其他模块通过 `window.MarkdownPreview.CONFIG` 访问
+
+#### 2.2.2 状态管理模块 (`js/state.js`)
+
+**功能**：全局状态集中管理
+```javascript
+window.MarkdownPreview.state = {
+  fileTreeData: [],       // 文件树数据
+  currentMode: 'files',    // 当前模式
+  currentFilePath: '',     // 当前文件
+  currentHeadings: []    // 标题列表
+};
+```
+
+#### 2.2.3 DOM 引用模块 (`js/dom.js`)
+
+**功能**：统一管理 DOM 元素引用，避免重复查询
+
+```javascript
+window.MarkdownPreview.dom = {
+  fileTree: document.getElementById('fileTree'),
+  markdownContent: document.getElementById('markdownContent'),
+  // ...其他元素
+};
+```
+
+#### 2.2.4 文件树模块 (`js/file-tree.js`)
 
 **功能**：双重策略加载文件树
 1. **优先使用预构建文件** - 无 API 限制，性能最佳
@@ -190,7 +236,7 @@ async function loadFileTreeFromGitHubAPI() {
 - 自动过滤 `.md` 文件
 - 递归构建目录结构
 
-#### 2.2.2 目录树构建算法 (`buildTreeFromFlatList` / `buildTreeFromDirectory`)
+#### 2.2.5 目录树构建算法 (`buildTreeFromFlatList`)
 
 **输入**：GitHub API 返回的扁平文件列表
 
@@ -217,27 +263,40 @@ function buildTreeFromFlatList(tree) {
 - 空间复杂度：O(n)
 - 使用 Map 避免重复创建目录节点
 
-#### 2.2.3 Markdown 渲染管道 (`renderMarkdown`)
+#### 2.2.6 Markdown 渲染模块 (`js/markdown.js`)
 
-**渲染顺序**（至关重要）：
+**功能**：Markdown 文件加载、渲染和链接拦截
 
+**渲染管道**（至关重要）：
 ```javascript
 setTimeout(() => {
-  renderApexCharts();        // 1. 交互式图表
-  renderMusicNotation();     // 2. 乐谱
-  renderDiff();             // 3. Diff 可视化
-  renderMermaidDiagrams();   // 4. Mermaid 图表
-  renderPlantUMLDiagrams();  // 5. PlantUML 图表
-  renderEmbeddedServices();  // 6. 外部服务嵌入
+  window.MarkdownPreview.renderers.apexcharts.render();
+  window.MarkdownPreview.renderers.musicNotation.render();
+  window.MarkdownPreview.renderers.diff.render();
+  window.MarkdownPreview.renderers.mermaid.render();
+  window.MarkdownPreview.renderers.plantuml.render();
+  window.MarkdownPreview.renderers.geo.render();
+  window.MarkdownPreview.renderers.embedded.render();
 }, 100);
 ```
+
+#### 2.2.7 渲染器模块 (`js/renderers/`)
+
+每个渲染器都是独立模块，提供统一的 `render()` 接口：
+- `mermaid.js` - Mermaid 图表
+- `plantuml.js` - PlantUML 图表
+- `apexcharts.js` - ApexCharts 图表
+- `music-notation.js` - 乐谱渲染
+- `diff.js` - Diff 可视化
+- `geo.js` - 地理数据可视化
+- `embedded.js` - 外部服务嵌入
 
 **为什么用 setTimeout(100ms)**：
 1. 等待 Marked.js 完成 HTML 转换
 2. 确保 DOM 完全渲染
 3. 避免异步渲染竞态条件
 
-#### 2.2.4 代码块渲染策略
+#### 2.2.8 代码块渲染策略
 
 所有代码块渲染器采用统一模式：
 
@@ -273,7 +332,7 @@ function renderXXXDiagrams() {
 - 正向遍历时，替换第一个元素后，数组索引会错位
 - 反向遍历确保即使修改 DOM 也不影响未处理元素
 
-#### 2.2.5 PlantUML 编码 (`encodePlantUML`)
+#### 2.2.9 PlantUML 编码 (`encodePlantUML`)
 
 ```javascript
 function encode64(data) {
@@ -286,7 +345,7 @@ function encode64(data) {
 
 **最终 URL**：`https://www.plantuml.com/plantuml/svg/${encoded}`
 
-#### 2.2.6 ApexCharts 配置 (`renderApexCharts`)
+#### 2.2.10 ApexCharts 配置
 
 ```javascript
 function renderApexCharts() {
@@ -305,7 +364,7 @@ function renderApexCharts() {
 - 用户只需提供简化配置
 - 系统自动补充默认样式和配色
 
-#### 2.2.7 外部服务嵌入 (`renderEmbeddedServices`)
+#### 2.2.11 外部服务嵌入
 
 **支持的嵌入语法**：
 ```markdown
@@ -329,7 +388,7 @@ while ((match = embedRegex.exec(content)) !== null) {
 }
 ```
 
-#### 2.2.8 地理数据渲染 (`renderGeoData`)
+#### 2.2.12 地理数据渲染
 
 **支持格式**：
 - GeoJSON
@@ -357,7 +416,7 @@ function topojsonToGeoJson(topology) {
 }
 ```
 
-#### 2.2.9 乐谱渲染 (`renderMusicNotation`)
+#### 2.2.13 乐谱渲染
 
 **支持三种格式**：
 
@@ -380,11 +439,14 @@ if (classList.includes('language-abc')) {
 
 ### 2.3 状态管理
 
+状态已封装在 `js/state.js` 中，全局访问：
 ```javascript
-let fileTreeData = [];       // 文件树数据
-let currentMode = 'files';    // 当前模式：files/index
-let currentFilePath = '';     // 当前文件路径
-let currentHeadings = [];    // 当前文件的标题列表
+window.MarkdownPreview.state = {
+  fileTreeData: [],       // 文件树数据
+  currentMode: 'files',    // 当前模式：files/index
+  currentFilePath: '',     // 当前文件路径
+  currentHeadings: []    // 当前文件的标题列表
+};
 ```
 
 **状态更新时机**：
@@ -845,10 +907,10 @@ function renderTwitterEmbed(service, url, originalMatch) {
 
 ### 4.3 自定义配置
 
-修改 `CONFIG` 对象：
+修改 `js/config.js` 中的 `CONFIG` 对象：
 
 ```javascript
-const CONFIG = {
+window.MarkdownPreview.CONFIG = {
   owner: 'your-github-username',  // 必填：GitHub 用户名
   repo: 'your-repo-name'          // 必填：仓库名称
 };
@@ -943,17 +1005,17 @@ const CONFIG = {
 
 | 功能 | 状态 | 代码位置 |
 |------|------|---------|
-| GitHub API 集成 | ✅ 完成 | app.js:30-46 |
-| 文件树构建 | ✅ 完成 | app.js:48-100 |
-| Markdown 渲染 | ✅ 完成 | app.js:176-205 |
-| Mermaid 图表 | ✅ 完成 | app.js:207-243 |
-| PlantUML 图表 | ✅ 完成 | app.js:470-504 |
-| ApexCharts | ✅ 完成 | app.js:506-572 |
-| 乐谱渲染 | ✅ 完成 | app.js:574-773 |
-| Diff 可视化 | ✅ 完成 | app.js:775-852 |
-| 地理数据可视化 | ✅ 完成 | app.js:870-1000 |
-| Twitter/X 嵌入 | ✅ 完成 | app.js:866-910 |
-| 外部服务嵌入 | ✅ 完成 | app.js:854-925 |
+| GitHub API 集成 | ✅ 完成 | js/file-tree.js |
+| 文件树构建 | ✅ 完成 | js/file-tree.js |
+| Markdown 渲染 | ✅ 完成 | js/markdown.js |
+| Mermaid 图表 | ✅ 完成 | js/renderers/mermaid.js |
+| PlantUML 图表 | ✅ 完成 | js/renderers/plantuml.js |
+| ApexCharts | ✅ 完成 | js/renderers/apexcharts.js |
+| 乐谱渲染 | ✅ 完成 | js/renderers/music-notation.js |
+| Diff 可视化 | ✅ 完成 | js/renderers/diff.js |
+| 地理数据可视化 | ✅ 完成 | js/renderers/geo.js |
+| Twitter/X 嵌入 | ✅ 完成 | js/renderers/embedded.js |
+| 外部服务嵌入 | ✅ 完成 | js/renderers/embedded.js |
 
 ### 8.2 贡献指南
 

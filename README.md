@@ -11,7 +11,7 @@
    - 在仓库 Settings 中点击 Pages
    - 源选择 GitHub Actions
 3. **自定义配置
-   - 修改 `app.js` 中的 `CONFIG.owner` 和 `CONFIG.repo`
+   - 修改 `js/config.js` 中的 `CONFIG.owner` 和 `CONFIG.repo`
 4. **推送代码后，GitHub Actions 会自动构建并部署
 
 ### 本地预览
@@ -378,12 +378,13 @@ index 1a2b3c4..5d6e7f8 100644
 
 ### 在 GitHub Pages 上使用：
 
-1. 将以下文件复制到你的 GitHub 仓库根目录：
+1. 将以下文件和目录复制到你的 GitHub 仓库根目录：
    - `index.html`
    - `styles.css`
    - `app.js`
+   - `js/` 目录（包含所有模块文件）
 
-2. 编辑 `app.js` 中的 `CONFIG` 配置你的仓库信息：
+2. 编辑 `js/config.js` 中的 `CONFIG` 配置你的仓库信息：
    ```javascript
    const CONFIG = {
      owner: '你的用户名',
@@ -401,7 +402,7 @@ index 1a2b3c4..5d6e7f8 100644
 
 ## 配置说明
 
-在 `app.js` 中配置：
+在 `js/config.js` 中配置：
 
 ```javascript
 const CONFIG = {
@@ -418,7 +419,22 @@ const CONFIG = {
 你的仓库/
 ├── index.html       # 主页面（必须在根目录）
 ├── styles.css       # 样式文件（必须在根目录）
-├── app.js          # 功能逻辑和配置（必须在根目录）
+├── app.js          # 入口文件（必须在根目录）
+├── js/             # 核心模块目录（必须在根目录）
+│   ├── config.js    # 配置文件
+│   ├── state.js     # 状态管理
+│   ├── dom.js       # DOM 引用
+│   ├── ui.js        # UI 工具
+│   ├── file-tree.js # 文件树功能
+│   ├── markdown.js  # Markdown 渲染
+│   └── renderers/   # 各种渲染器
+│       ├── mermaid.js
+│       ├── plantuml.js
+│       ├── apexcharts.js
+│       ├── music-notation.js
+│       ├── diff.js
+│       ├── geo.js
+│       └── embedded.js
 ├── README.md        # 你的文档
 ├── docs/           # 任意结构的文档目录
 │   ├── guide.md
