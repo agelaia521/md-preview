@@ -196,6 +196,7 @@
     
     setTimeout(() => {
       renderApexCharts();
+      renderMusicNotation();
       renderMermaidDiagrams();
       renderPlantUMLDiagrams();
       renderEmbeddedServices();
@@ -541,10 +542,8 @@
           theme: { mode: 'light' }
         };
         
-        // Replace pre element with our container
         pre.parentNode.replaceChild(container, pre);
         
-        // Render the chart
         setTimeout(() => {
           const chartElement = document.getElementById(chartId);
           if (chartElement) {
@@ -569,6 +568,112 @@
           pre.parentNode.replaceChild(errorDiv, pre);
         }
       }
+    }
+  }
+  
+  function renderMusicNotation() {
+    const allPres = Array.from(document.querySelectorAll('.markdown-body pre'));
+    
+    for (let i = 0; i < allPres.length; i++) {
+      const pre = allPres[i];
+      const codeElement = pre.querySelector('code');
+      
+      if (!codeElement) continue;
+      
+      const classList = codeElement.className;
+      if (!classList) continue;
+      
+      const container = document.createElement('div');
+      container.className = 'music-notation';
+      container.style.margin = '1.5em 0';
+      container.style.padding = '1.5em';
+      container.style.background = 'var(--color-surface)';
+      container.style.borderRadius = '12px';
+      container.style.border = '1px solid var(--color-border)';
+      container.style.overflowX = 'auto';
+      
+      if (classList.includes('language-abc')) {
+        renderABCNotation(codeElement.textContent.trim(), container, pre);
+      } else if (classList.includes('language-musicxml')) {
+        renderMusicXML(codeElement.textContent.trim(), container, pre);
+      }
+    }
+  }
+  
+  function renderABCNotation(code, container, pre) {
+    if (typeof ABCJS === 'undefined') {
+      console.error('ABCJS library is not loaded');
+      const errorDiv = document.createElement('div');
+      errorDiv.style.color = '#ff6b6b';
+      errorDiv.style.padding = '10px';
+      errorDiv.textContent = 'ABCJS 库未加载';
+      container.appendChild(errorDiv);
+      pre.parentNode.replaceChild(container, pre);
+      return;
+    }
+    
+    try {
+      const div = document.createElement('div');
+      div.className = 'abc-container';
+      container.appendChild(div);
+      
+      ABCJS.renderAbc(div, code, {
+        responsive: 'resize',
+        add_classes: true,
+        staffwidth: 700
+      });
+      
+      pre.parentNode.replaceChild(container, pre);
+    } catch (error) {
+      console.error('ABC notation rendering error:', error);
+      const errorDiv = document.createElement('div');
+      errorDiv.style.color = '#ff6b6b';
+      errorDiv.style.padding = '10px';
+      errorDiv.textContent = 'ABC 乐谱渲染错误: ' + error.message;
+      container.appendChild(errorDiv);
+      pre.parentNode.replaceChild(container, pre);
+    }
+  }
+  
+  function renderMusicXML(code, container, pre) {
+    if (typeof verovio === 'undefined') {
+      console.error('Verovio library is not loaded');
+      const errorDiv = document.createElement('div');
+      errorDiv.style.color = '#ff6b6b';
+      errorDiv.style.padding = '10px';
+      errorDiv.textContent = 'Verovio 库未加载';
+      container.appendChild(errorDiv);
+      pre.parentNode.replaceChild(container, pre);
+      return;
+    }
+    
+    try {
+      const tk = new verovio.toolkit();
+      
+      const formattedCode = code
+        .replace(/<!DOCTYPE[^>]*>/i, '')
+        .replace(/<\?xml[^>]*\?>/i, '')
+        .replace(/<!DOCTYPE score-partwise[^>]*>/i, '')
+        .trim();
+      
+      const svg = tk.renderData(formattedCode, {});
+      const div = document.createElement('div');
+      div.className = 'musicxml-container';
+      div.innerHTML = svg;
+      div.style.display = 'flex';
+      div.style.justifyContent = 'center';
+      div.style.overflowX = 'auto';
+      container.appendChild(div);
+      
+      pre.parentNode.replaceChild(container, pre);
+    } catch (error) {
+      console.error('MusicXML rendering error:', error);
+      const errorDiv = document.createElement('div');
+      errorDiv.style.color = '#ff6b6b';
+      errorDiv.style.padding = '10px';
+      errorDiv.textContent = 'MusicXML 乐谱渲染错误: ' + error.message;
+      container.appendChild(errorDiv);
+      pre.parentNode.replaceChild(container, pre);
     }
   }
   

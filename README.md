@@ -88,6 +88,58 @@ Animal <|-- Dog
 }
 ```
 
+### 乐谱渲染
+支持多种乐谱格式渲染：
+
+**支持格式：**
+- ABC 记谱法 (abcjs)
+- MEI/MusicXML (Verovio)
+
+使用示例（ABC记谱法）：
+```abc
+X:1
+T:简单小星星
+M:4/4
+L:1/4
+K:C
+C C G G | A A G2 | F F E E | D D C2 |
+```
+
+使用示例（MusicXML）：
+```musicxml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="3.1">
+  <part-list>
+    <score-part id="P1">
+      <part-name>Music</part-name>
+    </score-part>
+  </part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes>
+        <divisions>1</divisions>
+        <key>
+          <fifths>0</fifths>
+        </key>
+        <time>
+          <beats>4</beats>
+          <beat-type>4</beat-type>
+        </time>
+      </attributes>
+      <note>
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>1</duration>
+        <type>quarter</type>
+      </note>
+    </measure>
+  </part>
+</score-partwise>
+```
+
 ### 外部服务嵌入
 
 支持通过 iframe 嵌入多种外部服务：
