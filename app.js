@@ -574,7 +574,8 @@
   function renderMusicNotation() {
     const allPres = Array.from(document.querySelectorAll('.markdown-body pre'));
     
-    for (let i = 0; i < allPres.length; i++) {
+    // 反向遍历，避免 DOM 修改影响索引
+    for (let i = allPres.length - 1; i >= 0; i--) {
       const pre = allPres[i];
       const codeElement = pre.querySelector('code');
       
@@ -610,7 +611,9 @@
       errorDiv.style.padding = '10px';
       errorDiv.textContent = 'ABCJS 库未加载';
       container.appendChild(errorDiv);
-      pre.parentNode.replaceChild(container, pre);
+      if (pre.parentNode) {
+        pre.parentNode.replaceChild(container, pre);
+      }
       return;
     }
     
@@ -625,7 +628,9 @@
         staffwidth: 700
       });
       
-      pre.parentNode.replaceChild(container, pre);
+      if (pre.parentNode) {
+        pre.parentNode.replaceChild(container, pre);
+      }
     } catch (error) {
       console.error('ABC notation rendering error:', error);
       const errorDiv = document.createElement('div');
@@ -633,7 +638,9 @@
       errorDiv.style.padding = '10px';
       errorDiv.textContent = 'ABC 乐谱渲染错误: ' + error.message;
       container.appendChild(errorDiv);
-      pre.parentNode.replaceChild(container, pre);
+      if (pre.parentNode) {
+        pre.parentNode.replaceChild(container, pre);
+      }
     }
   }
   
@@ -645,7 +652,9 @@
       errorDiv.style.padding = '10px';
       errorDiv.textContent = 'Verovio 库未加载';
       container.appendChild(errorDiv);
-      pre.parentNode.replaceChild(container, pre);
+      if (pre.parentNode) {
+        pre.parentNode.replaceChild(container, pre);
+      }
       return;
     }
     
@@ -667,7 +676,9 @@
       div.style.overflowX = 'auto';
       container.appendChild(div);
       
-      pre.parentNode.replaceChild(container, pre);
+      if (pre.parentNode) {
+        pre.parentNode.replaceChild(container, pre);
+      }
     } catch (error) {
       console.error('MusicXML rendering error:', error);
       const errorDiv = document.createElement('div');
@@ -675,12 +686,14 @@
       errorDiv.style.padding = '10px';
       errorDiv.textContent = 'MusicXML 乐谱渲染错误: ' + error.message;
       container.appendChild(errorDiv);
-      pre.parentNode.replaceChild(container, pre);
+      if (pre.parentNode) {
+        pre.parentNode.replaceChild(container, pre);
+      }
     }
   }
   
   function renderOSMD(code, container, pre) {
-    if (typeof OpenSheetMusicDisplay === 'undefined') {
+    if (typeof opensheetmusicdisplay === 'undefined') {
       console.error('OSMD library is not loaded');
       const errorDiv = document.createElement('div');
       errorDiv.style.color = '#ff6b6b';
@@ -702,7 +715,12 @@
         .replace(/<\?xml[^>]*\?>/i, '')
         .trim();
       
-      const osmd = new OpenSheetMusicDisplay(div, {
+      // 先替换 DOM 元素
+      if (pre.parentNode) {
+        pre.parentNode.replaceChild(container, pre);
+      }
+      
+      const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(div, {
         autoResize: true,
         backend: 'svg',
         drawTitle: true,
@@ -727,15 +745,13 @@
         osmd.render();
       }).catch(err => {
         console.error('OSMD loading error:', err);
+        container.innerHTML = '';
         const errorDiv = document.createElement('div');
         errorDiv.style.color = '#ff6b6b';
         errorDiv.style.padding = '10px';
         errorDiv.textContent = 'OSMD 加载错误: ' + err.message;
-        container.innerHTML = '';
         container.appendChild(errorDiv);
       });
-      
-      pre.parentNode.replaceChild(container, pre);
     } catch (error) {
       console.error('OSMD rendering error:', error);
       const errorDiv = document.createElement('div');
@@ -743,7 +759,9 @@
       errorDiv.style.padding = '10px';
       errorDiv.textContent = 'OSMD 乐谱渲染错误: ' + error.message;
       container.appendChild(errorDiv);
-      pre.parentNode.replaceChild(container, pre);
+      if (pre.parentNode) {
+        pre.parentNode.replaceChild(container, pre);
+      }
     }
   }
   
