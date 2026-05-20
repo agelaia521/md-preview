@@ -421,11 +421,11 @@
     let r = "";
     for (let i = 0; i < data.length; i += 3) {
       if (i + 2 === data.length) {
-        r += append3bytes(data.charCodeAt(i), data.charCodeAt(i + 1), 0);
+        r += append3bytes(data[i], data[i + 1], 0);
       } else if (i + 1 === data.length) {
-        r += append3bytes(data.charCodeAt(i), 0, 0);
+        r += append3bytes(data[i], 0, 0);
       } else {
-        r += append3bytes(data.charCodeAt(i), data.charCodeAt(i + 1), data.charCodeAt(i + 2));
+        r += append3bytes(data[i], data[i + 1], data[i + 2]);
       }
     }
     return r;
@@ -462,10 +462,11 @@
   }
 
   function encodePlantUML(source) {
-    // 1. 将字符串转为 UTF-8 字节
-    let utf8 = unescape(encodeURIComponent(source));
+    // 1. 将字符串转为 UTF-8 字节数组
+    const encoder = new TextEncoder();
+    const utf8 = encoder.encode(source);
     // 2. DEFLATE 压缩 (raw, no header)
-    const compressed = pako.deflateRaw(utf8, { to: 'string' });
+    const compressed = pako.deflateRaw(utf8);
     // 3. 使用 PlantUML 自定义 base64 编码
     return encode64(compressed);
   }
