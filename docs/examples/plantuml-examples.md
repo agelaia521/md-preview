@@ -780,34 +780,45 @@ deactivate S
 
 ```txt
 @startuml
-robust "客户端" as C
-robust "服务器" as S
-robust "数据库" as DB
+title API 响应时序图
+concise "客户端" as C
+concise "服务器" as S
+concise "数据库" as DB
 
+@0
 C is idle
 S is idle
 DB is idle
 
-@0
+@100
 C is 发送请求
 S is 接收请求
-@+500ms
+
+@300
 S is 处理业务
-@+1000ms
+
+@600
 S is 查询数据库
 DB is 执行SQL
-@+200ms
+
+@800
 DB is 返回结果
 S is 接收结果
 DB is idle
-@+300ms
+
+@1100
 S is 生成响应
-@+100ms
+
+@1300
 S is 发送响应
 C is 接收响应
-@+50ms
+
+@1450
 C is 处理结果
 S is idle
+
+@1500
+C is idle
 @enduml
 ```
 
@@ -815,34 +826,45 @@ S is idle
 
 ```plantuml
 @startuml
-robust "客户端" as C
-robust "服务器" as S
-robust "数据库" as DB
+title API 响应时序图
+concise "客户端" as C
+concise "服务器" as S
+concise "数据库" as DB
 
+@0
 C is idle
 S is idle
 DB is idle
 
-@0
+@100
 C is 发送请求
 S is 接收请求
-@+500ms
+
+@300
 S is 处理业务
-@+1000ms
+
+@600
 S is 查询数据库
 DB is 执行SQL
-@+200ms
+
+@800
 DB is 返回结果
 S is 接收结果
 DB is idle
-@+300ms
+
+@1100
 S is 生成响应
-@+100ms
+
+@1300
 S is 发送响应
 C is 接收响应
-@+50ms
+
+@1450
 C is 处理结果
 S is idle
+
+@1500
+C is idle
 @enduml
 ```
 
@@ -1268,32 +1290,26 @@ sunday are closed
 
 ```txt
 @startuml
-!include <office/devices/computer>
-!include <office/devices/printer>
-!include <office/Servers/application_server>
-!include <office/Servers/database_server>
-!include <office/Networks/firewall>
-
 title 企业网络拓扑图
 
 rectangle 用户区域 {
-    node "员工电脑 1" as PC1 <<computer>>
-    node "员工电脑 2" as PC2 <<computer>>
-    node "员工电脑 3" as PC3 <<computer>>
+    node "员工电脑 1" as PC1
+    node "员工电脑 2" as PC2
+    node "员工电脑 3" as PC3
 }
 
 rectangle DMZ {
-    node "Web 服务器" as Web <<application_server>>
-    node "邮件服务器" as Mail <<application_server>>
+    node "Web 服务器" as Web
+    node "邮件服务器" as Mail
 }
 
 rectangle 内部网络 {
-    node "应用服务器" as App <<application_server>>
-    node "数据库服务器" as DB <<database_server>>
+    node "应用服务器" as App
+    database "数据库服务器" as DB
 }
 
 rectangle 安全设备 {
-    node "防火墙" as FW <<firewall>>
+    node "防火墙" as FW
     node "交换机" as Switch
 }
 
@@ -1315,32 +1331,26 @@ App --> DB
 
 ```plantuml
 @startuml
-!include <office/devices/computer>
-!include <office/devices/printer>
-!include <office/Servers/application_server>
-!include <office/Servers/database_server>
-!include <office/Networks/firewall>
-
 title 企业网络拓扑图
 
 rectangle 用户区域 {
-    node "员工电脑 1" as PC1 <<computer>>
-    node "员工电脑 2" as PC2 <<computer>>
-    node "员工电脑 3" as PC3 <<computer>>
+    node "员工电脑 1" as PC1
+    node "员工电脑 2" as PC2
+    node "员工电脑 3" as PC3
 }
 
 rectangle DMZ {
-    node "Web 服务器" as Web <<application_server>>
-    node "邮件服务器" as Mail <<application_server>>
+    node "Web 服务器" as Web
+    node "邮件服务器" as Mail
 }
 
 rectangle 内部网络 {
-    node "应用服务器" as App <<application_server>>
-    node "数据库服务器" as DB <<database_server>>
+    node "应用服务器" as App
+    database "数据库服务器" as DB
 }
 
 rectangle 安全设备 {
-    node "防火墙" as FW <<firewall>>
+    node "防火墙" as FW
     node "交换机" as Switch
 }
 
@@ -1504,31 +1514,29 @@ json "用户数据" {
 
 ```txt
 @startuml
-yaml "应用配置" {
-    application: {
-        name: "MyApp",
-        version: "1.0.0",
-        environment: "production"
-    },
-    database: {
-        host: "localhost",
-        port: 5432,
-        name: "mydb",
-        pool: {
-            min: 2,
-            max: 10
-        }
-    },
-    cache: {
-        enabled: true,
-        type: "redis",
-        ttl: 3600
-    },
-    logging: {
-        level: "info",
-        outputs: ["console", "file"]
-    }
-}
+yaml
+---
+application:
+  name: "MyApp"
+  version: "1.0.0"
+  environment: "production"
+database:
+  host: "localhost"
+  port: 5432
+  name: "mydb"
+  pool:
+    min: 2
+    max: 10
+cache:
+  enabled: true
+  type: "redis"
+  ttl: 3600
+logging:
+  level: "info"
+  outputs:
+    - "console"
+    - "file"
+---
 @enduml
 ```
 
@@ -1536,31 +1544,29 @@ yaml "应用配置" {
 
 ```plantuml
 @startuml
-yaml "应用配置" {
-    application: {
-        name: "MyApp",
-        version: "1.0.0",
-        environment: "production"
-    },
-    database: {
-        host: "localhost",
-        port: 5432,
-        name: "mydb",
-        pool: {
-            min: 2,
-            max: 10
-        }
-    },
-    cache: {
-        enabled: true,
-        type: "redis",
-        ttl: 3600
-    },
-    logging: {
-        level: "info",
-        outputs: ["console", "file"]
-    }
-}
+yaml
+---
+application:
+  name: "MyApp"
+  version: "1.0.0"
+  environment: "production"
+database:
+  host: "localhost"
+  port: 5432
+  name: "mydb"
+  pool:
+    min: 2
+    max: 10
+cache:
+  enabled: true
+  type: "redis"
+  ttl: 3600
+logging:
+  level: "info"
+  outputs:
+    - "console"
+    - "file"
+---
 @enduml
 ```
 
@@ -1698,37 +1704,28 @@ categories ||--o{ products : has
 
 ```txt
 @startuml
-skinparam backgroundColor #FEFEFE
-left to right direction
+title 在线购物用户旅程
 
-|顾客|
-start
-:访问网站;
-:浏览商品;
-:搜索商品;
-:查看商品详情;
-:比较价格;
-:加入购物车;
-:查看购物车;
-:确认商品;
-note right
+actor "顾客" as user
+user -> (访问网站)
+user -> (浏览商品)
+user -> (搜索商品)
+user -> (查看商品详情)
+user -> (比较价格)
+user -> (加入购物车)
+user -> (查看购物车)
+user -> (确认商品)
+note right of (确认商品)
   犹豫阶段
 end note
-:结算订单;
-:选择支付方式;
-:完成支付;
-:等待发货;
-:收到发货通知;
-:确认收货;
-:评价商品;
-:完成购物;
-stop
-
-note as N1
-用户旅程图展示
-用户在购物流程中的
-各个阶段和体验
-end note
+user -> (结算订单)
+user -> (选择支付方式)
+user -> (完成支付)
+user -> (等待发货)
+user -> (收到发货通知)
+user -> (确认收货)
+user -> (评价商品)
+user -> (完成购物)
 @enduml
 ```
 
@@ -1736,37 +1733,28 @@ end note
 
 ```plantuml
 @startuml
-skinparam backgroundColor #FEFEFE
-left to right direction
+title 在线购物用户旅程
 
-|顾客|
-start
-:访问网站;
-:浏览商品;
-:搜索商品;
-:查看商品详情;
-:比较价格;
-:加入购物车;
-:查看购物车;
-:确认商品;
-note right
+actor "顾客" as user
+user -> (访问网站)
+user -> (浏览商品)
+user -> (搜索商品)
+user -> (查看商品详情)
+user -> (比较价格)
+user -> (加入购物车)
+user -> (查看购物车)
+user -> (确认商品)
+note right of (确认商品)
   犹豫阶段
 end note
-:结算订单;
-:选择支付方式;
-:完成支付;
-:等待发货;
-:收到发货通知;
-:确认收货;
-:评价商品;
-:完成购物;
-stop
-
-note as N1
-用户旅程图展示
-用户在购物流程中的
-各个阶段和体验
-end note
+user -> (结算订单)
+user -> (选择支付方式)
+user -> (完成支付)
+user -> (等待发货)
+user -> (收到发货通知)
+user -> (确认收货)
+user -> (评价商品)
+user -> (完成购物)
 @enduml
 ```
 
@@ -2036,16 +2024,6 @@ stop
 
 ```txt
 @startuml
-!define DEVICONS https://raw.githubusercontent.com/ward-melborough-consulting/Devicons/master/icons/PLANTUML
-!define DEVICONS2 https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v2.0.0/docs
-!includeurl DEVICONS2/common.puml
-!includeurl DEVICONS2/devicons/mysql
-!includeurl DEVICONS2/devicons/nginx
-!includeurl DEVICONS2/devicons/react
-!includeurl DEVICONS2/devicons/java
-!includeurl DEVICONS2/devicons/postgresql
-!includeurl DEVICONS2/devicons/redis
-
 title 微服务架构图
 
 package "客户端" {
@@ -2106,16 +2084,6 @@ package "公共组件" {
 
 ```plantuml
 @startuml
-!define DEVICONS https://raw.githubusercontent.com/ward-melborough-consulting/Devicons/master/icons/PLANTUML
-!define DEVICONS2 https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v2.0.0/docs
-!includeurl DEVICONS2/common.puml
-!includeurl DEVICONS2/devicons/mysql
-!includeurl DEVICONS2/devicons/nginx
-!includeurl DEVICONS2/devicons/react
-!includeurl DEVICONS2/devicons/java
-!includeurl DEVICONS2/devicons/postgresql
-!includeurl DEVICONS2/devicons/redis
-
 title 微服务架构图
 
 package "客户端" {
@@ -2180,30 +2148,22 @@ package "公共组件" {
 
 ```txt
 @startuml
-skinparam circuitStyle rect
 title 简单电路图
 
-component V1 <<电源>> [
-    9V
-    电源
-]
-component R1 <<电阻>> [
-    330Ω
-    电阻
-]
-component LED1 <<发光二极管>> [
-    LED
-    发光二极管
-]
-component S1 <<开关>> [
-    ON/OFF
-    开关
-]
+rectangle "用户设备" {
+    [LED] as led <<发光二极管>>
+}
 
-V1 -down- S1
-S1 -down- R1
-R1 -down- LED1
-LED1 -down- V1
+rectangle "电路" {
+    [电源\nV1\n9V] as v1 <<电源>>
+    [电阻\nR1\n330Ω] as r1 <<电阻>>
+    [开关\nS1] as s1 <<开关>>
+}
+
+v1 --> s1
+s1 --> r1
+r1 --> led
+led --> v1
 @enduml
 ```
 
@@ -2211,30 +2171,22 @@ LED1 -down- V1
 
 ```plantuml
 @startuml
-skinparam circuitStyle rect
 title 简单电路图
 
-component V1 <<电源>> [
-    9V
-    电源
-]
-component R1 <<电阻>> [
-    330Ω
-    电阻
-]
-component LED1 <<发光二极管>> [
-    LED
-    发光二极管
-]
-component S1 <<开关>> [
-    ON/OFF
-    开关
-]
+rectangle "用户设备" {
+    [LED] as led <<发光二极管>>
+}
 
-V1 -down- S1
-S1 -down- R1
-R1 -down- LED1
-LED1 -down- V1
+rectangle "电路" {
+    [电源\nV1\n9V] as v1 <<电源>>
+    [电阻\nR1\n330Ω] as r1 <<电阻>>
+    [开关\nS1] as s1 <<开关>>
+}
+
+v1 --> s1
+s1 --> r1
+r1 --> led
+led --> v1
 @enduml
 ```
 
