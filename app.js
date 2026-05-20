@@ -197,6 +197,7 @@
     setTimeout(() => {
       renderMermaidDiagrams();
       renderPlantUMLDiagrams();
+      renderApexCharts();
       renderEmbeddedServices();
     }, 100);
   }
@@ -246,27 +247,21 @@
         const href = link.getAttribute('href');
         if (!href) return;
         
-        // 检查是否是指向 .md 文件的链接
         if (href.endsWith('.md')) {
           e.preventDefault();
           
-          // 处理相对路径
           let targetPath = href;
           if (!href.startsWith('/') && currentPath) {
-            // 获取当前文件所在文件夹
             const currentDir = currentPath.split('/').slice(0, -1).join('/');
             targetPath = currentDir ? `${currentDir}/${href}` : href;
-            // 简化路径，处理 .. 和 .
             targetPath = simplifyPath(targetPath);
           }
           
-          // 移除开头的 /
           if (targetPath.startsWith('/')) {
             targetPath = targetPath.substring(1);
           }
           
           loadMarkdownFile(targetPath);
-          // 尝试在侧边栏高亮对应的文件
           highlightFileInSidebar(targetPath);
         }
       });
@@ -463,15 +458,12 @@
   }
 
   function encodePlantUML(source) {
-    // 1. 将字符串转为 UTF-8 字节数组
     const encoder = new TextEncoder();
     const utf8 = encoder.encode(source);
-    // 2. DEFLATE 压缩 (raw, no header)
     const compressed = pako.deflateRaw(utf8);
-    // 3. 使用 PlantUML 自定义 base64 编码
     return encode64(compressed);
   }
-
+  
   async function renderPlantUMLDiagrams() {
     if (typeof pako === 'undefined') {
       console.error('Pako library is not loaded');
@@ -508,6 +500,64 @@
         pre.replaceWith(errorDiv);
       }
     }
+  }
+  
+  function renderApexCharts() {
+    if (typeof ApexCharts === 'undefined') {
+      console.error('ApexCharts library is not loaded');
+      return;
+    }
+    
+    const allPres = document.querySelectorAll('.markdown-body pre');
+    
+    allPres.forEach((pre, index) => {
+      const codeElement = pre.querySelector('code');
+      if (!codeElement) return;
+      
+      const classList = codeElement.className;
+      if (!classList || !classList.includes('language-apexcharts')) return;
+      
+      const chartConfigStr = codeElement.textContent.trim();
+      
+      try {
+        const chartConfig = JSON.parse(chartConfigStr);
+        const chartId = 'apexchart-' + Date.now() + '-' + index;
+        
+        const container = document.createElement('div');
+        container.id = chartId;
+        container.className = 'apex-chart';
+        
+        const mergedConfig = {
+          ...chartConfig,
+          chart: {
+            ...chartConfig.chart,
+            id: chartId,
+            toolbar: { show: true }
+          },
+          colors: chartConfig.colors || ['#8B5CF6', '#D946EF', '#3B82F6', '#10B981', '#F59E0B'],
+          theme: { mode: 'light' }
+        };
+        
+        pre.replaceWith(container);
+        
+        setTimeout(() => {
+          const chartElement = document.getElementById(chartId);
+          if (chartElement) {
+            const chart = new ApexCharts(chartElement, mergedConfig);
+            chart.render();
+          }
+        }, 100);
+      } catch (error) {
+        console.error('ApexCharts rendering error:', error);
+        const errorDiv = document.createElement('div');
+        errorDiv.style.color = '#ff6b6b';
+        errorDiv.style.padding = '10px';
+        errorDiv.style.border = '1px solid #ff6b6b';
+        errorDiv.style.borderRadius = '4px';
+        errorDiv.textContent = 'ApexCharts 渲染错误: ' + error.message;
+        pre.replaceWith(errorDiv);
+      }
+    });
   }
   
   function renderEmbeddedServices() {
