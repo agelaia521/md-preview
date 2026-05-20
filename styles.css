@@ -176,6 +176,32 @@ body {
   color: var(--color-accent-purple-deep);
 }
 
+.index-item {
+  display: block;
+  padding: 8px 20px;
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 400;
+  border-left: 2px solid transparent;
+  transition: var(--transition-smooth);
+  cursor: pointer;
+  position: relative;
+  line-height: 1.4;
+}
+
+.index-item:hover {
+  background: rgba(212, 165, 201, 0.1);
+  border-left-color: var(--color-accent-purple);
+}
+
+.index-item.active {
+  background: rgba(242, 196, 206, 0.15);
+  border-left-color: var(--color-accent-pink);
+  color: var(--color-accent-purple-deep);
+  font-weight: 500;
+}
+
 .folder-item {
   padding: 10px 20px;
   font-size: 0.875rem;
