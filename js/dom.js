@@ -12,6 +12,8 @@
     readingProgressBar: document.querySelector('.reading-progress-bar'),
     modeFiles: document.getElementById('modeFiles'),
     modeIndex: document.getElementById('modeIndex'),
-    indexTree: document.getElementById('indexTree')
+    indexTree: document.getElementById('indexTree'),
+    searchInput: document.getElementById('searchInput'),
+    searchResults: document.getElementById('searchResults')
   };
 })();

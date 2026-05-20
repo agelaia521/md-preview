@@ -1,7 +1,7 @@
 (function() {
   window.MarkdownPreview = window.MarkdownPreview || {};
   
-  const { dom, state, CONFIG } = window.MarkdownPreview;
+  const { dom, state, CONFIG, search } = window.MarkdownPreview;
   
   async function loadFileTree() {
     try {
@@ -13,6 +13,10 @@
         console.log('✅ 使用预构建的文件树');
         state.fileTreeData = await response.json();
         renderFileTree(state.fileTreeData);
+        // 延迟构建搜索索引
+        setTimeout(() => {
+          if (search && search.buildIndex) search.buildIndex();
+        }, 500);
         return;
       } else {
         console.log('⚠️ 预构建文件不存在，使用 GitHub API');
@@ -37,6 +41,10 @@
       const data = await response.json();
       state.fileTreeData = buildTreeFromFlatList(data.tree);
       renderFileTree(state.fileTreeData);
+      // 延迟构建搜索索引
+      setTimeout(() => {
+        if (search && search.buildIndex) search.buildIndex();
+      }, 500);
     } catch (error) {
       console.error('Error loading file tree:', error);
       dom.fileTree.innerHTML = '<div class="file-item" style="color: var(--color-text-muted);">无法加载文件列表，请检查网络或手动配置</div>';

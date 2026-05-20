@@ -5,6 +5,9 @@
     window.MarkdownPreview.fileTree.loadFileTree();
     window.MarkdownPreview.ui.setupEventListeners();
     window.MarkdownPreview.ui.setupScrollProgress();
+    if (window.MarkdownPreview.search && window.MarkdownPreview.search.init) {
+      window.MarkdownPreview.search.init();
+    }
   }
   
   if (document.readyState === 'loading') {

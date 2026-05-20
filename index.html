@@ -27,6 +27,10 @@
           </svg>
         </button>
       </div>
+      <div class="search-container">
+        <input type="search" id="searchInput" placeholder="搜索文档..." />
+      </div>
+      <div class="search-results" id="searchResults"></div>
       <div class="file-tree" id="fileTree"></div>
       <div class="index-tree hidden" id="indexTree"></div>
     </aside>
@@ -53,6 +57,7 @@
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flexsearch@0.7.31/dist/flexsearch.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -101,6 +106,7 @@
   <script src="js/ui.js"></script>
   <script src="js/file-tree.js"></script>
   <script src="js/markdown.js"></script>
+  <script src="js/search.js"></script>
   
   <!-- Renderers -->
   <script src="js/renderers/mermaid.js"></script>
