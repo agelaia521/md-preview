@@ -107,6 +107,21 @@ Animal <|-- Dog
 @[figma](https://www.figma.com/file/example)
 ```
 
+### 地理数据可视化
+
+支持嵌入 GeoJSON 和 TopoJSON 地理数据格式，使用 Leaflet.js 渲染交互式地图：
+
+**支持格式：**
+- GeoJSON（点、线、多边形等地理要素）
+- TopoJSON（压缩的地理数据格式）
+
+使用示例：
+```markdown
+@[geojson]({"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[116.4074,39.9042]},"properties":{"name":"北京"}}]})
+
+@[topojson]({"type":"Topology","objects":{"data":{"type":"GeometryCollection","geometries":[{"type":"Point","coordinates":[116.4074,39.9042]}]}},"arcs":[]})
+```
+
 ## 快速开始
 
 ### 在 GitHub Pages 上使用：
