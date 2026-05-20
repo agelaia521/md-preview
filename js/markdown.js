@@ -17,6 +17,8 @@
       renderMarkdown(markdown, path);
       extractAndRenderIndex(markdown);
       updateEditButton(path);
+      updateBreadcrumbs(path);
+      setupHeadingNavigation();
       if (router && router.updateHash) router.updateHash(path);
     } catch (error) {
       console.error('Error loading markdown:', error);
@@ -218,6 +220,110 @@
     dom.editPageBtn.href = editUrl;
   }
   
+  function updateBreadcrumbs(path) {
+    if (!dom.pageBreadcrumbs) return;
+    
+    dom.pageBreadcrumbs.innerHTML = '';
+    
+    if (!path) return;
+    
+    const parts = path.split('/');
+    
+    // 添加仓库根面包屑
+    const rootCrumb = document.createElement('span');
+    rootCrumb.className = 'breadcrumb-item';
+    rootCrumb.textContent = CONFIG.repo || 'Docs';
+    rootCrumb.style.cursor = 'pointer';
+    rootCrumb.style.color = 'var(--color-accent-purple-deep)';
+    rootCrumb.addEventListener('click', () => {
+      // 返回欢迎页
+      dom.markdownContent.innerHTML = '<div class="welcome-state"><p class="welcome-text">选择一个文件开始阅读</p></div>';
+      state.currentFilePath = '';
+      window.history.replaceState(null, '', window.location.pathname);
+      dom.pageHeader.style.display = 'none';
+    });
+    dom.pageBreadcrumbs.appendChild(rootCrumb);
+    
+    // 添加路径面包屑
+    let currentPath = '';
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (!part) continue;
+      
+      const separator = document.createElement('span');
+      separator.textContent = '/';
+      separator.style.margin = '0 4px';
+      separator.style.color = 'var(--color-text-muted)';
+      dom.pageBreadcrumbs.appendChild(separator);
+      
+      currentPath = currentPath ? currentPath + '/' + part : part;
+      
+      const crumb = document.createElement('span');
+      crumb.className = 'breadcrumb-item';
+      
+      if (i === parts.length - 1) {
+        // 最后一项是当前文件
+        crumb.textContent = part.replace('.md', '');
+        crumb.style.color = 'var(--color-text)';
+        crumb.style.fontWeight = '500';
+      } else {
+        // 目录项
+        crumb.textContent = part;
+        crumb.style.color = 'var(--color-accent-purple-deep)';
+        crumb.style.cursor = 'pointer';
+      }
+      
+      dom.pageBreadcrumbs.appendChild(crumb);
+    }
+  }
+  
+  function setupHeadingNavigation() {
+    if (!dom.markdownContent) return;
+    
+    // 移除旧的监听器
+    const oldHeadings = dom.markdownContent.querySelectorAll('.heading-clickable');
+    oldHeadings.forEach(h => {
+      h.classList.remove('heading-clickable');
+      h.style.cursor = '';
+    });
+    
+    // 给所有标题添加点击跳转功能
+    const headings = dom.markdownContent.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    headings.forEach(heading => {
+      heading.classList.add('heading-clickable');
+      heading.style.cursor = 'pointer';
+      heading.style.position = 'relative';
+      
+      // 添加悬停效果
+      heading.addEventListener('mouseenter', () => {
+        heading.style.borderLeft = '3px solid var(--color-accent-purple)';
+        heading.style.paddingLeft = '8px';
+        heading.style.marginLeft = '-11px';
+      });
+      
+      heading.addEventListener('mouseleave', () => {
+        heading.style.borderLeft = '';
+        heading.style.paddingLeft = '';
+        heading.style.marginLeft = '';
+      });
+      
+      heading.addEventListener('click', () => {
+        const id = heading.id;
+        if (id) {
+          window.location.hash = '#' + id;
+          
+          // 高亮对应的目录项
+          const indexItems = dom.indexTree.querySelectorAll('.index-item');
+          indexItems.forEach(item => {
+            if (item.dataset.id === id) {
+              setActiveIndexItem(item);
+            }
+          });
+        }
+      });
+    });
+  }
+  
   window.MarkdownPreview.markdown = {
     loadMarkdownFile,
     renderMarkdown,
@@ -227,6 +333,8 @@
     renderIndex,
     setActiveIndexItem,
     updateEditButton,
-    parseFrontmatter
+    parseFrontmatter,
+    updateBreadcrumbs,
+    setupHeadingNavigation
   };
 })();

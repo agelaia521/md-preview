@@ -19,7 +19,37 @@
       const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
       dom.readingProgressBar.style.width = scrollPercent + '%';
       dom.progressBar.style.width = scrollPercent + '%';
+      
+      updateActiveHeading();
     });
+  }
+  
+  function updateActiveHeading() {
+    const headings = document.querySelectorAll('.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6');
+    const indexItems = dom.indexTree.querySelectorAll('.index-item');
+    
+    let activeIndex = -1;
+    
+    for (let i = headings.length - 1; i >= 0; i--) {
+      const heading = headings[i];
+      const rect = heading.getBoundingClientRect();
+      if (rect.top <= 150) {
+        activeIndex = i;
+        break;
+      }
+    }
+    
+    // 找到对应的索引项并高亮
+    if (activeIndex >= 0 && headings[activeIndex]) {
+      const activeId = headings[activeIndex].id;
+      indexItems.forEach((item, idx) => {
+        if (item.dataset.id === activeId) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    }
   }
   
   function setupEventListeners() {
@@ -63,6 +93,7 @@
     setupScrollProgress,
     setupEventListeners,
     switchMode,
-    copyCodeToClipboard
+    copyCodeToClipboard,
+    updateActiveHeading
   };
 })();

@@ -980,6 +980,10 @@ body {
   flex-wrap: wrap;
 }
 
+.breadcrumb-item:hover {
+  text-decoration: underline;
+}
+
 .edit-page-btn {
   display: flex;
   align-items: center;
