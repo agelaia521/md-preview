@@ -651,6 +651,7 @@
   }
   
   function renderMusicXML(code, container, pre) {
+    console.log('Checking Verovio library...', typeof verovio);
     // 尝试多种可能的全局命名空间
     const verovioLib = window.verovio || window.Verovio;
     if (typeof verovioLib === 'undefined') {
@@ -705,6 +706,8 @@
   function renderOSMD(code, container, pre) {
     // 尝试多种可能的全局命名空间
     const osmdLib = window.opensheetmusicdisplay || window.OpenSheetMusicDisplay;
+    console.log('Checking OSMD library...', typeof osmdLib);
+    
     if (typeof osmdLib === 'undefined') {
       console.error('OSMD library is not loaded');
       const errorDiv = document.createElement('div');
@@ -734,51 +737,40 @@
         pre.parentNode.replaceChild(container, pre);
       }
       
-      // 正确获取构造函数
+      // 正确获取构造函数 - 简化
       const OSMDClass = osmdLib.OpenSheetMusicDisplay || osmdLib;
-      const osmd = new OSMDClass(div, {
-        autoResize: true,
-        backend: 'svg',
-        drawTitle: true,
-        drawComposer: true,
-        drawLyrics: true,
-        drawMeasureNumbers: true,
-        drawPartNames: true,
-        drawMeasureBars: true,
-        drawSlurs: true,
-        drawTies: true,
-        drawBeams: true,
-        drawArticulations: true,
-        drawOrnaments: true,
-        drawDynamics: true,
-        drawClefs: true,
-        drawTimeSignatures: true,
-        drawKeySignatures: true,
-        drawTuplets: true
-      });
+      const osmd = new OSMDClass(div);
       
-      osmd.load(formattedCode).then(() => {
-        osmd.render();
-      }).catch(err => {
-        console.error('OSMD loading error:', err);
-        container.innerHTML = '';
-        const errorDiv = document.createElement('div');
-        errorDiv.style.color = '#ff6b6b';
-        errorDiv.style.padding = '10px';
-        errorDiv.textContent = 'OSMD 加载错误: ' + err.message;
-        container.appendChild(errorDiv);
-      });
+      // 尝试直接渲染，简单配置
+      try {
+        // 有些版本可能需要不同的调用方式
+        osmd.load(formattedCode).then(() => {
+          osmd.render();
+        }).catch(err => {
+          console.error('OSMD loading error:', err);
+          showFallbackError(container, 'OSMD 加载失败，请使用 Verovio 渲染');
+        });
+      } catch (loadErr) {
+        console.error('OSMD direct loading failed:', loadErr);
+        showFallbackError(container, 'OSMD 渲染失败，请使用 Verovio 渲染');
+      }
     } catch (error) {
       console.error('OSMD rendering error:', error);
-      const errorDiv = document.createElement('div');
-      errorDiv.style.color = '#ff6b6b';
-      errorDiv.style.padding = '10px';
-      errorDiv.textContent = 'OSMD 乐谱渲染错误: ' + error.message;
-      container.appendChild(errorDiv);
+      showFallbackError(container, 'OSMD 渲染错误: ' + error.message);
       if (pre.parentNode) {
         pre.parentNode.replaceChild(container, pre);
       }
     }
+  }
+  
+  // 辅助函数：显示错误信息
+  function showFallbackError(container, message) {
+    container.innerHTML = '';
+    const errorDiv = document.createElement('div');
+    errorDiv.style.color = '#ff6b6b';
+    errorDiv.style.padding = '10px';
+    errorDiv.textContent = message;
+    container.appendChild(errorDiv);
   }
   
   function renderDiff() {
