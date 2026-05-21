@@ -4,8 +4,6 @@
   const STORAGE_KEY = 'md-preview-settings';
 
   const defaultSettings = {
-    accentColor: '#d4a5c9',
-    accentColor2: '#f2c4ce',
     showComments: true,
     showReadingProgress: true
   };
@@ -14,7 +12,8 @@
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return { ...defaultSettings, ...JSON.parse(saved) };
+        const parsed = JSON.parse(saved);
+        return { ...defaultSettings, showComments: parsed.showComments ?? defaultSettings.showComments, showReadingProgress: parsed.showReadingProgress ?? defaultSettings.showReadingProgress };
       }
     } catch (e) {
       console.error('Failed to load settings:', e);
@@ -28,13 +27,6 @@
     } catch (e) {
       console.error('Failed to save settings:', e);
     }
-  }
-
-  function applyThemeColors(accentColor, accentColor2) {
-    const root = document.documentElement;
-    root.style.setProperty('--color-accent-purple', accentColor);
-    root.style.setProperty('--color-accent-pink', accentColor2);
-    root.style.setProperty('--color-accent-light', `${accentColor}20`);
   }
 
   function initFloatingMenu() {
@@ -87,8 +79,6 @@
   function initSettingsPanel() {
     const settingsOverlay = document.getElementById('settingsOverlay');
     const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-    const accentColorPicker = document.getElementById('accentColorPicker');
-    const accentColor2Picker = document.getElementById('accentColor2Picker');
     const showCommentsToggle = document.getElementById('showCommentsToggle');
     const showReadingProgressToggle = document.getElementById('showReadingProgressToggle');
 
@@ -104,20 +94,6 @@
       if (e.target === settingsOverlay) {
         closeSettingsPanel();
       }
-    });
-
-    accentColorPicker?.addEventListener('input', (e) => {
-      const settings = loadSettings();
-      settings.accentColor = e.target.value;
-      saveSettings(settings);
-      applyThemeColors(settings.accentColor, settings.accentColor2);
-    });
-
-    accentColor2Picker?.addEventListener('input', (e) => {
-      const settings = loadSettings();
-      settings.accentColor2 = e.target.value;
-      saveSettings(settings);
-      applyThemeColors(settings.accentColor, settings.accentColor2);
     });
 
     showCommentsToggle?.addEventListener('change', (e) => {
@@ -167,19 +143,14 @@
 
   function init() {
     const settings = loadSettings();
-    applyThemeColors(settings.accentColor, settings.accentColor2);
     initFloatingMenu();
     initSettingsPanel();
     toggleComments(settings.showComments);
     toggleReadingProgress(settings.showReadingProgress);
 
-    const accentColorPicker = document.getElementById('accentColorPicker');
-    const accentColor2Picker = document.getElementById('accentColor2Picker');
     const showCommentsToggle = document.getElementById('showCommentsToggle');
     const showReadingProgressToggle = document.getElementById('showReadingProgressToggle');
 
-    if (accentColorPicker) accentColorPicker.value = settings.accentColor;
-    if (accentColor2Picker) accentColor2Picker.value = settings.accentColor2;
     if (showCommentsToggle) showCommentsToggle.checked = settings.showComments;
     if (showReadingProgressToggle) showReadingProgressToggle.checked = settings.showReadingProgress;
   }

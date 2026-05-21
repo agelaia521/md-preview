@@ -28,8 +28,6 @@
     openSettingsBtn: document.getElementById('openSettingsBtn'),
     settingsOverlay: document.getElementById('settingsOverlay'),
     closeSettingsBtn: document.getElementById('closeSettingsBtn'),
-    accentColorPicker: document.getElementById('accentColorPicker'),
-    accentColor2Picker: document.getElementById('accentColor2Picker'),
     showCommentsToggle: document.getElementById('showCommentsToggle'),
     showReadingProgressToggle: document.getElementById('showReadingProgressToggle')
   };
