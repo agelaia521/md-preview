@@ -17,6 +17,8 @@
     searchResults: document.getElementById('searchResults'),
     pageHeader: document.getElementById('pageHeader'),
     pageBreadcrumbs: document.getElementById('pageBreadcrumbs'),
-    editPageBtn: document.getElementById('editPageBtn')
+    editPageBtn: document.getElementById('editPageBtn'),
+    commentsSection: document.getElementById('commentsSection'),
+    giscusContainer: document.getElementById('giscusContainer')
   };
 })();

@@ -1059,3 +1059,32 @@ body {
   }
 }
 
+/* Giscus 评论区域 */
+.comments-section {
+  display: none;
+  max-width: 900px;
+  margin: 48px auto 80px;
+  padding: 0 24px;
+}
+
+.comments-section::before {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-accent-purple), var(--color-accent-pink));
+  margin: 0 auto 32px;
+  border-radius: 1px;
+}
+
+.giscus {
+  min-height: 200px;
+}
+
+@media (max-width: 768px) {
+  .comments-section {
+    padding: 0 16px;
+    margin: 32px auto 64px;
+  }
+}
+

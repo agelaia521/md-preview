@@ -111,6 +111,8 @@
       window.MarkdownPreview.renderers.plantuml.render();
       window.MarkdownPreview.renderers.embedded.render();
     }, 100);
+    
+    loadGiscus(currentPath);
   }
   
   function interceptLinks(currentPath) {
@@ -316,6 +318,46 @@
     });
   }
   
+  function loadGiscus(path) {
+    if (!dom.giscusContainer || !dom.commentsSection) return;
+    
+    const giscusConfig = CONFIG.giscus;
+    
+    if (!giscusConfig || !giscusConfig.enabled || !giscusConfig.repo) {
+      dom.commentsSection.style.display = 'none';
+      return;
+    }
+    
+    if (!path) {
+      dom.commentsSection.style.display = 'none';
+      return;
+    }
+    
+    dom.commentsSection.style.display = 'block';
+    
+    dom.giscusContainer.innerHTML = '';
+    
+    const script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.setAttribute('data-repo', giscusConfig.repo);
+    script.setAttribute('data-repo-id', giscusConfig.repoId);
+    script.setAttribute('data-category', giscusConfig.category);
+    script.setAttribute('data-category-id', giscusConfig.categoryId);
+    script.setAttribute('data-mapping', giscusConfig.mapping);
+    script.setAttribute('data-strict', giscusConfig.strict);
+    script.setAttribute('data-reactions-enabled', giscusConfig.reactionsEnabled);
+    script.setAttribute('data-emit-metadata', giscusConfig.emitMetadata);
+    script.setAttribute('data-input-position', giscusConfig.inputPosition);
+    script.setAttribute('data-theme', giscusConfig.theme);
+    script.setAttribute('data-lang', giscusConfig.lang);
+    script.setAttribute('data-loading', giscusConfig.loading);
+    script.setAttribute('data-term', path);
+    script.crossOrigin = 'anonymous';
+    script.async = true;
+    
+    dom.giscusContainer.appendChild(script);
+  }
+  
   window.MarkdownPreview.markdown = {
     loadMarkdownFile,
     renderMarkdown,
@@ -327,6 +369,7 @@
     updateEditButton,
     parseFrontmatter,
     updateBreadcrumbs,
-    setupHeadingNavigation
+    setupHeadingNavigation,
+    loadGiscus
   };
 })();

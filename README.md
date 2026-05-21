@@ -36,6 +36,33 @@
 - 🎯 **Hash 路由** - 每个文档有独特 URL，支持分享和书签
 - 📋 **面包屑导航** - 显示当前文件路径，方便跳转
 - 📝 **Frontmatter** - 支持 YAML 元数据解析
+- 💬 **Giscus 评论** - 基于 GitHub Discussions 的零后端评论系统
+
+## 配置 Giscus 评论
+
+1. **在 GitHub 仓库中开启 Discussions**
+   - 进入仓库 Settings
+   - 在 Features 中启用 Discussions
+
+2. **访问 Giscus 官网获取配置**
+   - 前往 [giscus.app](https://giscus.app)
+   - 按提示配置并获取所需的 `repoId` 和 `categoryId`
+
+3. **修改 `js/config.js` 中的配置**
+   ```javascript
+   window.MarkdownPreview.CONFIG = {
+     owner: 'your-username',
+     repo: 'your-repo',
+     giscus: {
+       enabled: true,
+       repo: 'your-username/your-repo',
+       repoId: 'your-repo-id',
+       category: 'Announcements',
+       categoryId: 'your-category-id',
+       // ...其他配置
+     }
+   };
+   ```
 
 ## 支持格式
 

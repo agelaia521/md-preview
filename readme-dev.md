@@ -582,6 +582,69 @@ window.addEventListener('hashchange', () => {
    - 跳转到 GitHub 编辑页面
    - 紫色渐变背景，悬停放大效果
 
+### 2.9 Giscus 评论模块 (`js/markdown.js`)
+
+**功能**：基于 GitHub Discussions 的零后端评论系统
+
+**配置文件**：`js/config.js`
+```javascript
+window.MarkdownPreview.CONFIG = {
+  owner: 'your-username',
+  repo: 'your-repo',
+  giscus: {
+    enabled: true,
+    repo: 'your-username/your-repo',
+    repoId: '',
+    category: 'Announcements',
+    categoryId: '',
+    mapping: 'pathname',
+    strict: '0',
+    reactionsEnabled: '1',
+    emitMetadata: '0',
+    inputPosition: 'bottom',
+    theme: 'light',
+    lang: 'zh-CN',
+    loading: 'lazy'
+  }
+};
+```
+
+**加载流程**：
+```javascript
+function loadGiscus(path) {
+  // 1. 检查配置是否启用
+  if (!giscusConfig || !giscusConfig.enabled || !giscusConfig.repo) {
+    dom.commentsSection.style.display = 'none';
+    return;
+  }
+  
+  // 2. 只在有文档时显示评论
+  if (!path) {
+    dom.commentsSection.style.display = 'none';
+    return;
+  }
+  
+  // 3. 清除旧的并加载新的 Giscus 脚本
+  dom.commentsSection.style.display = 'block';
+  dom.giscusContainer.innerHTML = '';
+  
+  const script = document.createElement('script');
+  script.src = 'https://giscus.app/client.js';
+  script.setAttribute('data-repo', giscusConfig.repo);
+  script.setAttribute('data-term', path);
+  // ...其他配置
+  script.crossOrigin = 'anonymous';
+  script.async = true;
+  
+  dom.giscusContainer.appendChild(script);
+}
+```
+
+**样式特点**：
+- 评论区域有紫色渐变分隔线
+- 响应式设计，移动端自动适配
+- 默认为隐藏，加载文档后显示
+
 ---
 
 ## 3. styles.css 样式系统分析
@@ -1126,6 +1189,7 @@ window.MarkdownPreview.CONFIG = {
 | **编辑按钮** | ✅ 完成 | js/markdown.js + styles.css |
 | **Frontmatter** | ✅ 完成 | js/markdown.js |
 | **悬浮 FAB** | ✅ 完成 | styles.css + index.html |
+| **Giscus 评论** | ✅ 完成 | js/markdown.js + config.js + styles.css |
 
 ### 8.2 贡献指南
 
