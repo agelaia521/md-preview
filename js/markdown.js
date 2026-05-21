@@ -335,11 +335,22 @@
     
     dom.commentsSection.style.display = 'block';
     
-    dom.giscusContainer.innerHTML = '';
+    const giscusFrame = dom.giscusContainer.querySelector('iframe');
     
-    if (window.giscus) {
-      window.giscus.destroy?.();
+    if (giscusFrame) {
+      giscusFrame.contentWindow.postMessage({
+        giscus: {
+          setConfig: {
+            term: path,
+            mapping: giscusConfig.mapping,
+            strict: giscusConfig.strict === '1'
+          }
+        }
+      }, 'https://giscus.app');
+      return;
     }
+    
+    dom.giscusContainer.innerHTML = '';
     
     const script = document.createElement('script');
     script.src = 'https://giscus.app/client.js';
