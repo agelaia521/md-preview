@@ -1,7 +1,7 @@
 (function() {
   window.MarkdownPreview = window.MarkdownPreview || {};
   
-  const { dom, state, CONFIG, router } = window.MarkdownPreview;
+  const { dom, state, CONFIG } = window.MarkdownPreview;
   
   async function loadMarkdownFile(path) {
     try {
@@ -19,7 +19,11 @@
       updateEditButton(path);
       updateBreadcrumbs(path);
       setupHeadingNavigation();
-      if (router && router.updateHash) router.updateHash(path);
+      
+      const { router } = window.MarkdownPreview;
+      if (router && router.updateHash) {
+        router.updateHash(path);
+      }
     } catch (error) {
       console.error('Error loading markdown:', error);
       dom.markdownContent.innerHTML = '<div class="welcome-state"><p class="welcome-text">无法加载文件</p></div>';
@@ -50,7 +54,6 @@
         const key = trimmed.substring(0, colonIndex).trim();
         let value = trimmed.substring(colonIndex + 1).trim();
         
-        // 移除引号
         if ((value.startsWith('"') && value.endsWith('"')) || 
             (value.startsWith("'") && value.endsWith("'"))) {
           value = value.substring(1, value.length - 1);
@@ -66,11 +69,9 @@
   function renderMarkdown(markdown, currentPath = '') {
     const { frontmatter, content } = parseFrontmatter(markdown);
     
-    // 更新文档标题
     if (frontmatter.title) {
       document.title = frontmatter.title + ' | ' + (CONFIG.repo || 'Markdown Preview');
     } else {
-      // 如果没有 frontmatter title，尝试从第一个标题获取
       const titleMatch = content.match(/^#\s+(.+)$/m);
       if (titleMatch) {
         document.title = titleMatch[1] + ' | ' + (CONFIG.repo || 'Markdown Preview');
@@ -79,7 +80,6 @@
       }
     }
     
-    // 保存 frontmatter 到 state
     state.currentFrontmatter = frontmatter;
     
     const html = marked.parse(content, {
@@ -214,8 +214,6 @@
     
     dom.pageHeader.style.display = 'flex';
     
-    // GitHub 编辑链接格式
-    // https://github.com/[owner]/[repo]/edit/[branch]/[path]
     const editUrl = `https://github.com/${CONFIG.owner}/${CONFIG.repo}/edit/main/${path}`;
     dom.editPageBtn.href = editUrl;
   }
@@ -229,14 +227,12 @@
     
     const parts = path.split('/');
     
-    // 添加仓库根面包屑
     const rootCrumb = document.createElement('span');
     rootCrumb.className = 'breadcrumb-item';
     rootCrumb.textContent = CONFIG.repo || 'Docs';
     rootCrumb.style.cursor = 'pointer';
     rootCrumb.style.color = 'var(--color-accent-purple-deep)';
     rootCrumb.addEventListener('click', () => {
-      // 返回欢迎页
       dom.markdownContent.innerHTML = '<div class="welcome-state"><p class="welcome-text">选择一个文件开始阅读</p></div>';
       state.currentFilePath = '';
       window.history.replaceState(null, '', window.location.pathname);
@@ -244,7 +240,6 @@
     });
     dom.pageBreadcrumbs.appendChild(rootCrumb);
     
-    // 添加路径面包屑
     let currentPath = '';
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
@@ -262,12 +257,10 @@
       crumb.className = 'breadcrumb-item';
       
       if (i === parts.length - 1) {
-        // 最后一项是当前文件
         crumb.textContent = part.replace('.md', '');
         crumb.style.color = 'var(--color-text)';
         crumb.style.fontWeight = '500';
       } else {
-        // 目录项
         crumb.textContent = part;
         crumb.style.color = 'var(--color-accent-purple-deep)';
         crumb.style.cursor = 'pointer';
@@ -280,21 +273,18 @@
   function setupHeadingNavigation() {
     if (!dom.markdownContent) return;
     
-    // 移除旧的监听器
     const oldHeadings = dom.markdownContent.querySelectorAll('.heading-clickable');
     oldHeadings.forEach(h => {
       h.classList.remove('heading-clickable');
       h.style.cursor = '';
     });
     
-    // 给所有标题添加点击跳转功能
     const headings = dom.markdownContent.querySelectorAll('h1, h2, h3, h4, h5, h6');
     headings.forEach(heading => {
       heading.classList.add('heading-clickable');
       heading.style.cursor = 'pointer';
       heading.style.position = 'relative';
       
-      // 添加悬停效果
       heading.addEventListener('mouseenter', () => {
         heading.style.borderLeft = '3px solid var(--color-accent-purple)';
         heading.style.paddingLeft = '8px';
@@ -312,7 +302,6 @@
         if (id) {
           window.location.hash = '#' + id;
           
-          // 高亮对应的目录项
           const indexItems = dom.indexTree.querySelectorAll('.index-item');
           indexItems.forEach(item => {
             if (item.dataset.id === id) {
