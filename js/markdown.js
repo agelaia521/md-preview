@@ -370,6 +370,17 @@
     script.crossOrigin = 'anonymous';
     script.async = true;
     
+    script.onload = function() {
+      const receiveMessage = function(event) {
+        if (event.origin !== 'https://giscus.app') return;
+        if (!event.data.giscus) return;
+        if (event.data.giscus.event === 'loaded') {
+          window.removeEventListener('message', receiveMessage);
+        }
+      };
+      window.addEventListener('message', receiveMessage);
+    };
+    
     dom.giscusContainer.appendChild(script);
   }
   
