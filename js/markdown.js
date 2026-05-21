@@ -210,10 +210,12 @@
     
     if (!path) {
       dom.pageHeader.style.display = 'none';
+      dom.editPageBtn.style.display = 'none';
       return;
     }
     
     dom.pageHeader.style.display = 'flex';
+    dom.editPageBtn.style.display = 'flex';
     
     const editUrl = `https://github.com/${CONFIG.owner}/${CONFIG.repo}/edit/main/${path}`;
     dom.editPageBtn.href = editUrl;

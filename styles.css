@@ -990,11 +990,10 @@ body {
 /* 页面头部 */
 .page-header {
   display: none;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
+  padding: 8px 24px;
+  background: transparent;
   max-width: 900px;
   margin: 0 auto;
   width: 100%;
@@ -1004,7 +1003,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-text-muted);
   flex-wrap: wrap;
 }
@@ -1013,38 +1012,50 @@ body {
   text-decoration: underline;
 }
 
-.edit-page-btn {
-  display: flex;
+/* 悬浮编辑按钮 */
+.edit-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-accent-purple);
+  display: none;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  color: var(--color-text);
+  justify-content: center;
+  color: white;
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(212, 165, 201, 0.4);
   transition: var(--transition-smooth);
-  white-space: nowrap;
+  z-index: 60;
 }
 
-.edit-page-btn:hover {
-  border-color: var(--color-accent-purple);
-  background: rgba(212, 165, 201, 0.08);
-  color: var(--color-accent-purple-deep);
+.edit-fab:hover {
+  background: var(--color-accent-purple-deep);
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(212, 165, 201, 0.5);
+}
+
+.edit-fab svg {
+  stroke: white;
 }
 
 @media (max-width: 768px) {
   .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 16px 16px;
+    padding: 6px 16px;
   }
   
-  .edit-page-btn {
-    align-self: flex-end;
+  .edit-fab {
+    bottom: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+  }
+  
+  .edit-fab svg {
+    width: 20px;
+    height: 20px;
   }
 }
 
