@@ -5,6 +5,7 @@
   let searchIndex = null;
   let documents = [];
   let debounceTimer = null;
+  let isIndexLoaded = false;
   
   async function loadSearchIndex() {
     try {
@@ -48,6 +49,7 @@
       searchIndex.add(item);
     }
     
+    isIndexLoaded = true;
     console.log('Search index initialized with', documents.length, 'documents');
   }
   
@@ -57,7 +59,16 @@
     return indexData.length;
   }
   
-  function performSearch(query) {
+  async function ensureIndexLoaded() {
+    if (!isIndexLoaded) {
+      console.log('Building index on first search...');
+      await buildIndex();
+    }
+  }
+  
+  async function performSearch(query) {
+    await ensureIndexLoaded();
+    
     const { dom } = window.MarkdownPreview;
     if (!searchIndex || !query.trim()) {
       hideSearchResults();
@@ -139,7 +150,7 @@
     return div.innerHTML;
   }
   
-  async function setupSearchEvents() {
+  function setupSearchEvents() {
     const { dom } = window.MarkdownPreview;
     if (!dom.searchInput) {
       console.error('searchInput not found!');
@@ -149,17 +160,11 @@
     console.log('Setting up search events...');
     
     dom.searchInput.addEventListener('input', (e) => {
+      console.log('Input event triggered:', e.target.value);
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         performSearch(e.target.value);
       }, 300);
-    });
-    
-    dom.searchInput.addEventListener('focus', async () => {
-      if (!searchIndex) {
-        const count = await buildIndex();
-        console.log(`Search index loaded: ${count} documents`);
-      }
     });
     
     document.addEventListener('click', (e) => {
@@ -169,8 +174,13 @@
     });
   }
   
+  function init() {
+    setupSearchEvents();
+    buildIndex();
+  }
+  
   window.MarkdownPreview.search = {
-    init: setupSearchEvents,
+    init: init,
     buildIndex: buildIndex
   };
 })();
