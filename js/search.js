@@ -9,15 +9,12 @@
   
   async function loadSearchIndex() {
     try {
-      console.log('Loading search index...');
       const response = await fetch('search-index.json');
       if (!response.ok) {
-        console.warn('Search index not found, status:', response.status);
+        console.warn('Search index not found');
         return [];
       }
-      const data = await response.json();
-      console.log('Search index loaded:', data.length, 'documents');
-      return data;
+      return await response.json();
     } catch (e) {
       console.error('Failed to load search index:', e);
       return [];
@@ -26,28 +23,24 @@
   
   function initSearchIndex(indexData) {
     if (searchIndex) return;
-    
     if (!window.FlexSearch) {
       console.error('FlexSearch not loaded!');
       return;
     }
     
-    console.log('Initializing search index...');
-    
     documents = indexData;
     
-    searchIndex = new window.FlexSearch.Index({
-      tokenize: 'forward',
-      cache: true,
-      document: {
-        id: 'path',
-        index: ['title', 'preview']
-      }
+    searchIndex = new window.FlexSearch({
+      tokenize: 'full',
+      threshold: 2,
+      resolution: 9,
+      depth: 3,
+      charset: 'latin:extra'
     });
     
-    for (const item of documents) {
-      searchIndex.add(item);
-    }
+    documents.forEach((doc, index) => {
+      searchIndex.add(index, doc.title + ' ' + doc.preview);
+    });
     
     isIndexLoaded = true;
     console.log('Search index initialized with', documents.length, 'documents');
@@ -61,7 +54,6 @@
   
   async function ensureIndexLoaded() {
     if (!isIndexLoaded) {
-      console.log('Building index on first search...');
       await buildIndex();
     }
   }
@@ -78,8 +70,7 @@
     console.log('Searching for:', query);
     
     const results = searchIndex.search(query, {
-      limit: 20,
-      enrich: true
+      limit: 20
     });
     
     console.log('Search results raw:', results);
@@ -101,12 +92,10 @@
     const seen = new Set();
     const merged = [];
     
-    for (const result of results) {
-      const path = typeof result === 'string' ? result : (result.path || result.id);
-      if (!path || seen.has(path)) continue;
-      
-      seen.add(path);
-      const doc = documents.find(d => d.path === path);
+    for (const index of results) {
+      if (seen.has(index)) continue;
+      seen.add(index);
+      const doc = documents[index];
       if (doc) {
         merged.push(doc);
       }
@@ -157,10 +146,7 @@
       return;
     }
     
-    console.log('Setting up search events...');
-    
     dom.searchInput.addEventListener('input', (e) => {
-      console.log('Input event triggered:', e.target.value);
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         performSearch(e.target.value);
