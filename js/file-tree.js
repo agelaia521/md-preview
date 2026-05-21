@@ -13,10 +13,7 @@
         console.log('✅ 使用预构建的文件树');
         state.fileTreeData = await response.json();
         renderFileTree(state.fileTreeData);
-        // 延迟构建搜索索引
-        setTimeout(() => {
-          if (search && search.buildIndex) search.buildIndex();
-        }, 500);
+        onFilesLoaded();
         return;
       } else {
         console.log('⚠️ 预构建文件不存在，使用 GitHub API');
@@ -41,10 +38,7 @@
       const data = await response.json();
       state.fileTreeData = buildTreeFromFlatList(data.tree);
       renderFileTree(state.fileTreeData);
-      // 延迟构建搜索索引
-      setTimeout(() => {
-        if (search && search.buildIndex) search.buildIndex();
-      }, 500);
+      onFilesLoaded();
     } catch (error) {
       console.error('Error loading file tree:', error);
       dom.fileTree.innerHTML = '<div class="file-item" style="color: var(--color-text-muted);">无法加载文件列表，请检查网络或手动配置</div>';
@@ -184,6 +178,19 @@
     }
   }
   
+  function onFilesLoaded() {
+    // 延迟构建搜索索引
+    setTimeout(() => {
+      if (search && search.buildIndex) search.buildIndex();
+    }, 500);
+    // 通知路由模块文件已加载
+    setTimeout(() => {
+      if (window.MarkdownPreview.router && window.MarkdownPreview.router.onFileTreeLoaded) {
+        window.MarkdownPreview.router.onFileTreeLoaded();
+      }
+    }, 100);
+  }
+  
   window.MarkdownPreview.fileTree = {
     loadFileTree,
     loadFileTreeFromGitHubAPI,
@@ -193,6 +200,7 @@
     highlightFileInSidebar,
     toggleSidebar,
     closeSidebar,
-    closeSidebarOnMobile
+    closeSidebarOnMobile,
+    onFilesLoaded
   };
 })();
