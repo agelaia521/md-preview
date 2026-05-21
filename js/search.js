@@ -2,7 +2,6 @@
   window.MarkdownPreview = window.MarkdownPreview || {};
   window.MarkdownPreview.search = {};
   
-  let searchIndex = null;
   let documents = [];
   let debounceTimer = null;
   let isIndexLoaded = false;
@@ -22,26 +21,7 @@
   }
   
   function initSearchIndex(indexData) {
-    if (searchIndex) return;
-    if (!window.FlexSearch) {
-      console.error('FlexSearch not loaded!');
-      return;
-    }
-    
     documents = indexData;
-    
-    searchIndex = new window.FlexSearch({
-      tokenize: 'full',
-      threshold: 2,
-      resolution: 9,
-      depth: 3,
-      charset: 'latin:extra'
-    });
-    
-    documents.forEach((doc, index) => {
-      searchIndex.add(index, doc.title + ' ' + doc.preview);
-    });
-    
     isIndexLoaded = true;
     console.log('Search index initialized with', documents.length, 'documents');
   }
@@ -58,24 +38,65 @@
     }
   }
   
+  function simpleSearch(query) {
+    const results = [];
+    const queryLower = query.toLowerCase();
+    
+    documents.forEach((doc, index) => {
+      const titleLower = doc.title.toLowerCase();
+      const previewLower = doc.preview ? doc.preview.toLowerCase() : '';
+      const pathLower = doc.path.toLowerCase();
+      
+      let score = 0;
+      
+      if (titleLower.includes(queryLower)) {
+        score += 10;
+        const indexInTitle = titleLower.indexOf(queryLower);
+        if (indexInTitle === 0) score += 5;
+      }
+      if (previewLower.includes(queryLower)) {
+        score += 5;
+      }
+      if (pathLower.includes(queryLower)) {
+        score += 2;
+      }
+      
+      if (score > 0) {
+        results.push({
+          index: index,
+          score: score,
+          doc: doc
+        });
+      }
+    });
+    
+    results.sort((a, b) => b.score - a.score);
+    return results.slice(0, 20).map(r => r.index);
+  }
+  
   async function performSearch(query) {
     await ensureIndexLoaded();
     
     const { dom } = window.MarkdownPreview;
-    if (!searchIndex || !query.trim()) {
+    if (!query.trim()) {
       hideSearchResults();
       return;
     }
     
     console.log('Searching for:', query);
     
-    const results = searchIndex.search(query, {
-      limit: 20
-    });
-    
-    console.log('Search results raw:', results);
-    
-    displaySearchResults(results);
+    try {
+      const results = simpleSearch(query);
+      
+      console.log('Search results raw:', results);
+      console.log('Results count:', results.length);
+      
+      displaySearchResults(results);
+    } catch (e) {
+      console.error('Search error:', e);
+      console.error('Error stack:', e.stack);
+      hideSearchResults();
+    }
   }
   
   function displaySearchResults(results) {
