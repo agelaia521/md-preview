@@ -5,6 +5,12 @@
   
   async function loadMarkdownFile(path) {
     try {
+      // 立即更新 URL，提供即时反馈
+      const { router } = window.MarkdownPreview;
+      if (router && router.updateHash) {
+        router.updateHash(path);
+      }
+      
       window.MarkdownPreview.ui.updateProgress(30);
       const response = await fetch(path);
       if (!response.ok) {
@@ -19,11 +25,6 @@
       updateEditButton(path);
       updateBreadcrumbs(path);
       setupHeadingNavigation();
-      
-      const { router } = window.MarkdownPreview;
-      if (router && router.updateHash) {
-        router.updateHash(path);
-      }
     } catch (error) {
       console.error('Error loading markdown:', error);
       dom.markdownContent.innerHTML = '<div class="welcome-state"><p class="welcome-text">无法加载文件</p></div>';
