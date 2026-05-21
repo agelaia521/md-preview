@@ -46,12 +46,112 @@
         <div class="page-breadcrumbs" id="pageBreadcrumbs"></div>
       </div>
       
-      <a href="#" class="edit-fab" id="editPageBtn" target="_blank" rel="noopener noreferrer">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-        </svg>
-      </a>
+      <!-- Floating Menu -->
+      <div class="floating-menu" id="floatingMenu">
+        <div class="menu-items">
+          <button class="menu-item-btn" id="backToTopBtn" title="回到顶部">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 15l-6-6-6 6"/>
+            </svg>
+            <span class="menu-item-label">回到顶部</span>
+          </button>
+          <button class="menu-item-btn" id="goToCommentsBtn" title="评论区">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span class="menu-item-label">评论区</span>
+          </button>
+          <a class="menu-item-btn" id="editPageBtn" title="编辑此页" target="_blank" rel="noopener noreferrer" href="#">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            <span class="menu-item-label">编辑此页</span>
+          </a>
+          <button class="menu-item-btn settings-btn" id="openSettingsBtn" title="设置">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+            </svg>
+            <span class="menu-item-label">设置</span>
+          </button>
+        </div>
+        <button class="menu-trigger" id="menuTrigger">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Settings Panel -->
+      <div class="settings-overlay" id="settingsOverlay">
+        <div class="settings-panel">
+          <div class="settings-header">
+            <h2 class="settings-title">设置</h2>
+            <button class="settings-close" id="closeSettingsBtn">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="settings-section">
+            <h3 class="settings-section-title">外观</h3>
+            
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">主题主色</div>
+                <div class="setting-description">调整界面的主色调</div>
+              </div>
+              <div class="setting-control">
+                <input type="color" class="color-picker" id="accentColorPicker" value="#d4a5c9">
+              </div>
+            </div>
+            
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">第二强调色</div>
+                <div class="setting-description">辅助色，用于渐变效果</div>
+              </div>
+              <div class="setting-control">
+                <input type="color" class="color-picker" id="accentColor2Picker" value="#f2c4ce">
+              </div>
+            </div>
+          </div>
+          
+          <div class="settings-section">
+            <h3 class="settings-section-title">功能</h3>
+            
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">显示评论</div>
+                <div class="setting-description">在页面底部显示评论区</div>
+              </div>
+              <div class="setting-control">
+                <label class="switch">
+                  <input type="checkbox" id="showCommentsToggle" checked>
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">显示阅读进度</div>
+                <div class="setting-description">显示页面阅读进度</div>
+              </div>
+              <div class="setting-control">
+                <label class="switch">
+                  <input type="checkbox" id="showReadingProgressToggle" checked>
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       
       <article class="markdown-body" id="markdownContent">
         <div class="welcome-state">
@@ -124,6 +224,7 @@
   <script src="js/markdown.js"></script>
   <script src="js/search.js"></script>
   <script src="js/router.js"></script>
+  <script src="js/settings.js"></script>
   
   <!-- Renderers -->
   <script src="js/renderers/mermaid.js"></script>
