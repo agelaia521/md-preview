@@ -3,10 +3,23 @@
   window.MarkdownPreview.search = {};
   
   let searchIndex = null;
-  let documentCache = new Map();
   let debounceTimer = null;
   
-  function initSearchIndex() {
+  async function loadSearchIndex() {
+    try {
+      const response = await fetch('search-index.json');
+      if (!response.ok) {
+        console.warn('Search index not found, using fallback');
+        return [];
+      }
+      return await response.json();
+    } catch (e) {
+      console.warn('Failed to load search index:', e);
+      return [];
+    }
+  }
+  
+  function initSearchIndex(indexData) {
     if (searchIndex) return;
     
     searchIndex = new FlexSearch.Document({
@@ -14,84 +27,24 @@
       cache: 100,
       document: {
         id: 'path',
-        index: ['title', 'content'],
+        index: ['title', 'preview'],
         store: ['title', 'path', 'preview']
       }
     });
-  }
-  
-  async function buildIndexFromFileTree() {
-    const { state } = window.MarkdownPreview;
-    if (!state.fileTreeData || state.fileTreeData.length === 0) return;
     
-    initSearchIndex();
-    
-    const files = [];
-    collectFiles(state.fileTreeData, files);
-    
-    for (const file of files) {
-      try {
-        const content = await loadAndCacheFile(file.path);
-        const title = extractTitle(content) || file.name.replace('.md', '');
-        const preview = extractPreview(content);
-        
-        searchIndex.add({
-          path: file.path,
-          title: title,
-          content: content,
-          preview: preview
-        });
-      } catch (e) {
-        console.warn('Failed to index file:', file.path, e);
-      }
+    for (const item of indexData) {
+      searchIndex.add({
+        path: item.path,
+        title: item.title,
+        preview: item.preview
+      });
     }
   }
   
-  function collectFiles(items, result) {
-    for (const item of items) {
-      if (item.type === 'file' && item.name.endsWith('.md')) {
-        result.push(item);
-      } else if (item.type === 'folder' && item.children) {
-        collectFiles(item.children, result);
-      }
-    }
-  }
-  
-  async function loadAndCacheFile(path) {
-    if (documentCache.has(path)) {
-      return documentCache.get(path);
-    }
-    
-    const response = await fetch(path);
-    if (!response.ok) throw new Error('Failed to load');
-    const content = await response.text();
-    
-    documentCache.set(path, content);
-    return content;
-  }
-  
-  function extractTitle(content) {
-    const frontmatterMatch = content.match(/^---[\s\S]*?title:\s*['"]?(.+?)['"]?\s*(?:\n|---)/i);
-    if (frontmatterMatch) return frontmatterMatch[1].trim();
-    
-    const headingMatch = content.match(/^#\s+(.+)$/m);
-    if (headingMatch) return headingMatch[1].trim();
-    
-    return null;
-  }
-  
-  function extractPreview(content) {
-    let text = content;
-    
-    text = text.replace(/^---[\s\S]*?---\s*/, '');
-    text = text.replace(/```[\s\S]*?```/g, '');
-    text = text.replace(/^#+\s*/gm, '');
-    text = text.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
-    text = text.replace(/!\[([^\]]*)\]\([^)]*\)/g, '');
-    text = text.replace(/[*_~`]/g, '');
-    text = text.replace(/\s+/g, ' ').trim();
-    
-    return text.substring(0, 200);
+  async function buildIndex() {
+    const indexData = await loadSearchIndex();
+    initSearchIndex(indexData);
+    return indexData.length;
   }
   
   function performSearch(query) {
@@ -142,8 +95,8 @@
       `;
       
       item.addEventListener('click', () => {
-        markdown.loadMarkdownFile(result.path);
-        fileTree.highlightFileInSidebar(result.path);
+        markdown.loadMarkdownFile('docs/' + result.path);
+        fileTree.highlightFileInSidebar('docs/' + result.path);
         hideSearchResults();
         dom.searchInput.value = '';
       });
@@ -163,7 +116,7 @@
     return div.innerHTML;
   }
   
-  function setupSearchEvents() {
+  async function setupSearchEvents() {
     const { dom } = window.MarkdownPreview;
     if (!dom.searchInput) return;
     
@@ -174,9 +127,10 @@
       }, 300);
     });
     
-    dom.searchInput.addEventListener('focus', () => {
+    dom.searchInput.addEventListener('focus', async () => {
       if (!searchIndex) {
-        buildIndexFromFileTree();
+        const count = await buildIndex();
+        console.log(`Search index loaded: ${count} documents`);
       }
     });
     
@@ -189,6 +143,6 @@
   
   window.MarkdownPreview.search = {
     init: setupSearchEvents,
-    buildIndex: buildIndexFromFileTree
+    buildIndex: buildIndex
   };
 })();
