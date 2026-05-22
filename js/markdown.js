@@ -13,6 +13,11 @@
       
       window.MarkdownPreview.ui.updateProgress(30);
       const response = await fetch(path);
+      
+      if (window.MarkdownPreview.debug && window.MarkdownPreview.debug.incrementApiCalls) {
+        window.MarkdownPreview.debug.incrementApiCalls();
+      }
+      
       if (!response.ok) {
         throw new Error('Failed to load markdown file');
       }

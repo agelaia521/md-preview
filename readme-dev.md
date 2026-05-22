@@ -751,6 +751,51 @@ function calculateReadingTime(content) {
 - `handleFeedbackVote(path, voteType, ...)`：处理投票逻辑
 - `updateFeedbackStats(path, statsEl)`：更新并显示投票统计
 
+### 2.15 调试模式
+
+**功能**：通过 URL 参数 `?debug=1` 开启性能诊断面板，帮助排查性能问题。
+
+**实现位置**：
+- DOM 结构：`index.html`
+- 样式：`css/markdown.css`
+- 逻辑：`js/debug.js`
+- 集成：`app.js`, `js/file-tree.js`, `js/markdown.js`
+
+**实现原理**：
+
+1. **初始化检测**：
+   ```javascript
+   function initDebug() {
+     const urlParams = new URLSearchParams(window.location.search);
+     const debugMode = urlParams.get('debug');
+     
+     if (debugMode === '1' || debugMode === 'true') {
+       debugState.enabled = true;
+       debugState.startTime = performance.now();
+       showDebugPanel();
+     }
+   }
+   ```
+
+2. **性能统计集成**：
+   - 在 `file-tree.js` 的 fetch 调用处增加 API 调用计数
+   - 在预构建文件命中时增加缓存命中计数
+   - 在 `markdown.js` 的文档加载处增加 API 调用计数
+   - 使用 `performance.now()` 计算首屏渲染耗时
+
+3. **显示内容**：
+   - API 调用次数
+   - 缓存命中数/总请求数
+   - 首屏耗时（毫秒）
+   - 当前渲染器信息
+
+**使用方式**：
+```
+https://example.com/?debug=1
+```
+
+**关闭方式**：点击调试面板右上角的关闭按钮
+
 ---
 
 ## 3. 样式系统分析
@@ -1318,6 +1363,7 @@ window.MarkdownPreview.CONFIG = {
 | **评论区跨文档隔离** | ✅ 完成 | js/markdown.js |
 | **CSS 模块化** | ✅ 完成 | css/ 目录 |
 | **文档评分反馈** | ✅ 完成 | js/markdown.js + css/markdown.css + index.html + js/dom.js |
+| **调试模式** | ✅ 完成 | js/debug.js + css/markdown.css + index.html |
 
 ### 8.2 贡献指南
 

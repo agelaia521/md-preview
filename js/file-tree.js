@@ -9,8 +9,15 @@
       const prebuiltUrl = './data/file-tree.json';
       let response = await fetch(prebuiltUrl);
       
+      if (window.MarkdownPreview.debug && window.MarkdownPreview.debug.incrementApiCalls) {
+        window.MarkdownPreview.debug.incrementApiCalls();
+      }
+      
       if (response.ok) {
         console.log('✅ 使用预构建的文件树');
+        if (window.MarkdownPreview.debug && window.MarkdownPreview.debug.incrementCacheHits) {
+          window.MarkdownPreview.debug.incrementCacheHits();
+        }
         state.fileTreeData = await response.json();
         renderFileTree(state.fileTreeData);
         onFilesLoaded();
@@ -30,6 +37,10 @@
     try {
       const apiUrl = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/git/trees/main?recursive=1`;
       const response = await fetch(apiUrl);
+      
+      if (window.MarkdownPreview.debug && window.MarkdownPreview.debug.incrementApiCalls) {
+        window.MarkdownPreview.debug.incrementApiCalls();
+      }
       
       if (!response.ok) {
         throw new Error(`Failed to fetch file tree from GitHub API: ${response.status} ${response.statusText}`);

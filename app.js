@@ -11,6 +11,9 @@
     if (window.MarkdownPreview.router && window.MarkdownPreview.router.init) {
       window.MarkdownPreview.router.init();
     }
+    if (window.MarkdownPreview.debug && window.MarkdownPreview.debug.init) {
+      window.MarkdownPreview.debug.init();
+    }
   }
   
   if (document.readyState === 'loading') {

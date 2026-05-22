@@ -179,7 +179,33 @@
   </div>
 
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
+  
+  <!-- Debug Panel (shown when ?debug=1) -->
+  <div class="debug-panel hidden" id="debugPanel">
+    <div class="debug-header">
+      <span class="debug-title">调试模式</span>
+      <button class="debug-close" id="debugClose">&times;</button>
+    </div>
+    <div class="debug-content">
+      <div class="debug-item">
+        <span class="debug-label">API 调用:</span>
+        <span class="debug-value" id="debugApiCalls">0 次</span>
+      </div>
+      <div class="debug-item">
+        <span class="debug-label">缓存命中:</span>
+        <span class="debug-value" id="debugCacheHits">0 / 0</span>
+      </div>
+      <div class="debug-item">
+        <span class="debug-label">首屏耗时:</span>
+        <span class="debug-value" id="debugRenderTime">-ms</span>
+      </div>
+      <div class="debug-item">
+        <span class="debug-label">渲染器:</span>
+        <span class="debug-value">Marked.js</span>
+      </div>
+    </div>
+  </div>
+  
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flexsearch@0.7.31/dist/flexsearch.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
@@ -226,6 +252,7 @@
   </script>
   <!-- App Modules -->
   <script src="js/config.js"></script>
+  <script src="js/debug.js"></script>
   <script src="js/state.js"></script>
   <script src="js/dom.js"></script>
   <script src="js/ui.js"></script>
