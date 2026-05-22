@@ -73,7 +73,7 @@
     }
     
     if (debugCacheHits) {
-      debugCacheHits.textContent = debugCacheHits.cacheHits + ' / ' + debugState.apiCalls;
+      debugCacheHits.textContent = debugState.cacheHits + ' / ' + debugState.apiCalls;
     }
   }
   
