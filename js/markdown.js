@@ -508,21 +508,7 @@
     
     dom.commentsSection.style.display = 'block';
     
-    const giscusFrame = dom.giscusContainer.querySelector('iframe');
-    
-    if (giscusFrame) {
-      giscusFrame.contentWindow.postMessage({
-        giscus: {
-          setConfig: {
-            term: path,
-            mapping: giscusConfig.mapping,
-            strict: giscusConfig.strict === '1'
-          }
-        }
-      }, 'https://giscus.app');
-      return;
-    }
-    
+    // 完全清空容器，每次重新初始化 Giscus
     dom.giscusContainer.innerHTML = '';
     
     const script = document.createElement('script');
@@ -542,17 +528,6 @@
     script.setAttribute('data-term', path);
     script.crossOrigin = 'anonymous';
     script.async = true;
-    
-    script.onload = function() {
-      const receiveMessage = function(event) {
-        if (event.origin !== 'https://giscus.app') return;
-        if (!event.data.giscus) return;
-        if (event.data.giscus.event === 'loaded') {
-          window.removeEventListener('message', receiveMessage);
-        }
-      };
-      window.addEventListener('message', receiveMessage);
-    };
     
     dom.giscusContainer.appendChild(script);
   }
