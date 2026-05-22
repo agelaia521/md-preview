@@ -800,19 +800,18 @@
 
 /* Debug Panel */
 .debug-panel {
-  position: fixed !important;
-  bottom: 20px !important;
-  right: 20px !important;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
   width: 280px;
-  background: rgba(30, 30, 30, 0.95) !important;
+  background: rgba(30, 30, 30, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   font-size: 13px;
-  color: #fff !important;
-  z-index: 10000 !important;
+  color: #fff;
+  z-index: 10000;
   overflow: hidden;
-  display: block !important;
 }
 
 .debug-header {
