@@ -62,6 +62,7 @@ node scripts/build-file-tree.js
 | **Verovio** | MusicXML 乐谱渲染 |
 | **OSMD** | OpenSheetMusicDisplay 乐谱渲染 |
 | **diff2html** | Git Diff 可视化 |
+| **KaTeX** | LaTeX 数学公式渲染 |
 | **Giscus** | 基于 GitHub Discussions 的评论系统 |
 
 ### 1.2 核心文件结构
@@ -98,7 +99,8 @@ md-preview/
 │       ├── music-notation.js
 │       ├── diff.js
 │       ├── geo.js
-│       └── embedded.js
+│       ├── embedded.js
+│       └── katex.js
 ├── scripts/
 │   ├── build-file-tree.js   # 文件树预构建脚本
 │   └── build-search-index.js  # 搜索索引预构建脚本
@@ -339,6 +341,7 @@ setTimeout(() => {
   window.MarkdownPreview.renderers.plantuml.render();
   window.MarkdownPreview.renderers.geo.render();
   window.MarkdownPreview.renderers.embedded.render();
+  window.MarkdownPreview.renderers.katex.render();
 }, 100);
 ```
 
@@ -352,6 +355,7 @@ setTimeout(() => {
 - `diff.js` - Diff 可视化
 - `geo.js` - 地理数据可视化
 - `embedded.js` - 外部服务嵌入
+- `katex.js` - LaTeX 公式渲染
 
 **为什么用 setTimeout(100ms)**：
 1. 等待 Marked.js 完成 HTML 转换
@@ -1285,6 +1289,7 @@ window.MarkdownPreview.CONFIG = {
 - [ ] Diff 可视化
 - [ ] 地理数据可视化
 - [ ] 外部服务嵌入
+- [ ] LaTeX 公式渲染（行内公式和块级公式）
 - [ ] 移动端响应式布局
 - [ ] 侧边栏展开/折叠
 - [ ] 代码复制功能
@@ -1371,6 +1376,7 @@ window.MarkdownPreview.CONFIG = {
 | **CSS 模块化** | ✅ 完成 | css/ 目录 |
 | **外部化配置** | ✅ 完成 | config.json + js/config.js + app.js |
 | **调试模式** | ✅ 完成 | js/debug.js + css/markdown.css + index.html |
+| **LaTeX 公式** | ✅ 完成 | js/renderers/katex.js + docs/examples/latex-examples.md |
 
 ### 8.2 贡献指南
 
@@ -1398,6 +1404,7 @@ window.MarkdownPreview.CONFIG = {
 - [Verovio](https://www.verovio.org/)
 - [OSMD](https://opensheetmusicdisplay.org/)
 - [diff2html](https://diff2html.xyz/)
+- [KaTeX](https://katex.org/)
 - [Twitter 嵌入文档](https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/overview)
 - [Twitter Widgets.js](https://platform.twitter.com/widgets.js)
 
@@ -1410,4 +1417,4 @@ window.MarkdownPreview.CONFIG = {
 ---
 
 **最后更新**：2026-05-22
-**文档版本**：1.2.0
+**文档版本**：1.3.0

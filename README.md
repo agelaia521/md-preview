@@ -42,6 +42,7 @@
 - 🖼️ **图片增强** - 图片懒加载、画廊模式、错误降级显示
 - 🔗 **社交分享** - Open Graph 和 Twitter Card meta 标签，支持更好的分享预览
 - 🔧 **调试模式** - 访问 `?debug=1` 时显示性能诊断面板
+- ⚗️ **LaTeX 公式** - 支持 KaTeX 渲染数学公式
 
 ## 配置
 
@@ -402,6 +403,36 @@ index 1a2b3c4..5d6e7f8 100644
 @[topojson]({"type":"Topology","objects":{"data":{"type":"GeometryCollection","geometries":[{"type":"Point","coordinates":[116.4074,39.9042]}]}},"arcs":[]})
 ```
 
+### LaTeX 公式
+
+使用 KaTeX 渲染数学公式，支持行内公式和块级公式。
+
+**行内公式**：使用单个 `$` 包裹
+```markdown
+勾股定理：$a^2 + b^2 = c^2$
+欧拉公式：$e^{i\pi} + 1 = 0$
+```
+
+**块级公式**：使用双 `$$` 包裹
+```markdown
+$$\int_{a}^{b} f(x) dx = F(b) - F(a)$$
+
+$$\begin{pmatrix}
+a & b \\
+c & d
+\end{pmatrix}$$
+```
+
+**支持的数学功能**：
+- 基本运算：$+, -, \times, \div, =$
+- 上下标：$x^2, a_1$
+- 平方根：$\sqrt{x}$
+- 求和积分：$\sum, \int, \prod$
+- 矩阵：$\begin{pmatrix} ... \end{pmatrix}$
+- 方程组：$\begin{cases} ... \end{cases}$
+- 希腊字母：$\alpha, \beta, \gamma, \pi$
+- 函数：$\sin, \cos, \log, \lim$
+
 ### 浏览器原生 HTML 元素与 Web API
 
 支持丰富的浏览器原生功能，零 JS、零后端即可使用！
@@ -535,7 +566,8 @@ const CONFIG = {
 │       ├── music-notation.js
 │       ├── diff.js
 │       ├── geo.js
-│       └── embedded.js
+│       ├── embedded.js
+│       └── katex.js
 ├── README.md        # 你的文档
 ├── docs/           # 任意结构的文档目录
 │   ├── guide.md

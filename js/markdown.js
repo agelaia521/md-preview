@@ -288,6 +288,7 @@
       window.MarkdownPreview.renderers.mermaid.render();
       window.MarkdownPreview.renderers.plantuml.render();
       window.MarkdownPreview.renderers.embedded.render();
+      window.MarkdownPreview.renderers.katex.render();
     }, 100);
     
     loadGiscus(currentPath);
