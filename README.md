@@ -7,21 +7,21 @@
 ### GitHub Pages 部署（推荐）
 
 1. **Fork 仓库**
-2. **开启 GitHub Pages
+2. **开启 GitHub Pages**
    - 在仓库 Settings 中点击 Pages
    - 源选择 GitHub Actions
-3. **自定义配置
+3. **自定义配置**
    - 修改 `js/config.js` 中的 `CONFIG.owner` 和 `CONFIG.repo`
-4. **推送代码后，GitHub Actions 会自动构建并部署
+4. **推送代码后，GitHub Actions 会自动构建并部署**
 
 ### 本地预览
 
 1. **克隆仓库**
-2. **本地构建文件树
+2. **本地构建文件树**
    ```bash
    node scripts/build-file-tree.js
    ```
-3. **用浏览器打开 `index.html`
+3. **用浏览器打开** `index.html`
 
 ## 功能特点
 
