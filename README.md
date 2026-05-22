@@ -11,7 +11,7 @@
    - 在仓库 Settings 中点击 Pages
    - 源选择 GitHub Actions
 3. **自定义配置**
-   - 修改 `js/config.js` 中的 `CONFIG.owner` 和 `CONFIG.repo`
+   - 修改 `config.json` 中的 `owner` 和 `repo`（无需懂 JavaScript，编辑更安全！
 4. **推送代码后，GitHub Actions 会自动构建并部署**
 
 ### 本地预览
@@ -41,10 +41,26 @@
 - 📢 **GitHub 风格 Alerts** - 支持 > [!NOTE]、> [!WARNING] 等警告提示语法
 - 🖼️ **图片增强** - 图片懒加载、画廊模式、错误降级显示
 - 🔗 **社交分享** - Open Graph 和 Twitter Card meta 标签，支持更好的分享预览
-- 📊 **文档评分** - 底部评分反馈功能，用户可以评价文档是否有帮助
 - 🔧 **调试模式** - 访问 `?debug=1` 时显示性能诊断面板
 
-## 配置 Giscus 评论
+## 配置
+
+### 外部配置文件
+
+所有配置都可以通过 `config.json` 文件进行自定义，无需修改 JavaScript 代码。如果 `config.json` 不存在，应用会使用内置的默认配置。
+
+### 基础配置
+
+修改 `config.json` 中的以下字段：
+
+```json
+{
+  "owner": "your-username",
+  "repo": "your-repo"
+}
+```
+
+### 配置 Giscus 评论
 
 1. **在 GitHub 仓库中开启 Discussions**
    - 进入仓库 Settings
@@ -54,20 +70,25 @@
    - 前往 [giscus.app](https://giscus.app)
    - 按提示配置并获取所需的 `repoId` 和 `categoryId`
 
-3. **修改 `js/config.js` 中的配置**
-   ```javascript
-   window.MarkdownPreview.CONFIG = {
-     owner: 'your-username',
-     repo: 'your-repo',
-     giscus: {
-       enabled: true,
-       repo: 'your-username/your-repo',
-       repoId: 'your-repo-id',
-       category: 'Announcements',
-       categoryId: 'your-category-id',
-       // ...其他配置
+3. **修改 `config.json` 中的 giscus 配置**
+   ```json
+   {
+     "giscus": {
+       "enabled": true,
+       "repo": "your-username/your-repo",
+       "repoId": "your-repo-id",
+       "category": "Announcements",
+       "categoryId": "your-category-id",
+       "mapping": "term",
+       "strict": "1",
+       "reactionsEnabled": "1",
+       "emitMetadata": "0",
+       "inputPosition": "bottom",
+       "theme": "preferred_color_scheme",
+       "lang": "zh-CN",
+       "loading": "lazy"
      }
-   };
+   }
    ```
 
 ## 支持格式
@@ -107,17 +128,6 @@
 **画廊模式**：连续两张或更多图片会自动组合成画廊布局，支持网格排列。
 
 **错误降级**：图片加载失败时，会显示文件名作为占位符，避免显示难看的裂图。
-
-### 文档评分反馈
-
-每篇文档底部都有评分反馈功能：
-
-**功能特点**：
-- 显示"这篇文档对你有帮助吗？"的问题
-- 用户可以选择"有帮助"或"没帮助"进行评价
-- 显示已有多少人选择了赞/踩
-- 支持切换投票和取消投票
-- 投票数据保存在浏览器本地存储中
 
 ### 调试模式
 

@@ -1,7 +1,11 @@
 (function() {
   window.MarkdownPreview = window.MarkdownPreview || {};
   
-  function init() {
+  async function init() {
+    if (window.MarkdownPreview.configLoadPromise) {
+      await window.MarkdownPreview.configLoadPromise;
+    }
+    
     window.MarkdownPreview.fileTree.loadFileTree();
     window.MarkdownPreview.ui.setupEventListeners();
     window.MarkdownPreview.ui.setupScrollProgress();

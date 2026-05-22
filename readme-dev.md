@@ -17,7 +17,7 @@
    - 进入 Settings → Pages
    - 源选择 GitHub Actions
 3. **自定义配置
-   - 修改 `js/config.js` 中的 `CONFIG.owner` 和 `CONFIG.repo`
+   - 修改 `config.json` 中的 `owner` 和 `repo`（无需懂 JavaScript，编辑更安全！
 4. **推送代码，自动部署
 
 #### 0.1.2 工作原理
@@ -70,6 +70,7 @@ node scripts/build-file-tree.js
 md-preview/
 ├── index.html          # 主页面结构，库依赖声明，Open Graph meta 标签
 ├── app.js             # 入口文件，初始化应用
+├── config.json         # 外部配置文件（用户配置，无需懂 JavaScript
 ├── styles.css         # 完整样式系统（已弃用，使用 css/ 目录下的模块化 CSS
 ├── css/              # 模块化样式目录
 │   ├── base.css     # 基础样式
@@ -180,17 +181,53 @@ mermaid   plantuml  state.js    config.js
 
 #### 2.2.1 配置模块 (`js/config.js`)
 
-**功能**：集中管理项目配置
+**功能**：集中管理项目配置，支持从外部 `config.json` 文件加载
+
+**核心实现**：
+
 ```javascript
-window.MarkdownPreview.CONFIG = {
+// 默认配置作为后备
+const DEFAULT_CONFIG = {
   owner: 'theforeveriris',
-  repo: 'md-preview'
+  repo: 'md-preview',
+  giscus: { /* ... */ }
 };
+
+// 异步加载外部配置
+async function loadConfig() {
+  try {
+    const response = await fetch('config.json');
+    if (response.ok) {
+      const externalConfig = await response.json();
+      // 深度合并默认配置和外部配置
+      window.MarkdownPreview.CONFIG = mergeDeep(DEFAULT_CONFIG, externalConfig);
+    }
+  } catch (error) {
+    // 加载失败时使用默认配置
+  }
+}
 ```
 
 **特点**：
-- 独立配置，易于修改
-- 其他模块通过 `window.MarkdownPreview.CONFIG` 访问
+- 外部化配置：用户通过编辑 `config.json` 修改，无需懂 JavaScript
+- 安全回退：如果 `config.json` 不存在或加载失败，自动使用内置默认配置
+- 深度合并：支持部分配置覆盖，无需复制整个配置对象
+- 同步加载：应用启动时等待配置加载完成
+
+**外部配置文件结构 (`config.json`)**：
+```json
+{
+  "owner": "your-username",
+  "repo": "your-repo",
+  "giscus": {
+    "enabled": true,
+    "repo": "your-username/your-repo",
+    "repoId": "your-repo-id",
+    "category": "Announcements",
+    "categoryId": "your-category-id"
+  }
+}
+```
 
 #### 2.2.2 状态管理模块 (`js/state.js`)
 
@@ -721,37 +758,7 @@ function calculateReadingTime(content) {
 
 **效果**：分享到微信、Twitter、钉钉等平台时，会显示标题、描述和预览图。
 
-### 2.14 文档评分反馈系统
-
-**功能**：在每篇文档底部添加评分反馈功能，用户可以评价文档是否有帮助。
-
-**实现位置**：
-- DOM 结构：`index.html`
-- 样式：`css/markdown.css`
-- 逻辑：`js/markdown.js`
-- DOM 引用：`js/dom.js`
-
-**核心功能**：
-
-1. **投票处理**：
-   - 用户可以点击"有帮助"或"没帮助"按钮进行投票
-   - 支持切换投票和取消投票
-   - 使用 LocalStorage 持久化投票状态
-
-2. **统计展示**：
-   - 显示已有多少人选择了赞/踩
-   - 绿色显示"有帮助"人数，红色显示"没帮助"人数
-
-3. **LocalStorage 存储结构**：
-   - `doc-feedback-${path}`：记录当前用户对某文档的投票（"up" 或 "down"）
-   - `doc-feedback-stats-${path}`：记录某文档的总投票数 `{"up": N, "down": M}`
-
-**关键函数**：
-- `initDocFeedback(path)`：初始化评分组件，恢复用户之前的投票状态
-- `handleFeedbackVote(path, voteType, ...)`：处理投票逻辑
-- `updateFeedbackStats(path, statsEl)`：更新并显示投票统计
-
-### 2.15 调试模式
+### 2.14 调试模式
 
 **功能**：通过 URL 参数 `?debug=1` 开启性能诊断面板，帮助排查性能问题。
 
@@ -1317,7 +1324,7 @@ window.MarkdownPreview.CONFIG = {
 
 **排查步骤**：
 1. 检查 GitHub API 是否可访问
-2. 检查 CONFIG 配置是否正确
+2. 检查 `config.json` 配置是否正确（或 `js/config.js` 中的默认配置
 3. 检查仓库是否包含 .md 文件
 4. 检查 GitHub Pages 是否启用
 
@@ -1362,7 +1369,7 @@ window.MarkdownPreview.CONFIG = {
 | **Open Graph / Twitter Card** | ✅ 完成 | index.html |
 | **评论区跨文档隔离** | ✅ 完成 | js/markdown.js |
 | **CSS 模块化** | ✅ 完成 | css/ 目录 |
-| **文档评分反馈** | ✅ 完成 | js/markdown.js + css/markdown.css + index.html + js/dom.js |
+| **外部化配置** | ✅ 完成 | config.json + js/config.js + app.js |
 | **调试模式** | ✅ 完成 | js/debug.js + css/markdown.css + index.html |
 
 ### 8.2 贡献指南
