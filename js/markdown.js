@@ -145,38 +145,26 @@
     let index = 0;
     
     const processed = markdownText.replace(/\$\$[\s\S]*?\$\$/g, (match) => {
-      const placeholder = `LATEXBLOCK_PLACEHOLDER_${index}_`;
+      const placeholder = `LATEXPROTECT_${index}_`;
       const lines = match.split('\n');
-      const firstLine = lines[0];
-      const lastLine = lines[lines.length - 1];
-      const leadingSpaces = firstLine.match(/^(\s*)/)[1];
-      const cleanedLines = lines.map(line => {
-        if (line.startsWith(leadingSpaces)) {
-          return line.substring(leadingSpaces.length);
+      const cleanedLines = [];
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (i === 0) {
+          cleanedLines.push(line.replace(/^\$\$\s*/, ''));
+        } else if (i === lines.length - 1) {
+          cleanedLines.push(line.replace(/\s*\$\$$/, ''));
+        } else {
+          cleanedLines.push(line.replace(/^    /, ''));
         }
-        return line;
-      });
-      const cleanedBlock = cleanedLines.join('\n');
+      }
+      const cleanedBlock = cleanedLines.join('\n').trim();
       latexBlocks.push(cleanedBlock);
       index++;
       return placeholder;
     });
     
     return { processed, latexBlocks };
-  }
-  
-  function restoreLaTeXBlocks(html, latexBlocks) {
-    let restored = html;
-    latexBlocks.forEach((block, index) => {
-      const placeholder = `LATEXBLOCK_PLACEHOLDER_${index}_`;
-      const innerContent = block.slice(2, -2).trim();
-      const wrappedBlock = `<div class="katex-block">${innerContent}</div>`;
-      restored = restored.replace(
-        new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
-        wrappedBlock
-      );
-    });
-    return restored;
   }
   
   function processImages(container) {
@@ -289,7 +277,11 @@
       breaks: true,
       gfm: true
     });
-    html = restoreLaTeXBlocks(html, latexBlocks);
+    
+    html = html.replace(/LATEXPROTECT_(\d+)_/g, (match, idx) => {
+      const latex = latexBlocks[parseInt(idx)];
+      return `<div class="katex-block">${latex}</div>`;
+    });
     
     const plainText = content.replace(/[#*`\[\]()_{}]/g, '').replace(/\n+/g, ' ').trim();
     const readingTime = calculateReadingTime(plainText);

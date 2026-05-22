@@ -2,21 +2,6 @@
   window.MarkdownPreview = window.MarkdownPreview || {};
   window.MarkdownPreview.renderers = window.MarkdownPreview.renderers || {};
   
-  function unescapeHtml(text) {
-    const entities = {
-      '&amp;': '&',
-      '&lt;': '<',
-      '&gt;': '>',
-      '&quot;': '"',
-      '&#39;': "'",
-      '&#x27;': "'",
-      '&#x2F;': '/',
-      '&#92;': '\\',
-      '&#0092;': '\\'
-    };
-    return text.replace(/&(?:amp|lt|gt|quot|#39|#x27|#x2F|#92|#0092);/g, match => entities[match] || match);
-  }
-  
   function render() {
     if (typeof katex === 'undefined' || typeof renderMathInElement === 'undefined') {
       console.error('KaTeX library is not loaded');
@@ -26,43 +11,37 @@
     const markdownBody = document.querySelector('.markdown-body');
     if (!markdownBody) return;
     
+    // 先处理所有 katex-block div 中的纯文本 LaTeX
+    const katexBlocks = markdownBody.querySelectorAll('.katex-block');
+    katexBlocks.forEach(block => {
+      const latex = block.textContent.trim();
+      if (latex) {
+        try {
+          // 清空 block 然后用 katex.render 重新渲染
+          block.textContent = '';
+          katex.render(latex, block, {
+            displayMode: true,
+            throwOnError: false,
+            trust: true,
+            strict: false
+          });
+        } catch (e) {
+          console.error('KaTeX block rendering error:', e);
+        }
+      }
+    });
+    
+    // 然后用 renderMathInElement 处理剩余的行内公式
     try {
       renderMathInElement(markdownBody, {
         delimiters: [
           {left: '$$', right: '$$', display: true},
-          {left: '$', right: '$', display: false},
-          {left: '\\[', right: '\\]', display: true},
-          {left: '\\(', right: '\\)', display: false}
+          {left: '$', right: '$', display: false}
         ],
-        ignoredTags: [
-          'script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option'
-        ],
+        ignoredTags: ['pre', 'code', 'script', 'style'],
         throwOnError: false,
         trust: true,
-        strict: false,
-        macros: {
-          '\\f': '#1f(#2)',
-          '\\bm': '\\boldsymbol{#1}',
-          '\\dif': '\\mathrm{d}',
-          '\\pdif': '\\partial'
-        }
-      });
-      
-      document.querySelectorAll('.katex-block').forEach(block => {
-        let latex = block.textContent;
-        latex = unescapeHtml(latex);
-        if (latex && !block.querySelector('.katex')) {
-          try {
-            katex.render(latex, block, {
-              displayMode: true,
-              throwOnError: false,
-              trust: true,
-              strict: false
-            });
-          } catch (e) {
-            console.error('KaTeX block rendering error:', e);
-          }
-        }
+        strict: false
       });
     } catch (error) {
       console.error('KaTeX rendering error:', error);
