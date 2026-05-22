@@ -146,7 +146,18 @@
     
     const processed = markdownText.replace(/\$\$[\s\S]*?\$\$/g, (match) => {
       const placeholder = `LATEXBLOCK_PLACEHOLDER_${index}_`;
-      latexBlocks.push(match);
+      const lines = match.split('\n');
+      const firstLine = lines[0];
+      const lastLine = lines[lines.length - 1];
+      const leadingSpaces = firstLine.match(/^(\s*)/)[1];
+      const cleanedLines = lines.map(line => {
+        if (line.startsWith(leadingSpaces)) {
+          return line.substring(leadingSpaces.length);
+        }
+        return line;
+      });
+      const cleanedBlock = cleanedLines.join('\n');
+      latexBlocks.push(cleanedBlock);
       index++;
       return placeholder;
     });

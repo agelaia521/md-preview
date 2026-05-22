@@ -2,6 +2,21 @@
   window.MarkdownPreview = window.MarkdownPreview || {};
   window.MarkdownPreview.renderers = window.MarkdownPreview.renderers || {};
   
+  function unescapeHtml(text) {
+    const entities = {
+      '&amp;': '&',
+      '&lt;': '<',
+      '&gt;': '>',
+      '&quot;': '"',
+      '&#39;': "'",
+      '&#x27;': "'",
+      '&#x2F;': '/',
+      '&#92;': '\\',
+      '&#0092;': '\\'
+    };
+    return text.replace(/&(?:amp|lt|gt|quot|#39|#x27|#x2F|#92|#0092);/g, match => entities[match] || match);
+  }
+  
   function render() {
     if (typeof katex === 'undefined' || typeof renderMathInElement === 'undefined') {
       console.error('KaTeX library is not loaded');
@@ -34,7 +49,8 @@
       });
       
       document.querySelectorAll('.katex-block').forEach(block => {
-        const latex = block.textContent;
+        let latex = block.textContent;
+        latex = unescapeHtml(latex);
         if (latex && !block.querySelector('.katex')) {
           try {
             katex.render(latex, block, {
