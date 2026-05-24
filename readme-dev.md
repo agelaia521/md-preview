@@ -13,12 +13,12 @@
 #### 0.1.1 部署流程
 
 1. **Fork 仓库**
-2. **配置仓库
+2. **配置仓库**
    - 进入 Settings → Pages
    - 源选择 GitHub Actions
-3. **自定义配置
-   - 修改 `config.json` 中的 `owner` 和 `repo`（无需懂 JavaScript，编辑更安全！
-4. **推送代码，自动部署
+3. **自定义配置**
+   - 修改 `config.json` 中的 `owner` 和 `repo`（无需懂 JavaScript，编辑更安全！）
+4. **推送代码，自动部署**
 
 #### 0.1.2 工作原理
 
@@ -65,7 +65,15 @@ node scripts/build-file-tree.js
 | **KaTeX** | LaTeX 数学公式渲染 |
 | **Giscus** | 基于 GitHub Discussions 的评论系统 |
 
-### 1.2 核心文件结构
+### 1.2 新增功能模块
+
+| 模块 | 用途 |
+|------|------|
+| **主题系统** | CSS 变量主题，7 种内置主题，自定义主题支持 |
+| **设置面板** | 集中式设置管理，主题切换，自定义 CSS 配置 |
+| **插件系统** | 扩展渲染器支持（如二维码生成） |
+
+### 1.3 核心文件结构
 
 ```
 md-preview/
@@ -79,6 +87,7 @@ md-preview/
 │   ├── floating.css # 悬浮球和浮动元素样式
 │   ├── layout.css  # 布局样式
 │   ├── markdown.css # Markdown 渲染样式
+│   ├── themes.css   # 主题系统（7 种内置主题）
 │   └── responsive.css # 响应式样式
 ├── README.md          # 用户文档
 ├── readme-dev.md     # 本文档（开发者文档）
@@ -91,7 +100,9 @@ md-preview/
 │   ├── markdown.js  # Markdown 渲染和处理（含图片处理、阅读时间、Alerts）
 │   ├── search.js    # 全文搜索功能
 │   ├── router.js    # Hash 路由管理
-│   ├── settings.js  # 用户设置管理
+│   ├── settings.js  # 用户设置管理（设置面板）
+│   ├── themes/      # 主题管理器
+│   │   └── theme-manager.js  # 主题切换、自定义 CSS、本地存储
 │   └── renderers/  # 扩展功能渲染器
 │       ├── mermaid.js
 │       ├── plantuml.js
@@ -101,6 +112,8 @@ md-preview/
 │       ├── geo.js
 │       ├── embedded.js
 │       └── katex.js
+├── plugins/         # 插件目录
+│   └── qrcode.js    # 二维码生成插件
 ├── scripts/
 │   ├── build-file-tree.js   # 文件树预构建脚本
 │   └── build-search-index.js  # 搜索索引预构建脚本
@@ -113,13 +126,15 @@ md-preview/
         └── build-search-index.yml    # 搜索索引自动构建
 ```
 
-### 1.3 架构特点
+### 1.4 架构特点
 
 - **纯前端架构**：无需后端，所有逻辑在浏览器运行
 - **预构建优化**：文件树预部署，避免 GitHub API 限流
 - **模块化设计**：使用 IIFE 模式避免全局污染
 - **事件驱动**：通过事件委托处理用户交互
 - **异步渲染**：Markdown 解析和内容渲染分离
+- **主题系统**：CSS 变量驱动，易于扩展
+- **插件架构**：可扩展渲染器支持
 
 ---
 
@@ -133,7 +148,7 @@ md-preview/
 模块依赖关系：
 ┌─────────────────────────────────────────────────────────┐
 │                     app.js (入口)                       │
-│  初始化：fileTree.loadFileTree() + ui.setupEventListeners() + search.init() │
+│  初始化：fileTree.loadFileTree() + ui.setupEventListeners() + search.init() + themes.init()
 └────────────────────┬────────────────────────────────────┘
                      │
          ┌───────────┴───────────┐
@@ -153,6 +168,7 @@ md-preview/
          │  - Frontmatter   │
          │  - 面包屑导航    │
          │  - 编辑按钮      │
+         │  - 插件渲染      │
          └────────┬─────────┘
                   │
          ┌────────┴────────┐
@@ -176,6 +192,16 @@ mermaid   plantuml  state.js    config.js
                       │    ┌──────┴───────┐
                       │    │  router.js   │
                       │    │  - 路由管理  │
+                      │    └──────────────┘
+                      │
+                      │    ┌──────────────┐
+                      │    │  themes.js   │
+                      │    │  - 主题切换  │
+                      │    └──────────────┘
+                      │
+                      │    ┌──────────────┐
+                      │    │ settings.js  │
+                      │    │  - 设置面板  │
                       │    └──────────────┘
 ```
 
@@ -239,7 +265,8 @@ window.MarkdownPreview.state = {
   fileTreeData: [],       // 文件树数据
   currentMode: 'files',    // 当前模式
   currentFilePath: '',     // 当前文件
-  currentHeadings: []    // 标题列表
+  currentHeadings: [],   // 标题列表
+  currentTheme: 'default' // 当前主题
 };
 ```
 
@@ -251,6 +278,8 @@ window.MarkdownPreview.state = {
 window.MarkdownPreview.dom = {
   fileTree: document.getElementById('fileTree'),
   markdownContent: document.getElementById('markdownContent'),
+  themeSelect: document.getElementById('themeSelect'),
+  customCSSInput: document.getElementById('customCSSInput'),
   // ...其他元素
 };
 ```
@@ -298,36 +327,66 @@ async function loadFileTreeFromGitHubAPI() {
 - 自动回退，保持兼容性
 - 使用 `recursive=1` 获取完整树结构
 - 自动过滤 `.md` 文件
-- 递归构建目录结构
 
-#### 2.2.5 目录树构建算法 (`buildTreeFromFlatList`)
+#### 2.2.5 主题管理模块 (`js/themes/theme-manager.js`)
 
-**输入**：GitHub API 返回的扁平文件列表
+**功能**：主题切换、自定义 CSS、本地存储持久化
 
 ```javascript
-function buildTreeFromFlatList(tree) {
-  // 使用 Map 缓存已创建的文件夹
-  const map = {};
-  const root = [];
-  
-  // 遍历每个 .md 文件
-  tree.forEach(item => {
-    const parts = item.path.split('/');
-    // 逐层创建或复用目录节点
-  });
-  
-  // 递归排序（文件夹优先，按名称排序）
-  sortTree(root);
-  return root;
+// 内置主题列表
+const builtInThemes = [
+  { id: 'default', name: '紫粉渐变' },
+  { id: 'github-light', name: 'GitHub Light' },
+  { id: 'github-dark', name: 'GitHub Dark' },
+  { id: 'notion', name: 'Notion' },
+  { id: 'arc', name: 'Arc Dark' },
+  { id: 'dracula', name: 'Dracula' },
+  { id: 'nord', name: 'Nord' }
+];
+
+function setTheme(themeId, save = true) {
+  document.documentElement.setAttribute('data-theme', themeId);
+  if (save) {
+    localStorage.setItem('md-preview-theme', themeId);
+  }
+  // 触发主题切换事件
+  window.dispatchEvent(new CustomEvent('themechange', {
+    detail: { theme: themeId }
+  }));
+}
+
+function setCustomCSS(url) {
+  localStorage.setItem('md-preview-custom-css', url);
+  // 移除旧的 link 元素，添加新的
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = url;
+  document.head.appendChild(link);
 }
 ```
 
-**算法特点**：
-- 时间复杂度：O(n log n)
-- 空间复杂度：O(n)
-- 使用 Map 避免重复创建目录节点
+**特点**：
+- CSS 变量驱动，易于扩展
+- localStorage 持久化
+- 支持自定义 CSS 外部链接
+- 事件机制，插件可监听主题变化
 
-#### 2.2.6 Markdown 渲染模块 (`js/markdown.js`)
+#### 2.2.6 设置面板模块 (`js/settings.js`)
+
+**功能**：集中式设置管理，设置面板 UI 交互
+
+```javascript
+function initSettingsPanel() {
+  // 初始化主题下拉菜单
+  const themeSelect = dom.themeSelect;
+  // 加载自定义 CSS 输入框
+  const customCSSInput = dom.customCSSInput;
+  // 显示/隐藏控制
+  // 事件绑定
+}
+```
+
+#### 2.2.7 Markdown 渲染模块 (`js/markdown.js`)
 
 **功能**：Markdown 文件加载、渲染和链接拦截
 
@@ -342,10 +401,48 @@ setTimeout(() => {
   window.MarkdownPreview.renderers.geo.render();
   window.MarkdownPreview.renderers.embedded.render();
   window.MarkdownPreview.renderers.katex.render();
+  // 插件渲染（如二维码）
+  renderWithPlugins();
 }, 100);
 ```
 
-#### 2.2.7 渲染器模块 (`js/renderers/`)
+#### 2.2.8 插件系统 (`plugins/`)
+
+**插件接口**：
+```javascript
+export default {
+  name: 'plugin-name',
+  description: '插件描述',
+  test(code, language) {
+    // 判断是否应该处理该代码块
+    return language === 'my-language';
+  },
+  render(code, container) {
+    // 渲染内容到容器
+    container.innerHTML = '...';
+  }
+};
+```
+
+**示例：二维码插件 (`plugins/qrcode.js`)**：
+```javascript
+export default {
+  name: 'qrcode',
+  description: '二维码生成',
+  
+  test(code, language) {
+    return language === 'qrcode';
+  },
+  
+  render(code, container) {
+    // 解析配置
+    // 调用外部 API 或本地 Canvas 渲染
+    // 替换代码块
+  }
+};
+```
+
+#### 2.2.9 渲染器模块 (`js/renderers/`)
 
 每个渲染器都是独立模块，提供统一的 `render()` 接口：
 - `mermaid.js` - Mermaid 图表
@@ -356,456 +453,6 @@ setTimeout(() => {
 - `geo.js` - 地理数据可视化
 - `embedded.js` - 外部服务嵌入
 - `katex.js` - LaTeX 公式渲染
-
-**为什么用 setTimeout(100ms)**：
-1. 等待 Marked.js 完成 HTML 转换
-2. 确保 DOM 完全渲染
-3. 避免异步渲染竞态条件
-
-#### 2.2.8 代码块渲染策略
-
-所有代码块渲染器采用统一模式：
-
-```javascript
-function renderXXXDiagrams() {
-  const allPres = document.querySelectorAll('.markdown-body pre');
-  
-  // 关键：反向遍历
-  for (let i = allPres.length - 1; i >= 0; i--) {
-    const pre = allPres[i];
-    const codeElement = pre.querySelector('code');
-    
-    // 检查代码块类型
-    if (!codeElement.className.includes('language-xxx')) continue;
-    
-    // 创建容器
-    const container = document.createElement('div');
-    
-    // 替换 DOM（关键操作）
-    pre.parentNode.replaceChild(container, pre);
-    
-    // 执行渲染
-    try {
-      renderLogic(codeElement.textContent, container);
-    } catch (error) {
-      showError(container, error);
-    }
-  }
-}
-```
-
-**为什么要反向遍历**：
-- 正向遍历时，替换第一个元素后，数组索引会错位
-- 反向遍历确保即使修改 DOM 也不影响未处理元素
-
-#### 2.2.9 PlantUML 编码 (`encodePlantUML`)
-
-```javascript
-function encode64(data) {
-  // 1. 将 UTF-8 字节数组压缩
-  const compressed = pako.deflateRaw(utf8);
-  // 2. 转换为 PlantUML 特殊 Base64
-  return encode64(compressed);
-}
-```
-
-**最终 URL**：`https://www.plantuml.com/plantuml/svg/${encoded}`
-
-#### 2.2.10 ApexCharts 配置
-
-```javascript
-function renderApexCharts() {
-  const chartConfig = JSON.parse(codeElement.textContent);
-  const chart = new ApexCharts(element, {
-    ...chartConfig,
-    chart: { ...chartConfig.chart, toolbar: { show: true } },
-    colors: chartConfig.colors || ['#8B5CF6', '#D946EF', ...],
-    theme: { mode: 'light' }
-  });
-  chart.render();
-}
-```
-
-**关键点**：
-- 用户只需提供简化配置
-- 系统自动补充默认样式和配色
-
-#### 2.2.11 外部服务嵌入
-
-**支持的嵌入语法**：
-```markdown
-@[youtube](视频ID)
-@[bilibili](BV号)
-@[figma](设计稿链接)
-@[codepen](代码演示链接)
-```
-
-**实现原理**：
-```javascript
-const embedRegex = /@\[(\w+)\]\(([^)]+)\)/g;
-
-while ((match = embedRegex.exec(content)) !== null) {
-  const service = match[1];  // 服务类型
-  const url = match[2];       // 资源 URL
-  
-  // 根据服务类型生成 iframe
-  const iframe = createEmbedIframe(service, url);
-  content = content.replace(match[0], iframe);
-}
-```
-
-#### 2.2.12 地理数据渲染
-
-**支持格式**：
-- GeoJSON
-- TopoJSON（需要转换为 GeoJSON）
-
-**渲染流程**：
-1. 解析 JSON 数据
-2. 创建 Leaflet 地图容器
-3. 加载 OpenStreetMap 瓦片
-4. 添加 GeoJSON 图层
-5. 自动适应边界
-
-**TopoJSON 转换**：
-```javascript
-function topojsonToGeoJson(topology) {
-  // 解码 arcs
-  function decodeArc(arcIndex) {
-    // 累加坐标变换
-  }
-  
-  // 转换几何类型
-  function transformGeometry(geometry) {
-    // Point, LineString, Polygon, Multi-* 等
-  }
-}
-```
-
-#### 2.2.13 乐谱渲染
-
-**支持三种格式**：
-
-| 格式 | 代码块类型 | 渲染库 | 特点 |
-|------|-----------|--------|------|
-| ABC 记谱法 | `abc` | abcjs | 文本格式，适合简单旋律 |
-| MusicXML | `musicxml` | Verovio | XML 格式，专业乐谱 |
-| MusicXML | `osmd` | OSMD | 现代化渲染效果 |
-
-**渲染策略**：
-```javascript
-if (classList.includes('language-abc')) {
-  renderABCNotation(code, container, pre);
-} else if (classList.includes('language-musicxml')) {
-  renderMusicXML(code, container, pre);
-} else if (classList.includes('language-osmd')) {
-  renderOSMD(code, container, pre);
-}
-```
-
-### 2.3 状态管理
-
-状态已封装在 `js/state.js` 中，全局访问：
-```javascript
-window.MarkdownPreview.state = {
-  fileTreeData: [],       // 文件树数据
-  currentMode: 'files',    // 当前模式：files/index
-  currentFilePath: '',     // 当前文件路径
-  currentHeadings: []    // 当前文件的标题列表
-};
-```
-
-**状态更新时机**：
-- `fileTreeData`：首次加载或仓库结构变化时
-- `currentFilePath`：加载新 Markdown 文件时
-- `currentHeadings`：Markdown 内容变化时
-
-### 2.4 事件处理
-
-**主要事件**：
-1. **点击文件** → 加载并渲染 Markdown
-2. **切换模式** → Files/Index 模式切换
-3. **滚动** → 更新阅读进度条
-4. **点击链接** → 拦截内部链接
-5. **点击代码块** → 复制代码
-
-**事件委托**：
-```javascript
-// 统一处理侧边栏点击
-document.getElementById('sidebar').addEventListener('click', (e) => {
-  // 事件委托处理
-});
-```
-
-### 2.5 错误处理
-
-**三层错误处理**：
-1. **API 请求层**：try-catch + 友好提示
-2. **渲染层**：为每个渲染器单独 try-catch
-3. **库加载层**：检查库是否定义
-
-**错误展示**：
-```javascript
-const errorDiv = document.createElement('div');
-errorDiv.style.color = '#ff6b6b';
-errorDiv.textContent = '错误信息';
-```
-
-### 2.6 搜索模块 (`js/search.js`)
-
-**功能**：全文搜索所有文档内容
-
-**实现方式**：
-- 预构建 `search-index.json`（通过 GitHub Action 自动生成）
-- 原生 JavaScript 字符串匹配，支持中英文搜索
-- 支持标题、路径、预览内容的加权匹配
-- 防抖搜索优化性能
-
-**搜索算法**：
-```javascript
-function simpleSearch(query) {
-  const results = [];
-  const queryLower = query.toLowerCase();
-  
-  documents.forEach((doc, index) => {
-    let score = 0;
-    if (titleLower.includes(queryLower)) score += 10;  // 标题权重最高
-    if (previewLower.includes(queryLower)) score += 5;  // 预览内容
-    if (pathLower.includes(queryLower)) score += 2;     // 路径匹配
-    
-    if (score > 0) results.push({ index, score });
-  });
-  
-  return results.sort((a, b) => b.score - a.score);  // 按分数排序
-}
-```
-
-**搜索索引结构**：
-```json
-{
-  "path": "docs/guide.md",
-  "title": "用户指南",
-  "preview": "这是文档的预览内容..."
-}
-```
-
-### 2.7 路由模块 (`js/router.js`)
-
-**功能**：Hash 路由管理，每个文档有独特 URL
-
-**实现方式**：
-- 监听 `hashchange` 事件
-- URL 格式：`#/path/to/document.md`
-- 自动加载对应文档并更新浏览器地址栏
-- 支持分享和书签
-
-**路由处理**：
-```javascript
-window.addEventListener('hashchange', () => {
-  const hash = window.location.hash;
-  if (hash.startsWith('#/')) {
-    const path = hash.substring(2);
-    loadMarkdownFile(path);
-  }
-});
-```
-
-### 2.8 Markdown 模块增强 (`js/markdown.js`)
-
-**新增功能**：
-1. **YAML Frontmatter 解析**：
-   ```javascript
-   function parseFrontmatter(markdown) {
-     // 解析 --- 包裹的 YAML 内容
-   }
-   ```
-
-2. **面包屑导航生成**：
-   ```javascript
-   function updateBreadcrumbs(path) {
-     // 解析路径，生成可点击的面包屑
-   }
-   ```
-
-3. **悬浮 FAB 编辑按钮**：
-   - 右下角圆形按钮
-   - 跳转到 GitHub 编辑页面
-   - 紫色渐变背景，悬停放大效果
-
-### 2.9 Giscus 评论模块 (`js/markdown.js`)
-
-**功能**：基于 GitHub Discussions 的零后端评论系统
-
-**配置文件**：`js/config.js`
-```javascript
-window.MarkdownPreview.CONFIG = {
-  owner: 'your-username',
-  repo: 'your-repo',
-  giscus: {
-    enabled: true,
-    repo: 'your-username/your-repo',
-    repoId: '',
-    category: 'Announcements',
-    categoryId: '',
-    mapping: 'pathname',
-    strict: '0',
-    reactionsEnabled: '1',
-    emitMetadata: '0',
-    inputPosition: 'bottom',
-    theme: 'light',
-    lang: 'zh-CN',
-    loading: 'lazy'
-  }
-};
-```
-
-**加载流程**：
-```javascript
-function loadGiscus(path) {
-  // 1. 检查配置是否启用
-  if (!giscusConfig || !giscusConfig.enabled || !giscusConfig.repo) {
-    dom.commentsSection.style.display = 'none';
-    return;
-  }
-  
-  // 2. 只在有文档时显示评论
-  if (!path) {
-    dom.commentsSection.style.display = 'none';
-    return;
-  }
-  
-  // 3. 清除旧的并加载新的 Giscus 脚本
-  dom.commentsSection.style.display = 'block';
-  dom.giscusContainer.innerHTML = '';
-  
-  const script = document.createElement('script');
-  script.src = 'https://giscus.app/client.js';
-  script.setAttribute('data-repo', giscusConfig.repo);
-  script.setAttribute('data-term', path);
-  // ...其他配置
-  script.crossOrigin = 'anonymous';
-  script.async = true;
-  
-  dom.giscusContainer.appendChild(script);
-}
-```
-
-**样式特点**：
-- 评论区域有紫色渐变分隔线
-- 响应式设计，移动端自动适配
-- 默认为隐藏，加载文档后显示
-
-**关键改进**：修复了评论区跨文档共享的问题，每次切换文档时完全清空容器并重新初始化，确保每个文档有独立的评论区。
-
-### 2.10 阅读时间估算
-
-**功能**：自动计算并显示文档的预计阅读时间。
-
-**实现逻辑**：
-```javascript
-function calculateReadingTime(content) {
-  const textContent = content.replace(/<[^>]*>/g, '').trim();
-  const chineseChars = (textContent.match(/[\u4e00-\u9fa5]/g) || []).length;
-  const englishWords = textContent.split(/\s+/).filter(word => word.length > 0).length;
-  
-  const chineseTime = Math.ceil(chineseChars / 400); // 中文约 400 字/分钟
-  const englishTime = Math.ceil(englishWords / 200); // 英文约 200 词/分钟
-  
-  return Math.max(chineseTime, englishTime) || 1;
-}
-```
-
-**展示位置**：文档标题下方，显示为"预计阅读 x 分钟"。
-
-### 2.11 GitHub 风格 Alerts
-
-**功能**：支持 GitHub 的警告提示语法，自动渲染为美观的提示框。
-
-**支持的类型**：
-- `[!NOTE]` - 提示信息
-- `[!TIP]` - 技巧提示
-- `[!IMPORTANT]` - 重要提示
-- `[!WARNING]` - 警告
-- `[!CAUTION]` - 小心警告
-
-**实现方式**：在 Markdown 渲染前，使用正则表达式匹配并替换为自定义 HTML 结构。
-
-**样式配置**：在 `css/markdown.css` 中为每种类型定义了不同的颜色和图标。
-
-### 2.12 图片增强功能
-
-#### 2.12.1 图片懒加载
-
-**功能**：自动为所有图片添加 `loading="lazy"` 属性，提升页面加载性能。
-
-#### 2.12.2 画廊模式
-
-**功能**：连续两张或更多图片自动组合成画廊布局，支持网格排列。
-
-**实现逻辑**：遍历所有图片，识别连续的图片序列，将其包裹在 `.image-gallery` 容器中。
-
-#### 2.12.3 图片错误降级
-
-**功能**：图片加载失败时，显示文件名作为占位符，避免显示难看的裂图。
-
-**实现**：为每个图片添加 `onerror` 事件处理，加载失败时替换为 `.image-placeholder` 元素。
-
-### 2.13 Open Graph 和 Twitter Card
-
-**功能**：为网站添加社交分享元标签，让分享到社交平台时显示更美观的预览。
-
-**实现位置**：`index.html` 的 `<head>` 标签内。
-
-**meta 标签配置**：
-- Open Graph 标签：`og:type`, `og:site_name`, `og:title`, `og:description`, `og:url`
-- Twitter Card 标签：`twitter:card`, `twitter:title`, `twitter:description`, `twitter:creator`
-
-**效果**：分享到微信、Twitter、钉钉等平台时，会显示标题、描述和预览图。
-
-### 2.14 调试模式
-
-**功能**：通过 URL 参数 `?debug=1` 开启性能诊断面板，帮助排查性能问题。
-
-**实现位置**：
-- DOM 结构：`index.html`
-- 样式：`css/markdown.css`
-- 逻辑：`js/debug.js`
-- 集成：`app.js`, `js/file-tree.js`, `js/markdown.js`
-
-**实现原理**：
-
-1. **初始化检测**：
-   ```javascript
-   function initDebug() {
-     const urlParams = new URLSearchParams(window.location.search);
-     const debugMode = urlParams.get('debug');
-     
-     if (debugMode === '1' || debugMode === 'true') {
-       debugState.enabled = true;
-       debugState.startTime = performance.now();
-       showDebugPanel();
-     }
-   }
-   ```
-
-2. **性能统计集成**：
-   - 在 `file-tree.js` 的 fetch 调用处增加 API 调用计数
-   - 在预构建文件命中时增加缓存命中计数
-   - 在 `markdown.js` 的文档加载处增加 API 调用计数
-   - 使用 `performance.now()` 计算首屏渲染耗时
-
-3. **显示内容**：
-   - API 调用次数
-   - 缓存命中数/总请求数
-   - 首屏耗时（毫秒）
-   - 当前渲染器信息
-
-**使用方式**：
-```
-https://example.com/?debug=1
-```
-
-**关闭方式**：点击调试面板右上角的关闭按钮
 
 ---
 
@@ -822,6 +469,7 @@ https://example.com/?debug=1
 | `floating.css` | 悬浮元素样式（FAB、弹出层等） |
 | `layout.css` | 布局样式（侧边栏、主内容区等） |
 | `markdown.css` | Markdown 渲染样式（包括 Alerts、图片画廊等） |
+| `themes.css` | 主题系统（7 种内置主题） |
 | `responsive.css` | 响应式样式（媒体查询） |
 
 ### 3.2 设计系统
@@ -871,240 +519,46 @@ https://example.com/?debug=1
 | 标题 | Cormorant Garamond | 衬线体，优雅，适合标题 |
 | 正文 | IBM Plex Sans | 无衬线，清晰，适合阅读 |
 
-### 3.3 布局系统
-
-#### 3.3.1 整体布局
-
-```
-┌──────────────────────────────────┐
-│        进度条 (position: fixed)   │
-├─────────┬────────────────────────┤
-│         │                        │
-│ 侧边栏   │      主内容区          │
-│ 280px   │      flex: 1           │
-│ fixed   │                        │
-│         │                        │
-│ 文件树   │      Markdown 渲染     │
-│ 或目录   │                        │
-│         │                        │
-├─────────┴────────────────────────┤
-│         阅读进度条 (fixed)        │
-└──────────────────────────────────┘
-```
-
-#### 3.3.2 响应式断点
-
-```css
-/* 平板和手机 */
-@media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-100%);
-  }
-  .sidebar.open {
-    transform: translateX(0);
-  }
-  .main-content {
-    margin-left: 0;
-  }
-  .mobile-menu-btn {
-    display: block;
-  }
-}
-
-/* 桌面端 */
-@media (min-width: 769px) {
-  .sidebar {
-    transform: translateX(0);
-  }
-  .mobile-menu-btn {
-    display: none;
-  }
-  .sidebar-overlay {
-    display: none;
-  }
-}
-```
-
-### 3.4 组件系统
-
-#### 3.4.1 侧边栏组件
-
-```css
-.sidebar {
-  position: fixed;
-  width: var(--sidebar-width);
-  height: 100vh;
-  background: var(--color-surface);
-  transition: var(--transition-smooth);
-}
-
-.sidebar.open {
-  transform: translateX(0);
-}
-```
-
-**状态**：
-- **默认（桌面）**：始终可见
-- **默认（移动）**：隐藏，滑入
-- **打开**：translateX(0)
-- **关闭**：translateX(-100%)
-
-#### 3.4.2 文件树组件
-
-```css
-.folder-item {
-  cursor: pointer;
-  transition: var(--transition-smooth);
-}
-
-.folder-item:hover {
-  background: rgba(212, 165, 201, 0.1);
-}
-
-.folder-item.expanded .folder-icon {
-  transform: rotate(90deg);
-}
-
-.file-item {
-  cursor: pointer;
-}
-
-.file-item.active {
-  font-weight: 600;
-  background: rgba(212, 165, 201, 0.15);
-}
-```
-
-**交互细节**：
-- 点击文件夹：展开/折叠
-- 点击文件：高亮并加载
-- 展开动画：icon 旋转 90°
-
-#### 3.4.3 Markdown 内容样式
-
-```css
-.markdown-body {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 40px 24px;
-}
-
-.markdown-body h1,
-.markdown-body h2 {
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 0.3em;
-}
-
-/* 代码块 */
-.markdown-body pre {
-  background: #f6f8fa;
-  border-radius: 6px;
-  padding: 16px;
-  overflow-x: auto;
-  cursor: pointer;
-}
-
-.markdown-body pre:hover {
-  background: #f0f0f0;
-}
-```
-
-### 3.5 特效系统
-
-#### 3.5.1 发光进度条
-
-```css
-.progress-bar {
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.9),
-    rgba(255,255,255,0.7)
-  );
-  box-shadow: 
-    0 0 8px rgba(255,255,255,0.8),
-    0 0 16px rgba(255,255,255,0.6),
-    0 0 24px rgba(255,255,255,0.4);
-}
-```
-
-**效果**：白色荧光条，仿佛有光晕
-
-#### 3.5.2 滚动条样式
-
-```css
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-accent-purple);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent-purple-deep);
-}
-```
-
-### 3.6 图表容器样式
-
-#### 3.6.1 Mermaid 图表
-
-```css
-.mermaid-diagram {
-  margin: 1.5em 0;
-  padding: 1.5em;
-  background: var(--color-surface);
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-  text-align: center;
-  overflow-x: auto;
-}
-```
-
-#### 3.6.2 ApexCharts
-
-```css
-.apex-chart {
-  margin: 1.5em 0;
-  padding: 1.5em;
-  background: var(--color-surface);
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-}
-```
-
-#### 3.6.3 地理地图
-
-```css
-.geo-map {
-  margin: 1.5em 0;
-  height: 400px;
-  border-radius: 8px;
-  overflow: hidden;
-}
-```
-
-#### 3.6.4 乐谱容器
-
-```css
-.music-notation {
-  margin: 1.5em 0;
-  padding: 1.5em;
-  background: var(--color-surface);
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-  overflow-x: auto;
-}
-```
-
 ---
 
 ## 4. 扩展开发指南
 
-### 4.1 添加新的图表渲染器
+### 4.1 添加新的主题
+
+**步骤 1**：在 `css/themes.css` 中添加主题变量
+
+```css
+[data-theme="my-theme"] {
+  --color-bg: #...;
+  --color-surface: #...;
+  /* 其他变量 */
+}
+```
+
+**步骤 2**：在 `js/themes/theme-manager.js` 中添加主题到列表
+
+**步骤 3**：在设置面板下拉菜单中添加选项（可选）
+
+### 4.2 添加新的渲染器插件
+
+**步骤 1**：在 `plugins/` 目录创建插件文件
+
+```javascript
+// plugins/my-plugin.js
+export default {
+  name: 'my-plugin',
+  test(code, language) {
+    return language === 'my-language';
+  },
+  render(code, container) {
+    container.innerHTML = '...';
+  }
+};
+```
+
+**步骤 2**：在 `js/markdown.js` 的 `renderWithPlugins()` 中加载（可选）
+
+### 4.3 添加新的图表渲染器
 
 **步骤 1**：在 `index.html` 添加库依赖
 
@@ -1112,239 +566,15 @@ https://example.com/?debug=1
 <script src="https://cdn.example.com/chart-lib.min.js"></script>
 ```
 
-**步骤 2**：实现渲染函数
-
-```javascript
-function renderNewCharts() {
-  const allPres = document.querySelectorAll('.markdown-body pre');
-  
-  for (let i = allPres.length - 1; i >= 0; i--) {
-    const pre = allPres[i];
-    const codeElement = pre.querySelector('code');
-    
-    if (!codeElement) continue;
-    
-    const classList = codeElement.className;
-    if (!classList || !classList.includes('language-newchart')) continue;
-    
-    try {
-      const chartCode = codeElement.textContent.trim();
-      const container = document.createElement('div');
-      container.className = 'new-chart';
-      
-      // 执行渲染逻辑
-      renderChartLogic(chartCode, container);
-      
-      // 替换 DOM
-      pre.parentNode.replaceChild(container, pre);
-    } catch (error) {
-      console.error('Chart rendering error:', error);
-    }
-  }
-}
-```
+**步骤 2**：实现渲染函数（放在 `js/renderers/` 或 `plugins/`）
 
 **步骤 3**：在渲染管道中注册
 
-```javascript
-setTimeout(() => {
-  renderApexCharts();
-  renderMusicNotation();
-  renderDiff();
-  renderMermaidDiagrams();
-  renderPlantUMLDiagrams();
-  renderNewCharts();  // 添加在这里
-  renderEmbeddedServices();
-}, 100);
-```
-
-**步骤 4**：添加样式
-
-```css
-.new-chart {
-  margin: 1.5em 0;
-  padding: 1.5em;
-  background: var(--color-surface);
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-}
-```
-
-### 4.2 添加新的外部嵌入服务
-
-在 `createEmbedIframe` 函数中添加：
-
-```javascript
-function createEmbedIframe(service, url) {
-  const iframeBase = '<iframe src="{src}" width="100%" height="{height}" frameborder="0" allowfullscreen></iframe>';
-  
-  switch (service) {
-    // ... 现有服务 ...
-    
-    case 'newservice':
-      const videoId = url.match(/正则/)?.[1] || url;
-      return iframeBase
-        .replace('{src}', `https://newservice.com/embed/${videoId}`)
-        .replace('{height}', '400');
-      
-    default:
-      return null;
-  }
-}
-```
-
-### 4.2.1 Twitter/X 嵌入实现
-
-Twitter 嵌入与 iframe 不同，需要使用官方 widget.js：
-
-```javascript
-function renderTwitterEmbed(service, url, originalMatch) {
-  try {
-    let embedCode = '';
-    
-    // 推文嵌入
-    const tweetMatch = url.match(/twitter\.com\/\w+\/status\/(\d+)/);
-    if (tweetMatch) {
-      embedCode = `<blockquote class="twitter-tweet"><a href="${url}">...</a></blockquote>`;
-    }
-    // 时间线嵌入
-    else if (url.includes('twitter.com/') && !url.includes('/status/')) {
-      embedCode = `<a class="twitter-timeline" href="${url}">...</a>`;
-    }
-    
-    if (embedCode) {
-      markdownContent.innerHTML = markdownContent.innerHTML.replace(originalMatch, embedCode);
-      
-      // 异步加载 Twitter widgets
-      if (typeof twttr !== 'undefined' && twttr.widgets) {
-        twttr.widgets.load();
-      } else {
-        // 等待加载
-        const checkTwitter = setInterval(() => {
-          if (typeof twttr !== 'undefined' && twttr.widgets) {
-            twttr.widgets.load();
-            clearInterval(checkTwitter);
-          }
-        }, 100);
-      }
-    }
-  } catch (error) {
-    console.error('Twitter embed error:', error);
-  }
-}
-```
-
-**关键技术点**：
-- **Widget.js**：`https://platform.twitter.com/widgets.js`
-- **异步加载**：使用 `async` 属性不阻塞页面
-- **嵌入式 HTML**：使用 `blockquote.twitter-tweet` 和 `a.twitter-timeline`
-- **自动初始化**：通过 `twttr.widgets.load()` 触发渲染
-
-### 4.3 自定义配置
-
-修改 `js/config.js` 中的 `CONFIG` 对象：
-
-```javascript
-window.MarkdownPreview.CONFIG = {
-  owner: 'your-github-username',  // 必填：GitHub 用户名
-  repo: 'your-repo-name'          // 必填：仓库名称
-};
-```
-
 ---
 
-## 5. 性能优化建议
+## 5. 版本历史与贡献
 
-### 5.1 渲染优化
-
-1. **延迟加载库**：只加载当前 Markdown 文件需要的库
-2. **缓存已渲染内容**：避免重复渲染
-3. **使用 Intersection Observer**：懒加载可视化内容
-
-### 5.2 API 优化
-
-1. **添加请求缓存**：避免重复请求
-2. **错误重试机制**：网络不稳定时自动重试
-3. **请求取消**：切换文件时取消未完成的请求
-
-### 5.3 DOM 优化
-
-1. **批量 DOM 操作**：使用 DocumentFragment
-2. **减少重排重绘**：合并样式变更
-3. **事件委托**：减少事件监听器数量
-
----
-
-## 6. 测试建议
-
-### 6.1 手动测试清单
-
-- [ ] GitHub API 连接正常
-- [ ] 文件树正确显示
-- [ ] Markdown 文件加载和渲染
-- [ ] Mermaid 图表渲染
-- [ ] PlantUML 图表渲染
-- [ ] ApexCharts 图表渲染
-- [ ] 乐谱渲染（abc/musicxml/osmd）
-- [ ] Diff 可视化
-- [ ] 地理数据可视化
-- [ ] 外部服务嵌入
-- [ ] LaTeX 公式渲染（行内公式和块级公式）
-- [ ] 移动端响应式布局
-- [ ] 侧边栏展开/折叠
-- [ ] 代码复制功能
-- [ ] 进度条更新
-- [ ] 全文搜索功能正常
-- [ ] 搜索结果显示和点击跳转
-- [ ] Hash 路由正常工作
-- [ ] 面包屑导航显示
-- [ ] 编辑按钮正常跳转
-- [ ] 悬浮 FAB 显示和交互
-- [ ] Frontmatter 解析
-
-### 6.2 边界情况测试
-
-- 无网络连接
-- GitHub API 速率限制
-- 空仓库
-- 深层嵌套目录
-- 超大 Markdown 文件
-- 非标准代码块格式
-- 错误的 JSON 配置
-- 浏览器兼容性问题
-
----
-
-## 7. 常见问题排查
-
-### 问题 1：图表不渲染
-
-**排查步骤**：
-1. 打开浏览器控制台（F12）
-2. 检查是否有库加载错误
-3. 检查代码块类型是否正确
-4. 检查 JSON 格式是否有效
-
-### 问题 2：文件列表不显示
-
-**排查步骤**：
-1. 检查 GitHub API 是否可访问
-2. 检查 `config.json` 配置是否正确（或 `js/config.js` 中的默认配置
-3. 检查仓库是否包含 .md 文件
-4. 检查 GitHub Pages 是否启用
-
-### 问题 3：移动端样式错乱
-
-**排查步骤**：
-1. 检查 CSS 断点设置
-2. 检查 flexbox 布局
-3. 测试不同设备尺寸
-
----
-
-## 8. 版本历史与贡献
-
-### 8.1 当前版本功能
+### 5.1 当前版本功能
 
 | 功能 | 状态 | 代码位置 |
 |------|------|---------|
@@ -1376,45 +606,12 @@ window.MarkdownPreview.CONFIG = {
 | **CSS 模块化** | ✅ 完成 | css/ 目录 |
 | **外部化配置** | ✅ 完成 | config.json + js/config.js + app.js |
 | **调试模式** | ✅ 完成 | js/debug.js + css/markdown.css + index.html |
-| **LaTeX 公式** | ✅ 完成 | js/renderers/katex.js + docs/examples/latex-examples.md |
-
-### 8.2 贡献指南
-
-欢迎提交 Issue 和 Pull Request！
-
-**提交流程**：
-1. Fork 仓库
-2. 创建功能分支
-3. 编写代码和测试
-4. 提交 Pull Request
-5. 等待代码审查
+| **LaTeX 公式** | ✅ 完成 | js/renderers/katex.js |
+| **主题系统** | ✅ 完成 | js/themes/theme-manager.js + css/themes.css |
+| **设置面板** | ✅ 完成 | js/settings.js + index.html |
+| **二维码插件** | ✅ 完成 | plugins/qrcode.js |
 
 ---
 
-## 9. 技术参考
-
-### 9.1 外部库文档
-
-- [Marked.js](https://marked.js.org/)
-- [Mermaid.js](https://mermaid.js.org/)
-- [PlantUML](https://plantuml.com/)
-- [ApexCharts](https://apexcharts.com/)
-- [Leaflet.js](https://leafletjs.com/)
-- [abcjs](https://abcjs.net/)
-- [Verovio](https://www.verovio.org/)
-- [OSMD](https://opensheetmusicdisplay.org/)
-- [diff2html](https://diff2html.xyz/)
-- [KaTeX](https://katex.org/)
-- [Twitter 嵌入文档](https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/overview)
-- [Twitter Widgets.js](https://platform.twitter.com/widgets.js)
-
-### 9.2 学习资源
-
-- [GitHub REST API](https://docs.github.com/en/rest)
-- [CSS 变量指南](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Using_CSS_custom_properties)
-- [JavaScript 事件委托](https://developer.mozilla.org/zh-CN/docs/Learn/JavaScript/Building_blocks/Event_bubbling)
-
----
-
-**最后更新**：2026-05-22
-**文档版本**：1.3.0
+**最后更新**：2026-05-24
+**文档版本**：1.4.0

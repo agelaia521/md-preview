@@ -2,27 +2,6 @@
 
 这是一个极简风格的 Markdown 文件预览工具，专为 GitHub Pages 设计，完全静态，无需后端。
 
-## 快速开始
-
-### GitHub Pages 部署（推荐）
-
-1. **Fork 仓库**
-2. **开启 GitHub Pages**
-   - 在仓库 Settings 中点击 Pages
-   - 源选择 GitHub Actions
-3. **自定义配置**
-   - 修改 `config.json` 中的 `owner` 和 `repo`（无需懂 JavaScript，编辑更安全！
-4. **推送代码后，GitHub Actions 会自动构建并部署**
-
-### 本地预览
-
-1. **克隆仓库**
-2. **本地构建文件树**
-   ```bash
-   node scripts/build-file-tree.js
-   ```
-3. **用浏览器打开** `index.html`
-
 ## 功能特点
 
 - 📂 **自动发现** - 通过 GitHub API 自动扫描仓库中的所有 .md 文件
@@ -43,6 +22,63 @@
 - 🔗 **社交分享** - Open Graph 和 Twitter Card meta 标签，支持更好的分享预览
 - 🔧 **调试模式** - 访问 `?debug=1` 时显示性能诊断面板
 - ⚗️ **LaTeX 公式** - 支持 KaTeX 渲染数学公式
+- 🏷️ **主题系统** - 7 种内置主题，支持自定义 CSS 主题
+- 🔌 **插件系统** - 支持扩展自定义渲染器（如二维码生成）
+
+## 主题系统
+
+支持 7 种内置主题，一键切换：
+- **默认** - 浅紫浅粉渐变
+- **GitHub Light** - GitHub 明亮风格
+- **GitHub Dark** - GitHub 深色风格
+- **Notion** - Notion 暖灰风格
+- **Arc Dark** - Arc 浏览器彩虹紫风格
+- **Dracula** - Dracula 经典配色
+- **Nord** - 北极光配色
+
+**自定义主题**：在设置中输入自定义 CSS 文件 URL 即可。
+
+## 文档目录结构
+
+```
+/
+├── docs/
+│   ├── getting-started.md       # 快速开始指南
+│   ├── configuration.md         # 配置参考
+│   ├── plugin-development.md    # 插件开发指南
+│   ├── theme-customization.md   # 主题定制指南
+│   ├── migration.md             # 迁移指南
+│   ├── faq.md                   # 故障排查 FAQ
+│   └── examples/                # 示例文档
+│       ├── markdown-syntax.md   # Markdown 语法
+│       ├── mermaid-examples.md  # Mermaid 图表
+│       ├── plantuml-examples.md # PlantUML 图表
+│       ├── latex-examples.md    # LaTeX 公式
+│       ├── qrcode-examples.md   # 二维码示例
+│       └── theme-demo.md        # 主题演示
+└── README.md
+```
+
+## 快速开始
+
+### GitHub Pages 部署（推荐）
+
+1. **Fork 仓库**
+2. **开启 GitHub Pages**
+   - 在仓库 Settings 中点击 Pages
+   - Source 选择 Deploy from a branch
+3. **自定义配置**
+   - 修改 `config.json` 中的 `owner` 和 `repo`（无需懂 JavaScript，编辑更安全！）
+4. **推送代码后，GitHub Actions 会自动构建并部署**
+
+### 本地预览
+
+1. **克隆仓库**
+2. **本地构建文件树**
+   ```bash
+   node scripts/build-file-tree.js
+   ```
+3. **用浏览器打开** `index.html`
 
 ## 配置
 
@@ -122,27 +158,22 @@
 > 这是一条警告信息
 ```
 
-### 图片增强功能
+### 二维码生成
 
-**图片懒加载**：所有图片自动添加 `loading="lazy"` 属性，提升页面加载性能。
+使用 `qrcode` 语言代码块生成二维码：
 
-**画廊模式**：连续两张或更多图片会自动组合成画廊布局，支持网格排列。
+```qrcode
+https://github.com
+```
 
-**错误降级**：图片加载失败时，会显示文件名作为占位符，避免显示难看的裂图。
+或使用配置格式：
 
-### 调试模式
-
-访问 URL 时添加 `?debug=1` 参数可以开启调试诊断模式：
-
-**使用方式**：`https://example.com/?debug=1`
-
-**显示内容**：
-- API 调用次数
-- 缓存命中率
-- 首屏渲染耗时
-- 当前使用的渲染器信息
-
-**关闭方式**：点击调试面板右上角的关闭按钮
+```qrcode
+{
+  "data": "Hello, world!",
+  "size": 200
+}
+```
 
 ### Mermaid 图表
 支持 18+ 种图表类型：
@@ -190,7 +221,7 @@ Animal <|-- Dog
 ### ApexCharts 交互式图表
 支持现代化的交互式图表，使用 ApexCharts 库渲染：
 
-**支持图表类型：**
+**支持图表类型**：
 - 折线图、面积图
 - 柱状图、条形图
 - 饼图、环形图
@@ -214,7 +245,7 @@ Animal <|-- Dog
 ### 乐谱渲染
 支持多种乐谱格式渲染：
 
-**支持格式：**
+**支持格式**：
 - ABC 记谱法 (abcjs)
 - MEI/MusicXML (Verovio)
 - MusicXML (OSMD - OpenSheetMusicDisplay)
@@ -229,104 +260,10 @@ K:C
 C C G G | A A G2 | F F E E | D D C2 |
 ```
 
-使用示例（MusicXML - Verovio）：
-```musicxml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
-<score-partwise version="3.1">
-  <part-list>
-    <score-part id="P1">
-      <part-name>Music</part-name>
-    </score-part>
-  </part-list>
-  <part id="P1">
-    <measure number="1">
-      <attributes>
-        <divisions>1</divisions>
-        <key>
-          <fifths>0</fifths>
-        </key>
-        <time>
-          <beats>4</beats>
-          <beat-type>4</beat-type>
-        </time>
-      </attributes>
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>1</duration>
-        <type>quarter</type>
-      </note>
-    </measure>
-  </part>
-</score-partwise>
-```
-
-使用示例（MusicXML - OSMD）：
-```osmd
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
-<score-partwise version="3.1">
-  <part-list>
-    <score-part id="P1">
-      <part-name>Music</part-name>
-    </score-part>
-  </part-list>
-  <part id="P1">
-    <measure number="1">
-      <attributes>
-        <divisions>1</divisions>
-        <key>
-          <fifths>0</fifths>
-        </key>
-        <time>
-          <beats>4</beats>
-          <beat-type>4</beat-type>
-        </time>
-      </attributes>
-      <note>
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>1</duration>
-        <type>quarter</type>
-      </note>
-      <note>
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>1</duration>
-        <type>quarter</type>
-      </note>
-      <note>
-        <pitch>
-          <step>E</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>1</duration>
-        <type>quarter</type>
-      </note>
-      <note>
-        <pitch>
-          <step>F</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>1</duration>
-        <type>quarter</type>
-      </note>
-    </measure>
-  </part>
-</score-partwise>
-```
-
 ### Git Diff 可视化
 支持使用 diff2html 可视化展示 Git Diff 内容：
 
-**使用示例：**
+**使用示例**：
 ```diff
 diff --git a/index.html b/index.html
 index 1a2b3c4..5d6e7f8 100644
@@ -346,35 +283,35 @@ index 1a2b3c4..5d6e7f8 100644
 
 支持通过 iframe 嵌入多种外部服务：
 
-**视频平台：**
+**视频平台**：
 - YouTube
 - Bilibili
 - Vimeo
 
-**设计稿：**
+**设计稿**：
 - Figma
 - Canva
 
-**代码演示：**
+**代码演示**：
 - CodePen
 - JSFiddle
 - StackBlitz
 - Replit
 
-**地图：**
+**地图**：
 - Google Maps
 - OpenStreetMap
 
-**办公文档：**
+**办公文档**：
 - Google Docs/Sheets/Slides
 - Office Online
 
-**社交媒体：**
+**社交媒体**：
 - Twitter/X 推文嵌入
 - Twitter/X 时间线嵌入
 - GitHub Gist
 
-**徽章/状态：**
+**徽章/状态**：
 - Shields.io
 - Badgen
 
@@ -392,7 +329,7 @@ index 1a2b3c4..5d6e7f8 100644
 
 支持嵌入 GeoJSON 和 TopoJSON 地理数据格式，使用 Leaflet.js 渲染交互式地图：
 
-**支持格式：**
+**支持格式**：
 - GeoJSON（点、线、多边形等地理要素）
 - TopoJSON（压缩的地理数据格式）
 
@@ -433,115 +370,11 @@ c & d
 - 希腊字母：$\alpha, \beta, \gamma, \pi$
 - 函数：$\sin, \cos, \log, \lim$
 
-### 浏览器原生 HTML 元素与 Web API
+---
 
-支持丰富的浏览器原生功能，零 JS、零后端即可使用！
+## 添加新文档
 
-#### 语义与排版元素
-- `<dialog>` - 原生模态对话框
-- `<details>` + `<summary>` - 折叠面板
-- `<search>` - 语义化搜索区域
-- `<ruby>` + `<rt>` + `<rp>` - 中文/日文注音
-- `<bdi>`/`<bdo>` - 双向文本处理
-- `<wbr>` - 可选换行点
-- `<mark>` - 文本高亮
-- `<kbd>` - 键盘按键
-- `<samp>` - 程序输出
-- `<var>` - 变量
-- `<dfn>` - 定义术语
-- `<abbr>` - 缩写说明
-- `<time>` - 机器可读时间
-- `<data>` - 关联数据
-- `<ins>`/`<del>` - 增删标记
-- `<sub>`/`<sup>` - 下标/上标
-- `<small>` - 小号文字
-- `<cite>` - 作品引用
-- `<q>` - 行内引用
-- `<blockquote>` - 块级引用
-- `<address>` - 联系信息
-- `<figure>` + `<figcaption>` - 图文组合
-- `<hr>` - 主题转换
-- `<template>` - HTML 模板
-- `<slot>` - Web Components 插槽
-
-#### 多媒体与嵌入
-- `<picture>` + `<source>` - 响应式图片
-- `<audio>` + `<track>` - 音频+字幕
-- `<video>` + `<track>` - 视频+字幕
-- `<iframe srcdoc>` - 内联 HTML
-- `<iframe sandbox>` - 沙盒化嵌入
-- `<object>` - PDF/SVG 嵌入
-- `<embed>` - 快捷嵌入
-- `<map>` + `<area>` - 图片热区
-- `<canvas>` - 2D/WebGL 画布
-- `<svg>` - 内联矢量图
-- `<math>` - MathML 数学公式
-
-#### 表单与交互控件
-- `<meter>` - 仪表盘/度量
-- `<progress>` - 进度条
-- `<datalist>` - 自动补全
-- `<output>` - 计算结果
-- `<fieldset>` + `<legend>` - 内容分组
-
-#### 全局属性增强
-- `contenteditable` - 可编辑区域
-- `draggable` - 可拖拽
-- `translate="no"` - 禁止翻译
-- `spellcheck` - 拼写检查
-- `hidden="until-found"` - 隐藏但可搜索
-- `popover` - 原生弹出层
-- `inert` - 不可交互
-- `loading="lazy"` - 懒加载
-- `decoding="async"` - 异步解码
-- `fetchpriority` - 加载优先级
-- `referrerpolicy` - 引用策略
-
-#### 浏览器原生 Web API
-- WebGL / WebGL 2.0 - 3D 图形
-- WebGPU - 下一代图形 API
-- Canvas 2D API - 位图绘制
-- SVG + SMIL - 原生 SVG 动画
-- Web Animations API - JS 控制动画
-- View Transitions API - 视图过渡
-- CSS Houdini - 自定义 CSS 绘制
-
-## 快速开始
-
-### 在 GitHub Pages 上使用：
-
-1. 将以下文件和目录复制到你的 GitHub 仓库根目录：
-   - `index.html`
-   - `styles.css`
-   - `app.js`
-   - `js/` 目录（包含所有模块文件）
-
-2. 编辑 `js/config.js` 中的 `CONFIG` 配置你的仓库信息：
-   ```javascript
-   const CONFIG = {
-     owner: '你的用户名',
-     repo: '你的仓库名'
-   };
-   ```
-
-3. 在仓库设置中启用 GitHub Pages，选择 `main` 分支或其他分支
-
-4. 访问 `https://你的用户名.github.io/仓库名/`
-
-### 添加新文档
-
-只需在仓库的任何位置添加 `.md` 文件，系统会自动发现并显示在侧边栏！
-
-## 配置说明
-
-在 `js/config.js` 中配置：
-
-```javascript
-const CONFIG = {
-  owner: 'theforeveriris',  // 你的 GitHub 用户名
-  repo: 'md-preview'        // 你的仓库名称
-};
-```
+只需在仓库的任意位置添加 `.md` 文件，系统会自动发现并显示在侧边栏！
 
 ## 文件结构
 
@@ -550,15 +383,26 @@ const CONFIG = {
 ```
 你的仓库/
 ├── index.html       # 主页面（必须在根目录）
-├── styles.css       # 样式文件（必须在根目录）
-├── app.js          # 入口文件（必须在根目录）
-├── js/             # 核心模块目录（必须在根目录）
+├── css/             # 样式文件（模块化 CSS）
+│   ├── base.css
+│   ├── components.css
+│   ├── floating.css
+│   ├── layout.css
+│   ├── markdown.css
+│   ├── themes.css   # 主题系统
+│   └── responsive.css
+├── js/              # 核心模块目录（必须在根目录）
 │   ├── config.js    # 配置文件
 │   ├── state.js     # 状态管理
 │   ├── dom.js       # DOM 引用
 │   ├── ui.js        # UI 工具
 │   ├── file-tree.js # 文件树功能
 │   ├── markdown.js  # Markdown 渲染
+│   ├── search.js    # 搜索功能
+│   ├── router.js    # Hash 路由
+│   ├── settings.js  # 设置面板
+│   ├── themes/      # 主题管理器
+│   │   └── theme-manager.js
 │   └── renderers/   # 各种渲染器
 │       ├── mermaid.js
 │       ├── plantuml.js
@@ -568,13 +412,17 @@ const CONFIG = {
 │       ├── geo.js
 │       ├── embedded.js
 │       └── katex.js
+├── plugins/         # 插件目录
+│   └── qrcode.js    # 二维码生成插件
 ├── README.md        # 你的文档
-├── docs/           # 任意结构的文档目录
+├── docs/            # 任意结构的文档目录
 │   ├── guide.md
 │   └── ...
-└── any/            # 任意位置的文档
+└── any/             # 任意位置的文档
     └── file.md
 ```
+
+---
 
 ## 代码示例
 
