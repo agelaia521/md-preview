@@ -7,12 +7,12 @@
   const plugin = {
     name: 'qrcode',
     description: 'QR Code generator',
-    
+
     test: function(code, language) {
       console.log('[QRCode] test called, language:', language, 'code:', code.substring(0, 30));
       return language === 'qrcode';
     },
-    
+
     render: function(code, container) {
       console.log('[QRCode] render called!');
       container.innerHTML = '';

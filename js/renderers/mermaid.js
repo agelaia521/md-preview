@@ -1,44 +1,49 @@
 (function() {
+  console.log('[Mermaid] Renderer module loading...');
   window.MarkdownPreview = window.MarkdownPreview || {};
   window.MarkdownPreview.renderers = window.MarkdownPreview.renderers || {};
-  
+
   async function render() {
-    console.log('[Mermaid] Starting render');
+    console.log('[Mermaid] render() called');
+    
     if (typeof mermaid === 'undefined') {
       console.error('[Mermaid] Library is not loaded');
       return;
     }
-    
-    // 从后往前遍历，防止替换前面的元素后导致索引失效
+
     const allPres = document.querySelectorAll('.markdown-body pre');
     console.log('[Mermaid] Found pre elements:', allPres.length);
-    
+
+    // 从后往前遍历，防止替换元素导致索引失效
     for (let i = allPres.length - 1; i >= 0; i--) {
       const pre = allPres[i];
       const codeElement = pre.querySelector('code');
-      
-      if (!codeElement) continue;
-      
+
+      if (!codeElement) {
+        console.log('[Mermaid] No codeElement found, skipping');
+        continue;
+      }
+
       const classList = codeElement.className;
-      // More precise language matching using regex
-      const languageMatch = classList ? classList.match(/language-([a-zA-Z0-9\-_]+)/) : null;
-      const language = languageMatch ? languageMatch[1] : '';
+      console.log('[Mermaid] codeElement classList:', classList);
       
-      if (language !== 'mermaid') continue;
-      
-      console.log('[Mermaid] Found mermaid block at index', i);
-      
+      if (!classList || !classList.includes('language-mermaid')) {
+        console.log('[Mermaid] Not a mermaid code block, skipping');
+        continue;
+      }
+
       const mermaidCode = codeElement.textContent.trim();
       const id = 'mermaid-' + Date.now() + '-' + i;
+
+      console.log('[Mermaid] Found mermaid code block, rendering with id:', id);
       
       try {
-        console.log('[Mermaid] Rendering diagram:', id);
         const { svg } = await mermaid.render(id, mermaidCode);
         const container = document.createElement('div');
         container.className = 'mermaid-diagram';
         container.innerHTML = svg;
         pre.replaceWith(container);
-        console.log('[Mermaid] Successfully rendered:', id);
+        console.log('[Mermaid] Successfully rendered mermaid diagram');
       } catch (error) {
         console.error('[Mermaid] Rendering error:', error);
         const errorDiv = document.createElement('div');
@@ -51,8 +56,10 @@
       }
     }
   }
-  
+
   window.MarkdownPreview.renderers.mermaid = {
     render
   };
+  
+  console.log('[Mermaid] Renderer module loaded and registered');
 })();
