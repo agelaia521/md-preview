@@ -249,3 +249,51 @@
 .switch input:checked + .switch-slider:before {
   transform: translateX(22px);
 }
+
+.theme-select {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.theme-select:focus {
+  outline: none;
+  border-color: var(--color-accent-purple);
+}
+
+.custom-css-input {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  width: 200px;
+}
+
+.custom-css-input:focus {
+  outline: none;
+  border-color: var(--color-accent-purple);
+}
+
+.setting-control .custom-css-input {
+  width: 160px;
+}
+
+@media (max-width: 600px) {
+  .setting-control {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 8px;
+  }
+  
+  .theme-select,
+  .custom-css-input {
+    width: 100%;
+  }
+}
