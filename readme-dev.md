@@ -63,7 +63,6 @@ node scripts/build-file-tree.js
 | **OSMD** | OpenSheetMusicDisplay 乐谱渲染 |
 | **diff2html** | Git Diff 可视化 |
 | **KaTeX** | LaTeX 数学公式渲染 |
-| **Giscus** | 基于 GitHub Discussions 的评论系统 |
 
 ### 1.2 新增功能模块
 
@@ -217,8 +216,7 @@ mermaid   plantuml  state.js    config.js
 // 默认配置作为后备
 const DEFAULT_CONFIG = {
   owner: 'theforeveriris',
-  repo: 'md-preview',
-  giscus: { /* ... */ }
+  repo: 'md-preview'
 };
 
 // 异步加载外部配置
@@ -246,14 +244,7 @@ async function loadConfig() {
 ```json
 {
   "owner": "your-username",
-  "repo": "your-repo",
-  "giscus": {
-    "enabled": true,
-    "repo": "your-username/your-repo",
-    "repoId": "your-repo-id",
-    "category": "Announcements",
-    "categoryId": "your-category-id"
-  }
+  "repo": "your-repo"
 }
 ```
 
@@ -595,14 +586,12 @@ export default {
 | **编辑按钮** | ✅ 完成 | js/markdown.js |
 | **Frontmatter** | ✅ 完成 | js/markdown.js |
 | **悬浮 FAB** | ✅ 完成 | css/floating.css + index.html |
-| **Giscus 评论** | ✅ 完成 | js/markdown.js + config.js |
 | **阅读时间估算** | ✅ 完成 | js/markdown.js |
 | **GitHub 风格 Alerts** | ✅ 完成 | js/markdown.js + css/markdown.css |
 | **图片懒加载** | ✅ 完成 | js/markdown.js |
 | **图片画廊模式** | ✅ 完成 | js/markdown.js + css/markdown.css |
 | **图片错误降级** | ✅ 完成 | js/markdown.js + css/markdown.css |
 | **Open Graph / Twitter Card** | ✅ 完成 | index.html |
-| **评论区跨文档隔离** | ✅ 完成 | js/markdown.js |
 | **CSS 模块化** | ✅ 完成 | css/ 目录 |
 | **外部化配置** | ✅ 完成 | config.json + js/config.js + app.js |
 | **调试模式** | ✅ 完成 | js/debug.js + css/markdown.css + index.html |

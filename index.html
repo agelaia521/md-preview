@@ -71,12 +71,6 @@
             </svg>
             <span class="menu-item-label">回到顶部</span>
           </button>
-          <button class="menu-item-btn" id="goToCommentsBtn" title="评论区">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-            <span class="menu-item-label">评论区</span>
-          </button>
           <a class="menu-item-btn" id="editPageBtn" title="编辑此页" target="_blank" rel="noopener noreferrer" href="#">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -150,19 +144,6 @@
             
             <div class="setting-item">
               <div>
-                <div class="setting-label">显示评论</div>
-                <div class="setting-description">在页面底部显示评论区</div>
-              </div>
-              <div class="setting-control">
-                <label class="switch">
-                  <input type="checkbox" id="showCommentsToggle" checked>
-                  <span class="switch-slider"></span>
-                </label>
-              </div>
-            </div>
-            
-            <div class="setting-item">
-              <div>
                 <div class="setting-label">显示阅读进度</div>
                 <div class="setting-description">显示页面阅读进度</div>
               </div>
@@ -192,11 +173,6 @@
           <p class="welcome-text">选择一个文件开始阅读</p>
         </div>
       </article>
-      
-      <!-- Giscus 评论区 - 放在 markdown 内容外面避免被 innerHTML 替换 -->
-      <div class="comments-section hidden" id="commentsSection">
-        <div class="giscus" id="giscusContainer"></div>
-      </div>
       
       <div class="reading-progress" id="readingProgress">
         <div class="reading-progress-bar"></div>

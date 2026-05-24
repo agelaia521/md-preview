@@ -4,7 +4,6 @@
   const STORAGE_KEY = 'md-preview-settings';
 
   const defaultSettings = {
-    showComments: true,
     showReadingProgress: true
   };
 
@@ -13,7 +12,7 @@
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        return { ...defaultSettings, showComments: parsed.showComments ?? defaultSettings.showComments, showReadingProgress: parsed.showReadingProgress ?? defaultSettings.showReadingProgress };
+        return { ...defaultSettings, showReadingProgress: parsed.showReadingProgress ?? defaultSettings.showReadingProgress };
       }
     } catch (e) {
       console.error('Failed to load settings:', e);
@@ -34,7 +33,6 @@
     const menuTrigger = document.getElementById('menuTrigger');
     const menuItems = document.querySelector('.menu-items');
     const backToTopBtn = document.getElementById('backToTopBtn');
-    const goToCommentsBtn = document.getElementById('goToCommentsBtn');
     const openSettingsBtn = document.getElementById('openSettingsBtn');
 
     if (!floatingMenu || !menuTrigger || !menuItems) {
@@ -49,15 +47,6 @@
 
     backToTopBtn?.addEventListener('click', () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      menuItems.classList.remove('open');
-      menuTrigger.classList.remove('active');
-    });
-
-    goToCommentsBtn?.addEventListener('click', () => {
-      const commentsSection = document.getElementById('commentsSection');
-      if (commentsSection) {
-        commentsSection.scrollIntoView({ behavior: 'smooth' });
-      }
       menuItems.classList.remove('open');
       menuTrigger.classList.remove('active');
     });
@@ -79,7 +68,6 @@
   function initSettingsPanel() {
     const settingsOverlay = document.getElementById('settingsOverlay');
     const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-    const showCommentsToggle = document.getElementById('showCommentsToggle');
     const showReadingProgressToggle = document.getElementById('showReadingProgressToggle');
 
     if (!settingsOverlay) {
@@ -94,13 +82,6 @@
       if (e.target === settingsOverlay) {
         closeSettingsPanel();
       }
-    });
-
-    showCommentsToggle?.addEventListener('change', (e) => {
-      const settings = loadSettings();
-      settings.showComments = e.target.checked;
-      saveSettings(settings);
-      toggleComments(settings.showComments);
     });
 
     showReadingProgressToggle?.addEventListener('change', (e) => {
@@ -124,17 +105,6 @@
     if (settingsOverlay) {
       settingsOverlay.classList.remove('open');
       document.body.style.overflow = '';
-    }
-  }
-
-  function toggleComments(show) {
-    const commentsSection = document.getElementById('commentsSection');
-    if (!commentsSection) return;
-    
-    if (show) {
-      commentsSection.classList.remove('hidden');
-    } else {
-      commentsSection.classList.add('hidden');
     }
   }
 
@@ -191,13 +161,10 @@
     initFloatingMenu();
     initSettingsPanel();
     initDownloadButtons();
-    toggleComments(settings.showComments);
     toggleReadingProgress(settings.showReadingProgress);
 
-    const showCommentsToggle = document.getElementById('showCommentsToggle');
     const showReadingProgressToggle = document.getElementById('showReadingProgressToggle');
 
-    if (showCommentsToggle) showCommentsToggle.checked = settings.showComments;
     if (showReadingProgressToggle) showReadingProgressToggle.checked = settings.showReadingProgress;
   }
 

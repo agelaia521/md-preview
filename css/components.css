@@ -134,30 +134,6 @@
   stroke: white;
 }
 
-.comments-section {
-  max-width: 900px;
-  margin: 48px auto 80px;
-  padding: 0 24px;
-}
-
-.comments-section.hidden {
-  display: none !important;
-}
-
-.comments-section::before {
-  content: '';
-  display: block;
-  width: 60px;
-  height: 2px;
-  background: linear-gradient(90deg, var(--color-accent-purple), var(--color-accent-pink));
-  margin: 0 auto 32px;
-  border-radius: 1px;
-}
-
-.giscus {
-  min-height: 200px;
-}
-
 .reading-time {
   font-size: 14px;
   color: var(--color-text-muted);

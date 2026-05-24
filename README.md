@@ -15,7 +15,6 @@
 - 🎯 **Hash 路由** - 每个文档有独特 URL，支持分享和书签
 - 📋 **面包屑导航** - 显示当前文件路径，方便跳转
 - 📝 **Frontmatter** - 支持 YAML 元数据解析
-- 💬 **Giscus 评论** - 基于 GitHub Discussions 的零后端评论系统，支持跨文档隔离
 - ⏱️ **阅读时间估算** - 自动计算并显示文档的预计阅读时间
 - 📢 **GitHub 风格 Alerts** - 支持 > [!NOTE]、> [!WARNING] 等警告提示语法
 - 🖼️ **图片增强** - 图片懒加载、画廊模式、错误降级显示
@@ -96,37 +95,6 @@
   "repo": "your-repo"
 }
 ```
-
-### 配置 Giscus 评论
-
-1. **在 GitHub 仓库中开启 Discussions**
-   - 进入仓库 Settings
-   - 在 Features 中启用 Discussions
-
-2. **访问 Giscus 官网获取配置**
-   - 前往 [giscus.app](https://giscus.app)
-   - 按提示配置并获取所需的 `repoId` 和 `categoryId`
-
-3. **修改 `config.json` 中的 giscus 配置**
-   ```json
-   {
-     "giscus": {
-       "enabled": true,
-       "repo": "your-username/your-repo",
-       "repoId": "your-repo-id",
-       "category": "Announcements",
-       "categoryId": "your-category-id",
-       "mapping": "term",
-       "strict": "1",
-       "reactionsEnabled": "1",
-       "emitMetadata": "0",
-       "inputPosition": "bottom",
-       "theme": "preferred_color_scheme",
-       "lang": "zh-CN",
-       "loading": "lazy"
-     }
-   }
-   ```
 
 ## 支持格式
 

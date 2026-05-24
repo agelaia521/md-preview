@@ -4,8 +4,6 @@
   window.MarkdownPreview.dom = {
     fileTree: document.getElementById('fileTree'),
     markdownContent: document.getElementById('markdownContent'),
-    commentsSection: document.getElementById('commentsSection'),
-    giscusContainer: document.getElementById('giscusContainer'),
     sidebar: document.getElementById('sidebar'),
     sidebarToggle: document.getElementById('sidebarToggle'),
     mobileMenuBtn: document.getElementById('mobileMenuBtn'),
@@ -24,11 +22,9 @@
     menuTrigger: document.getElementById('menuTrigger'),
     menuItems: document.querySelector('.menu-items'),
     backToTopBtn: document.getElementById('backToTopBtn'),
-    goToCommentsBtn: document.getElementById('goToCommentsBtn'),
     openSettingsBtn: document.getElementById('openSettingsBtn'),
     settingsOverlay: document.getElementById('settingsOverlay'),
     closeSettingsBtn: document.getElementById('closeSettingsBtn'),
-    showCommentsToggle: document.getElementById('showCommentsToggle'),
     showReadingProgressToggle: document.getElementById('showReadingProgressToggle')
   };
 })();
