@@ -4,6 +4,40 @@
   
   const { dom } = window.MarkdownPreview;
   
+  function extractEmbedSyntax(text) {
+    const atBracketStart = text.indexOf('@[');
+    if (atBracketStart === -1) return null;
+    
+    const serviceStart = atBracketStart + 2;
+    const serviceEnd = text.indexOf(']', serviceStart);
+    if (serviceEnd === -1) return null;
+    
+    const service = text.substring(serviceStart, serviceEnd);
+    
+    const urlStart = serviceEnd + 1;
+    if (text[urlStart] !== '(') return null;
+    
+    let depth = 1;
+    let urlEnd = -1;
+    for (let i = urlStart + 1; i < text.length; i++) {
+      if (text[i] === '(') depth++;
+      else if (text[i] === ')') {
+        depth--;
+        if (depth === 0) {
+          urlEnd = i;
+          break;
+        }
+      }
+    }
+    
+    if (urlEnd === -1) return null;
+    
+    const url = text.substring(urlStart + 1, urlEnd);
+    const fullMatch = text.substring(atBracketStart, urlEnd + 1);
+    
+    return { service, url, fullMatch };
+  }
+  
   function render() {
     const content = dom.markdownContent.innerHTML;
     let processedContent = content;
@@ -29,48 +63,40 @@
       }
       
       if (shouldRender) {
-        let newContent = content;
-        
-        const innerEmbedRegex = /@\[(\w+)\]\(([\s\S]*?)\)/g;
-        let innerMatch;
-        let lastIndex = 0;
-        let replacedContent = '';
-        
-        while ((innerMatch = innerEmbedRegex.exec(newContent)) !== null) {
-          const service = innerMatch[1].toLowerCase();
-          const url = innerMatch[2];
+        const codeTagMatch = content.match(/<code[^>]*>([\s\S]*?)<\/code>/i);
+        if (codeTagMatch) {
+          let codeText = codeTagMatch[1];
           
-          replacedContent += newContent.substring(lastIndex, innerMatch.index);
+          codeText = codeText.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
           
-          if (service === 'geojson' || service === 'topojson') {
-            const mapId = 'map-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-            const container = `<div id="${mapId}" class="geo-map" style="height:400px;border-radius:8px;overflow:hidden"></div>`;
-            replacedContent += container;
+          const embedMatch = extractEmbedSyntax(codeText);
+          
+          if (embedMatch) {
+            const { service, url, fullMatch } = embedMatch;
             
-            setTimeout(() => {
-              window.MarkdownPreview.renderers.geo.renderGeoData(service, url, innerMatch[0], mapId);
-            }, 10);
-          } else if (service === 'twitter' || service === 'x') {
-            const twitterCode = renderTwitterEmbed(service, url, innerMatch[0]);
-            replacedContent += twitterCode;
-          } else {
-            const iframe = createEmbedIframe(service, url);
-            if (iframe) {
-              replacedContent += iframe;
+            if (service === 'geojson' || service === 'topojson') {
+              const mapId = 'map-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+              const container = `<div id="${mapId}" class="geo-map" style="height:400px;border-radius:8px;overflow:hidden"></div>`;
+              
+              setTimeout(() => {
+                window.MarkdownPreview.renderers.geo.renderGeoData(service, url, fullMatch, mapId);
+              }, 10);
+              
+              processedContent = processedContent.replace(placeholder, container);
+            } else if (service === 'twitter' || service === 'x') {
+              const twitterCode = renderTwitterEmbed(service, url, fullMatch);
+              processedContent = processedContent.replace(placeholder, twitterCode);
             } else {
-              replacedContent += innerMatch[0];
+              const iframe = createEmbedIframe(service, url);
+              if (iframe) {
+                processedContent = processedContent.replace(placeholder, iframe);
+              } else {
+                processedContent = processedContent.replace(placeholder, content);
+              }
             }
+          } else {
+            processedContent = processedContent.replace(placeholder, content);
           }
-          
-          lastIndex = innerEmbedRegex.lastIndex;
-        }
-        
-        if (lastIndex < newContent.length) {
-          replacedContent += newContent.substring(lastIndex);
-        }
-        
-        if (replacedContent) {
-          processedContent = processedContent.replace(placeholder, replacedContent);
         } else {
           processedContent = processedContent.replace(placeholder, content);
         }
