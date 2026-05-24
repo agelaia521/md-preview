@@ -606,6 +606,7 @@
     // 创建新的评论区容器
     const commentsSection = document.createElement('div');
     commentsSection.className = 'comments-section';
+    commentsSection.style.display = 'block'; // 显示评论区
     const giscusContainer = document.createElement('div');
     giscusContainer.className = 'giscus';
     commentsSection.appendChild(giscusContainer);
