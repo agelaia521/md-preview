@@ -332,22 +332,22 @@
   
   function renderDocNavigation(currentPath) {
     if (!currentPath || !state.fileTreeData) return;
-    
+
     const { prev, next } = window.MarkdownPreview.fileTree.getAdjacentFiles(currentPath);
     if (!prev && !next) return;
-    
+
     const navHtml = `
       <div class="doc-navigation">
-        <div class="nav-prev">${prev ? `<a href="#/${prev.path}" data-path="${prev.path}" class="nav-link">← ${prev.name}</a>` : ''}</div>
-        <div class="nav-next">${next ? `<a href="#/${next.path}" data-path="${next.path}" class="nav-link">${next.name} →</a>` : ''}</div>
+        ${prev ? `<a href="#/${prev.path}" data-path="${prev.path}" class="nav-link nav-prev">← ${prev.name}</a>` : '<span></span>'}
+        ${next ? `<a href="#/${next.path}" data-path="${next.path}" class="nav-link nav-next">${next.name} →</a>` : '<span></span>'}
       </div>
     `;
-    
+
     const existingNav = dom.markdownContent.querySelector('.doc-navigation');
     if (existingNav) existingNav.remove();
-    
+
     dom.markdownContent.insertAdjacentHTML('beforeend', navHtml);
-    
+
     dom.markdownContent.querySelectorAll('.doc-navigation .nav-link').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
