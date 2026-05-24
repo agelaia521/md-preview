@@ -644,23 +644,12 @@
       script.crossOrigin = 'anonymous';
       script.async = true;
       
-      // 在加载 giscus 之前确保 URL hash 正确保存
-      if (window.location.hash && !window.sessionStorage.getItem('giscus_original_hash')) {
-        window.sessionStorage.setItem('giscus_original_hash', window.location.hash);
+      // 在加载 giscus 之前确保完整 URL 正确保存，包括 hash
+      if (window.location.hash && !window.sessionStorage.getItem('giscus_original_url')) {
+        window.sessionStorage.setItem('giscus_original_url', window.location.href);
       }
       
       giscusContainer.appendChild(script);
-      
-      // 监听 giscus 加载完成事件，恢复可能丢失的 hash
-      window.addEventListener('message', function(event) {
-        if (event.origin === 'https://giscus.app' && event.data && event.data.type === 'giscus-loaded') {
-          const savedHash = window.sessionStorage.getItem('giscus_original_hash');
-          if (savedHash && savedHash !== window.location.hash) {
-            window.history.replaceState(null, '', savedHash);
-            window.sessionStorage.removeItem('giscus_original_hash');
-          }
-        }
-      });
     } else {
       // 如果 giscus 已加载，尝试通过 postMessage 更新 term
       const iframe = giscusContainer.querySelector('iframe');
