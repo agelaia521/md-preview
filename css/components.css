@@ -141,6 +141,12 @@
   padding: 0 24px;
 }
 
+.comments-section.comments-section-visible {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
 .comments-section::before {
   content: '';
   display: block;

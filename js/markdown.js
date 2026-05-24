@@ -613,8 +613,12 @@
       dom.markdownContent.appendChild(commentsSection);
     }
     
-    // 确保评论区可见
+    // 确保评论区绝对可见，覆盖任何 CSS 样式
     commentsSection.style.display = 'block';
+    commentsSection.style.visibility = 'visible';
+    commentsSection.style.opacity = '1';
+    // 添加 class 来强制覆盖 CSS
+    commentsSection.classList.add('comments-section-visible');
     
     // 检查 giscus 是否已初始化
     const giscusContainer = document.getElementById('giscus-container');
@@ -660,6 +664,17 @@
         }, 'https://giscus.app');
       }
     }
+    
+    // 额外的安全措施：延迟再确保一次可见
+    setTimeout(() => {
+      const comments = document.querySelector('.comments-section');
+      if (comments) {
+        comments.style.display = 'block';
+        comments.style.visibility = 'visible';
+        comments.style.opacity = '1';
+        comments.classList.add('comments-section-visible');
+      }
+    }, 100);
   }
   
   window.MarkdownPreview.markdown = {

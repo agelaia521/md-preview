@@ -1,39 +1,33 @@
 (function() {
   window.MarkdownPreview = window.MarkdownPreview || {};
   
-  // 检测并处理 giscus 重定向
-  function handleGiscusRedirect() {
-    // 检查 URL 是否有 giscus 参数
+  // 立即检测并处理 giscus 重定向，在任何其他代码执行前
+  (function handleGiscusRedirectImmediately() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('giscus')) {
-      // 尝试从 sessionStorage 恢复原 URL
       const savedUrl = window.sessionStorage.getItem('giscus_original_url');
       if (savedUrl) {
         try {
           const savedUrlObj = new URL(savedUrl);
-          // 只保留原 URL 的 hash 部分，因为这是我们文档路径
           if (savedUrlObj.hash) {
-            // 替换当前 URL，保留 giscus 参数但添加原 hash
-            const newUrl = new URL(window.location.href);
-            newUrl.hash = savedUrlObj.hash;
+            // 完全替换为原 URL，但保留 giscus 查询参数让 giscus 处理
+            const newUrl = new URL(savedUrlObj.href);
+            newUrl.search = window.location.search;
             window.history.replaceState(null, '', newUrl.toString());
+            console.log('Restored URL hash from giscus redirect:', newUrl.toString());
           }
         } catch (e) {
           console.error('Failed to restore giscus URL:', e);
         }
-        // 清理 sessionStorage
-        window.sessionStorage.removeItem('giscus_original_url');
+        // 不立即清理，以防需要多次处理
       }
     }
-  }
+  })();
   
   async function init() {
     if (window.MarkdownPreview.configLoadPromise) {
       await window.MarkdownPreview.configLoadPromise;
     }
-    
-    // 首先处理 giscus 重定向
-    handleGiscusRedirect();
     
     window.MarkdownPreview.fileTree.loadFileTree();
     window.MarkdownPreview.ui.setupEventListeners();
