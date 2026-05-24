@@ -327,6 +327,7 @@
       window.MarkdownPreview.renderers.katex.render();
     }, 100);
     
+    renderDocNavigation(currentPath);
     loadGiscus(currentPath);
   }
   
