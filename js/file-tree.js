@@ -190,11 +190,9 @@
   }
   
   function onFilesLoaded() {
-    // 延迟构建搜索索引
     setTimeout(() => {
       if (search && search.buildIndex) search.buildIndex();
     }, 500);
-    // 通知路由模块文件已加载
     setTimeout(() => {
       if (window.MarkdownPreview.router && window.MarkdownPreview.router.onFileTreeLoaded) {
         window.MarkdownPreview.router.onFileTreeLoaded();
@@ -202,6 +200,37 @@
     }, 100);
   }
   
+  function getAllFilesInDFSOrder(files = state.fileTreeData) {
+    const result = [];
+    
+    function traverse(items) {
+      for (const item of items) {
+        if (item.type === 'file' && item.name.endsWith('.md')) {
+          result.push({ name: item.name.replace('.md', ''), path: item.path });
+        } else if (item.type === 'folder' && item.children) {
+          traverse(item.children);
+        }
+      }
+    }
+    
+    traverse(files);
+    return result;
+  }
+  
+  function getAdjacentFiles(currentPath) {
+    const allFiles = getAllFilesInDFSOrder();
+    const currentIndex = allFiles.findIndex(f => f.path === currentPath);
+    
+    if (currentIndex === -1) {
+      return { prev: null, next: null };
+    }
+    
+    return {
+      prev: currentIndex > 0 ? allFiles[currentIndex - 1] : null,
+      next: currentIndex < allFiles.length - 1 ? allFiles[currentIndex + 1] : null
+    };
+  }
+
   window.MarkdownPreview.fileTree = {
     loadFileTree,
     loadFileTreeFromGitHubAPI,
@@ -212,6 +241,8 @@
     toggleSidebar,
     closeSidebar,
     closeSidebarOnMobile,
-    onFilesLoaded
+    onFilesLoaded,
+    getAllFilesInDFSOrder,
+    getAdjacentFiles
   };
 })();

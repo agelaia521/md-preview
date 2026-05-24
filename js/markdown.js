@@ -314,6 +314,8 @@
     
     processImages(dom.markdownContent);
     
+    renderDocNavigation(currentPath);
+    
     setTimeout(async () => {
       await renderWithPlugins();
       window.MarkdownPreview.renderers.apexcharts.render();
@@ -326,6 +328,34 @@
     }, 100);
     
     loadGiscus(currentPath);
+  }
+  
+  function renderDocNavigation(currentPath) {
+    if (!currentPath || !state.fileTreeData) return;
+    
+    const { prev, next } = window.MarkdownPreview.fileTree.getAdjacentFiles(currentPath);
+    if (!prev && !next) return;
+    
+    const navHtml = `
+      <div class="doc-navigation">
+        <div class="nav-prev">${prev ? `<a href="#/${prev.path}" data-path="${prev.path}" class="nav-link">← ${prev.name}</a>` : ''}</div>
+        <div class="nav-next">${next ? `<a href="#/${next.path}" data-path="${next.path}" class="nav-link">${next.name} →</a>` : ''}</div>
+      </div>
+    `;
+    
+    const existingNav = dom.markdownContent.querySelector('.doc-navigation');
+    if (existingNav) existingNav.remove();
+    
+    dom.markdownContent.insertAdjacentHTML('beforeend', navHtml);
+    
+    dom.markdownContent.querySelectorAll('.doc-navigation .nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const path = link.dataset.path;
+        loadMarkdownFile(path);
+        window.MarkdownPreview.fileTree.highlightFileInSidebar(path);
+      });
+    });
   }
   
   async function renderWithPlugins() {
