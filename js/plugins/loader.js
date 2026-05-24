@@ -71,40 +71,14 @@
     }
   }
   
-  async function loadPluginsFromManifest(manifestUrl) {
-    try {
-      const response = await fetch(manifestUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to load manifest: ${response.status}`);
-      }
-      
-      const manifest = await response.json();
-      const loadPromises = manifest.plugins.map(plugin => loadPlugin(plugin.path));
-      
-      await Promise.allSettled(loadPromises);
-      console.log(`Loaded ${pluginRegistry.size} plugins`);
-    } catch (error) {
-      console.error('Failed to load plugins from manifest:', error);
-    }
-  }
-  
   async function autoLoadPlugins() {
     try {
-      const response = await fetch('plugins/manifest.json');
-      if (response.ok) {
-        await loadPluginsFromManifest('plugins/manifest.json');
-      } else {
-        console.warn('No plugin manifest found, loading plugins individually');
-        await loadAllPluginsFromDirectory();
-      }
-    } catch (error) {
-      console.warn('Auto plugin loading skipped:', error.message);
-    }
-  }
-  
-  async function loadAllPluginsFromDirectory() {
-    try {
       const response = await fetch('plugins/');
+      if (!response.ok) {
+        console.warn('Plugins directory not accessible');
+        return;
+      }
+      
       const html = await response.text();
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
@@ -113,16 +87,17 @@
       const loadPromises = [];
       links.forEach(link => {
         const href = link.getAttribute('href');
-        if (href && !href.includes('manifest.json')) {
-          loadPromises.push(loadPlugin(href));
+        if (href) {
+          loadPromises.push(loadPlugin('plugins/' + href));
         }
       });
       
       if (loadPromises.length > 0) {
         await Promise.allSettled(loadPromises);
+        console.log(`Loaded ${pluginRegistry.size} plugins from plugins/ directory`);
       }
     } catch (error) {
-      console.warn('Directory listing not available, using manifest:', error.message);
+      console.warn('Auto plugin loading skipped:', error.message);
     }
   }
   
@@ -133,7 +108,6 @@
     getAll: getAllPlugins,
     find: findPlugin,
     load: loadPlugin,
-    loadManifest: loadPluginsFromManifest,
     autoLoad: autoLoadPlugins,
     _registry: pluginRegistry
   };
