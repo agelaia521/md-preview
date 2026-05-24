@@ -20,45 +20,54 @@
       container.style.borderRadius = '8px';
       container.style.overflow = 'hidden';
       
-      // 延迟替换，确保代码块保护机制生效
+      const targetContent = originalMatch.includes('__CODEBLOCK_') 
+        ? dom.markdownContent.innerHTML 
+        : dom.markdownContent.innerHTML;
+      
+      const matchIndex = targetContent.indexOf(originalMatch);
+      if (matchIndex === -1) {
+        console.error('Geo match not found in DOM');
+        return;
+      }
+      
+      const before = targetContent.substring(0, matchIndex);
+      const after = targetContent.substring(matchIndex + originalMatch.length);
+      dom.markdownContent.innerHTML = before + container.outerHTML + after;
+      
       setTimeout(() => {
-        dom.markdownContent.innerHTML = dom.markdownContent.innerHTML.replace(originalMatch, container.outerHTML);
+        const mapContainer = document.getElementById(mapId);
+        if (!mapContainer) return;
         
-        setTimeout(() => {
-          const mapContainer = document.getElementById(mapId);
-          if (!mapContainer) return;
-          
-          const map = L.map(mapId).setView([35.8617, 104.1954], 5);
-          
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
+        const map = L.map(mapId).setView([35.8617, 104.1954], 5);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        if (type === 'geojson') {
+          L.geoJSON(geoData, {
+            onEachFeature: function(feature, layer) {
+              if (feature.properties && feature.properties.name) {
+                layer.bindPopup(feature.properties.name);
+              }
+            }
           }).addTo(map);
-          
-          if (type === 'geojson') {
-            L.geoJSON(geoData, {
-              onEachFeature: function(feature, layer) {
-                if (feature.properties && feature.properties.name) {
-                  layer.bindPopup(feature.properties.name);
-                }
+        } else if (type === 'topojson') {
+          const geojsonData = topojsonToGeoJson(geoData);
+          L.geoJSON(geojsonData, {
+            onEachFeature: function(feature, layer) {
+              if (feature.properties && feature.properties.name) {
+                layer.bindPopup(feature.properties.name);
               }
-            }).addTo(map);
-          } else if (type === 'topojson') {
-            const geojsonData = topojsonToGeoJson(geoData);
-            L.geoJSON(geojsonData, {
-              onEachFeature: function(feature, layer) {
-                if (feature.properties && feature.properties.name) {
-                  layer.bindPopup(feature.properties.name);
-                }
-              }
-            }).addTo(map);
-          }
-          
-          const bounds = map.getBounds();
-          if (bounds.isValid()) {
-            map.fitBounds(bounds);
-          }
-        }, 10);
-      }, 0);
+            }
+          }).addTo(map);
+        }
+        
+        const bounds = map.getBounds();
+        if (bounds.isValid()) {
+          map.fitBounds(bounds);
+        }
+      }, 10);
     } catch (error) {
       console.error('Geo data parsing error:', error);
     }

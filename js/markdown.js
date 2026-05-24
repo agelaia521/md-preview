@@ -255,6 +255,20 @@
     container.innerHTML = tempDiv.innerHTML;
   }
   
+  function protectEmbedSyntax(markdownText) {
+    const embedBlocks = [];
+    let index = 0;
+    
+    const processed = markdownText.replace(/@\[(\w+)\]\([\s\S]*?\)/g, (match) => {
+      const placeholder = `__EMBEDPROTECT_${index}__`;
+      embedBlocks.push(match);
+      index++;
+      return placeholder;
+    });
+    
+    return { processed, embedBlocks };
+  }
+
   function renderMarkdown(markdown, currentPath = '') {
     const { frontmatter, content } = parseFrontmatter(markdown);
     
@@ -271,11 +285,16 @@
     
     state.currentFrontmatter = frontmatter;
     
-    const { processed: alertProcessed, latexBlocks } = protectLaTeXBlocks(content);
+    const { processed: embedProtected, embedBlocks } = protectEmbedSyntax(content);
+    const { processed: alertProcessed, latexBlocks } = protectLaTeXBlocks(embedProtected);
     const processedContent = processGitHubAlerts(alertProcessed);
     let html = marked.parse(processedContent, {
       breaks: true,
       gfm: true
+    });
+    
+    embedBlocks.forEach((embed, idx) => {
+      html = html.replace(`__EMBEDPROTECT_${idx}__`, embed);
     });
     
     html = html.replace(/LATEXPROTECT_(\d+)_/g, (match, idx) => {
