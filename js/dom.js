@@ -4,6 +4,8 @@
   window.MarkdownPreview.dom = {
     fileTree: document.getElementById('fileTree'),
     markdownContent: document.getElementById('markdownContent'),
+    commentsSection: document.getElementById('commentsSection'),
+    giscusContainer: document.getElementById('giscusContainer'),
     sidebar: document.getElementById('sidebar'),
     sidebarToggle: document.getElementById('sidebarToggle'),
     mobileMenuBtn: document.getElementById('mobileMenuBtn'),

@@ -3,6 +3,8 @@
   
   const { dom, state, CONFIG } = window.MarkdownPreview;
   
+  let giscusInitialized = false;
+  
   async function loadMarkdownFile(path) {
     try {
       // 立即更新 URL，提供即时反馈
@@ -596,74 +598,69 @@
     
     if (!giscusConfig || !giscusConfig.enabled || !giscusConfig.repo || !path || path.trim() === '' || !settings.showComments) {
       console.log('[Giscus] Conditions not met, hiding comments');
-      const existingComments = document.querySelector('.comments-section');
-      if (existingComments) {
-        existingComments.style.display = 'none';
-        existingComments.classList.remove('comments-section-visible');
-      }
+      dom.commentsSection.style.display = 'none';
       return;
     }
     
-    // 移除旧的评论区，重新创建，确保干净的加载状态
-    const existingComments = document.querySelector('.comments-section');
-    if (existingComments) {
-      existingComments.remove();
-    }
+    // 显示评论区
+    dom.commentsSection.style.display = 'block';
+    dom.commentsSection.style.visibility = 'visible';
+    dom.commentsSection.style.opacity = '1';
+    dom.commentsSection.classList.add('comments-section-visible');
     
-    // 移除旧的 giscus script
-    const oldScripts = document.querySelectorAll('script[src="https://giscus.app/client.js"]');
-    oldScripts.forEach(script => script.remove());
-    
-    // 创建新的评论区容器
-    const commentsSection = document.createElement('div');
-    commentsSection.className = 'comments-section comments-section-visible';
-    commentsSection.style.display = 'block';
-    commentsSection.style.visibility = 'visible';
-    commentsSection.style.opacity = '1';
-    
-    const giscusContainer = document.createElement('div');
-    giscusContainer.className = 'giscus';
-    commentsSection.appendChild(giscusContainer);
-    dom.markdownContent.appendChild(commentsSection);
-    
-    // 保存当前 URL，以便 giscus 重定向后能恢复
-    if (window.location.href && !window.sessionStorage.getItem('giscus_original_url')) {
-      window.sessionStorage.setItem('giscus_original_url', window.location.href);
-    }
-    
-    // 加载 giscus script，使用文档路径作为唯一 identifier
-    const script = document.createElement('script');
-    script.src = 'https://giscus.app/client.js';
-    script.setAttribute('data-repo', giscusConfig.repo);
-    script.setAttribute('data-repo-id', giscusConfig.repoId);
-    script.setAttribute('data-category', giscusConfig.category);
-    script.setAttribute('data-category-id', giscusConfig.categoryId);
-    script.setAttribute('data-mapping', 'specific');
-    script.setAttribute('data-term', path);
-    script.setAttribute('data-strict', '0');
-    script.setAttribute('data-reactions-enabled', '1');
-    script.setAttribute('data-emit-metadata', '0');
-    script.setAttribute('data-input-position', 'bottom');
-    script.setAttribute('data-theme', giscusConfig.theme);
-    script.setAttribute('data-lang', 'zh-CN');
-    script.setAttribute('data-loading', 'lazy');
-    script.crossOrigin = 'anonymous';
-    script.async = true;
-    
-    console.log('[Giscus] Creating script with path:', path);
-    giscusContainer.appendChild(script);
-    
-    // 延迟确保可见
-    setTimeout(() => {
-      const comments = document.querySelector('.comments-section');
-      if (comments) {
-        comments.classList.add('comments-section-visible');
-        comments.style.display = 'block';
-        comments.style.visibility = 'visible';
-        comments.style.opacity = '1';
-        console.log('[Giscus] Comments section made visible');
+    if (!giscusInitialized) {
+      // 首次加载 giscus
+      console.log('[Giscus] Initializing giscus for first time');
+      
+      if (window.location.href && !window.sessionStorage.getItem('giscus_original_url')) {
+        window.sessionStorage.setItem('giscus_original_url', window.location.href);
       }
-    }, 300);
+      
+      const script = document.createElement('script');
+      script.src = 'https://giscus.app/client.js';
+      script.setAttribute('data-repo', giscusConfig.repo);
+      script.setAttribute('data-repo-id', giscusConfig.repoId);
+      script.setAttribute('data-category', giscusConfig.category);
+      script.setAttribute('data-category-id', giscusConfig.categoryId);
+      script.setAttribute('data-mapping', 'specific');
+      script.setAttribute('data-term', path);
+      script.setAttribute('data-strict', '0');
+      script.setAttribute('data-reactions-enabled', '1');
+      script.setAttribute('data-emit-metadata', '0');
+      script.setAttribute('data-input-position', 'bottom');
+      script.setAttribute('data-theme', giscusConfig.theme);
+      script.setAttribute('data-lang', 'zh-CN');
+      script.setAttribute('data-loading', 'eager');
+      script.crossOrigin = 'anonymous';
+      script.async = true;
+      
+      dom.giscusContainer.appendChild(script);
+      giscusInitialized = true;
+    } else {
+      // giscus 已初始化，通过 postMessage 更新
+      console.log('[Giscus] Updating giscus discussion term:', path);
+      const iframe = dom.giscusContainer.querySelector('iframe');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+          setConfig: {
+            term: path
+          }
+        }, 'https://giscus.app');
+      }
+    }
+    
+    // 多次确保可见
+    const ensureVisible = (ms) => {
+      setTimeout(() => {
+        dom.commentsSection.style.display = 'block';
+        dom.commentsSection.style.visibility = 'visible';
+        dom.commentsSection.style.opacity = '1';
+        dom.commentsSection.classList.add('comments-section-visible');
+      }, ms);
+    };
+    ensureVisible(100);
+    ensureVisible(500);
+    ensureVisible(1000);
   }
   
   window.MarkdownPreview.markdown = {
