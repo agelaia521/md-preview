@@ -128,9 +128,23 @@
   }
 
   function toggleComments(show) {
-    const commentsSection = document.getElementById('commentsSection');
-    if (commentsSection) {
-      commentsSection.style.display = show ? 'block' : 'none';
+    const { state } = window.MarkdownPreview;
+    const currentPath = state.currentFilePath;
+    
+    if (!currentPath || currentPath.trim() === '') {
+      const existingComments = document.querySelector('.comments-section');
+      if (existingComments) existingComments.remove();
+      return;
+    }
+    
+    if (!show) {
+      const existingComments = document.querySelector('.comments-section');
+      if (existingComments) existingComments.remove();
+      return;
+    }
+    
+    if (window.MarkdownPreview.markdown && window.MarkdownPreview.markdown.loadGiscus) {
+      window.MarkdownPreview.markdown.loadGiscus(currentPath);
     }
   }
 
