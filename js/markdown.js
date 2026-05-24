@@ -261,7 +261,7 @@
     let index = 0;
     
     let processed = markdownText.replace(/```[\s\S]*?```/g, (match) => {
-      const placeholder = `__CODEPROTECT_${index}__`;
+      const placeholder = `<!--CODE_BLOCK_${index}-->`;
       codeBlocks.push(match);
       index++;
       return placeholder;
@@ -269,7 +269,7 @@
     
     index = 0;
     processed = processed.replace(/@\[(\w+)\]\([\s\S]*?\)/g, (match) => {
-      const placeholder = `__EMBEDPROTECT_${index}__`;
+      const placeholder = `<!--EMBED_BLOCK_${index}-->`;
       embedBlocks.push(match);
       index++;
       return placeholder;
@@ -280,11 +280,11 @@
   
   function restoreCodeBlocksAndEmbeds(html, codeBlocks, embedBlocks) {
     codeBlocks.forEach((block, idx) => {
-      html = html.replace(`__CODEPROTECT_${idx}__`, block);
+      html = html.replace(`<!--CODE_BLOCK_${idx}-->`, block);
     });
     
     embedBlocks.forEach((embed, idx) => {
-      html = html.replace(`__EMBEDPROTECT_${idx}__`, embed);
+      html = html.replace(`<!--EMBED_BLOCK_${idx}-->`, embed);
     });
     
     return html;
