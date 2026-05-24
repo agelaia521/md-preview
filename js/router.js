@@ -6,10 +6,17 @@
   
   function initRouter() {
     // 检查是否有保存的 hash 需要恢复
-    const savedHash = window.sessionStorage.getItem('giscus_original_hash');
-    if (savedHash && !window.location.hash) {
-      window.history.replaceState(null, '', savedHash);
-      window.sessionStorage.removeItem('giscus_original_hash');
+    const savedUrl = window.sessionStorage.getItem('giscus_original_url');
+    if (savedUrl) {
+      try {
+        const savedUrlObj = new URL(savedUrl);
+        if (savedUrlObj.hash && savedUrlObj.hash !== window.location.hash) {
+          console.log('[Router] Restoring saved URL from giscus redirect:', savedUrlObj.href);
+          window.history.replaceState(null, '', savedUrlObj.href);
+        }
+      } catch (e) {
+        console.error('[Router] Failed to restore URL:', e);
+      }
     }
     
     window.addEventListener('hashchange', handleHashChange);

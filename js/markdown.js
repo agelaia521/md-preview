@@ -592,40 +592,45 @@
     const giscusConfig = CONFIG.giscus;
     const settings = window.MarkdownPreview.settings ? window.MarkdownPreview.settings.load() : { showComments: true };
     
+    console.log('[Giscus] Loading comments for path:', path);
+    console.log('[Giscus] Config:', giscusConfig);
+    console.log('[Giscus] Settings:', settings);
+    
     if (!giscusConfig || !giscusConfig.enabled || !giscusConfig.repo || !path || path.trim() === '' || !settings.showComments) {
-      // 隐藏评论区而非移除
+      console.log('[Giscus] Conditions not met, hiding comments');
       const existingComments = document.querySelector('.comments-section');
       if (existingComments) {
         existingComments.style.display = 'none';
+        existingComments.classList.remove('comments-section-visible');
       }
       return;
     }
     
-    // 获取或创建评论区容器
     let commentsSection = document.querySelector('.comments-section');
     if (!commentsSection) {
+      console.log('[Giscus] Creating new comments section');
       commentsSection = document.createElement('div');
-      commentsSection.className = 'comments-section';
+      commentsSection.className = 'comments-section comments-section-visible';
       const giscusContainer = document.createElement('div');
       giscusContainer.className = 'giscus';
       giscusContainer.id = 'giscus-container';
       commentsSection.appendChild(giscusContainer);
       dom.markdownContent.appendChild(commentsSection);
+    } else {
+      console.log('[Giscus] Found existing comments section, making visible');
+      commentsSection.classList.add('comments-section-visible');
     }
     
-    // 确保评论区绝对可见，覆盖任何 CSS 样式
+    // 强制设置样式
     commentsSection.style.display = 'block';
     commentsSection.style.visibility = 'visible';
     commentsSection.style.opacity = '1';
-    // 添加 class 来强制覆盖 CSS
-    commentsSection.classList.add('comments-section-visible');
     
-    // 检查 giscus 是否已初始化
     const giscusContainer = document.getElementById('giscus-container');
     const isGiscusLoaded = giscusContainer && giscusContainer.querySelector('iframe');
     
     if (!isGiscusLoaded) {
-      // 清除之前的 script，防止重复加载
+      console.log('[Giscus] Loading giscus script');
       const oldScripts = document.querySelectorAll('script[src="https://giscus.app/client.js"]');
       oldScripts.forEach(script => script.remove());
       
@@ -635,7 +640,6 @@
       script.setAttribute('data-repo-id', giscusConfig.repoId);
       script.setAttribute('data-category', giscusConfig.category);
       script.setAttribute('data-category-id', giscusConfig.categoryId);
-      // 使用 term 映射，因为我们的路由是基于 hash 的
       script.setAttribute('data-mapping', 'term');
       script.setAttribute('data-term', path);
       script.setAttribute('data-strict', giscusConfig.strict);
@@ -648,14 +652,13 @@
       script.crossOrigin = 'anonymous';
       script.async = true;
       
-      // 在加载 giscus 之前确保完整 URL 正确保存，包括 hash
       if (window.location.hash && !window.sessionStorage.getItem('giscus_original_url')) {
         window.sessionStorage.setItem('giscus_original_url', window.location.href);
       }
       
       giscusContainer.appendChild(script);
     } else {
-      // 如果 giscus 已加载，尝试通过 postMessage 更新 term
+      console.log('[Giscus] Giscus already loaded, updating term');
       const iframe = giscusContainer.querySelector('iframe');
       if (iframe && iframe.contentWindow) {
         iframe.contentWindow.postMessage({
@@ -665,16 +668,22 @@
       }
     }
     
-    // 额外的安全措施：延迟再确保一次可见
-    setTimeout(() => {
+    // 多次检查确保可见
+    const ensureVisibility = () => {
       const comments = document.querySelector('.comments-section');
       if (comments) {
+        console.log('[Giscus] Ensuring visibility');
+        comments.classList.add('comments-section-visible');
         comments.style.display = 'block';
         comments.style.visibility = 'visible';
         comments.style.opacity = '1';
-        comments.classList.add('comments-section-visible');
       }
-    }, 100);
+    };
+    
+    ensureVisibility();
+    setTimeout(ensureVisibility, 200);
+    setTimeout(ensureVisibility, 500);
+    setTimeout(ensureVisibility, 1000);
   }
   
   window.MarkdownPreview.markdown = {
