@@ -27,21 +27,38 @@ export default {
     }
 
     const img = document.createElement('img');
-    img.src = this.generateQRCodeUrl(data, size);
     img.alt = 'QR Code';
     img.style.display = 'inline-block';
     img.style.margin = '0 auto';
     img.style.maxWidth = '100%';
     img.style.borderRadius = '8px';
 
-    img.onerror = () => {
-      img.style.display = 'none';
-      const errorDiv = document.createElement('div');
-      errorDiv.style.color = '#ff6b6b';
-      errorDiv.style.padding = '20px';
-      errorDiv.textContent = '二维码生成失败';
-      container.appendChild(errorDiv);
+    const apis = [
+      (d, s) => `https://api.qrserver.com/v1/create-qr-code/?size=${s}x${s}&data=${encodeURIComponent(d)}`,
+      (d, s) => `https://goqr.me/api/v1/create-qr-code/?size=${s}x${s}&data=${encodeURIComponent(d)}`,
+      (d, s) => `https://qrcode.show/api/qr?size=${s}&data=${encodeURIComponent(d)}`
+    ];
+
+    let fallbackIndex = 0;
+    
+    const tryNextApi = () => {
+      if (fallbackIndex < apis.length) {
+        img.src = apis[fallbackIndex](data, size);
+        fallbackIndex++;
+      } else {
+        img.style.display = 'none';
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        canvas.style.display = 'inline-block';
+        canvas.style.margin = '0 auto';
+        this.generateQRCodeCanvas(canvas, data);
+        container.appendChild(canvas);
+      }
     };
+
+    img.onerror = tryNextApi;
+    tryNextApi();
 
     container.appendChild(img);
 
@@ -53,9 +70,136 @@ export default {
     container.appendChild(textDiv);
   },
 
-  generateQRCodeUrl(data, size) {
-    const encodedData = encodeURIComponent(data);
-    const level = 'L';
-    return `https://chart.googleapis.com/chart?cht=qr&chs=${size}x${size}&chl=${encodedData}&choe=UTF-8&chld=${level}|0`;
+  generateQRCodeCanvas(canvas, data) {
+    const ctx = canvas.getContext('2d');
+    const size = canvas.width;
+    
+    const modules = this.encodeQRCode(data);
+    const moduleSize = size / modules.length;
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+    
+    ctx.fillStyle = '#000000';
+    for (let i = 0; i < modules.length; i++) {
+      for (let j = 0; j < modules[i].length; j++) {
+        if (modules[i][j]) {
+          ctx.fillRect(j * moduleSize, i * moduleSize, moduleSize, moduleSize);
+        }
+      }
+    }
+  },
+
+  encodeQRCode(data) {
+    const version = 1;
+    const modules = [];
+    const size = 21 + (version - 1) * 4;
+    
+    for (let i = 0; i < size; i++) {
+      modules[i] = [];
+      for (let j = 0; j < size; j++) {
+        modules[i][j] = false;
+      }
+    }
+    
+    this.addPositionPatterns(modules, size);
+    this.addTimingPatterns(modules, size);
+    this.addData(modules, data, size);
+    
+    return modules;
+  },
+
+  addPositionPatterns(modules, size) {
+    const drawPattern = (x, y) => {
+      for (let i = -1; i <= 7; i++) {
+        for (let j = -1; j <= 7; j++) {
+          const px = x + j;
+          const py = y + i;
+          if (px >= 0 && px < size && py >= 0 && py < size) {
+            const inOuter = (i >= 0 && i <= 6 && j >= 0 && j <= 6);
+            const inMiddle = (i >= 2 && i <= 4 && j >= 2 && j <= 4);
+            const inCenter = (i === 3 && j === 3);
+            
+            if (inOuter && !inMiddle) {
+              modules[py][px] = true;
+            } else if (inCenter) {
+              modules[py][px] = true;
+            }
+          }
+        }
+      }
+    };
+
+    drawPattern(3, 3);
+    drawPattern(size - 4, 3);
+    drawPattern(3, size - 4);
+  },
+
+  addTimingPatterns(modules, size) {
+    for (let i = 8; i < size - 8; i++) {
+      if (!modules[6][i]) {
+        modules[6][i] = i % 2 === 0;
+      }
+      if (!modules[i][6]) {
+        modules[i][6] = i % 2 === 0;
+      }
+    }
+  },
+
+  addData(modules, data, size) {
+    const binary = this.encodeData(data);
+    let bitIndex = 0;
+    
+    for (let i = size - 1; i >= 0; i--) {
+      const direction = (i % 2 === 0) ? 1 : -1;
+      const startCol = (i % 2 === 0) ? 0 : size - 1;
+      
+      for (let j = startCol; j >= 0 && j < size; j += direction) {
+        if (j === 6) continue;
+        
+        if (!modules[i][j]) {
+          modules[i][j] = this.getBit(binary, bitIndex);
+          bitIndex++;
+        }
+      }
+    }
+  },
+
+  encodeData(data) {
+    const binary = [];
+    
+    binary.push(0b0100);
+    
+    const length = data.length;
+    for (let i = 7; i >= 0; i--) {
+      binary.push((length >> i) & 1);
+    }
+    
+    for (let i = 0; i < data.length; i++) {
+      const code = data.charCodeAt(i);
+      for (let j = 7; j >= 0; j--) {
+        binary.push((code >> j) & 1);
+      }
+    }
+    
+    while (binary.length % 8 !== 0) {
+      binary.push(0);
+    }
+    
+    const padCode1 = [1, 1, 0, 1, 1, 0, 0, 0];
+    const padCode2 = [0, 0, 0, 1, 1, 0, 1, 1];
+    
+    while (binary.length < 236) {
+      binary.push(...(binary.length % 16 < 8 ? padCode1 : padCode2));
+    }
+    
+    return binary;
+  },
+
+  getBit(binary, index) {
+    if (index >= binary.length) {
+      return (index + 1) % 2 === 0;
+    }
+    return binary[index] === 1;
   }
 };
