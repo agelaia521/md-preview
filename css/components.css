@@ -163,56 +163,105 @@
   font-style: italic;
 }
 
-.doc-navigation {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 64px;
-  padding-top: 32px;
-  border-top: 1px solid var(--color-border);
+.doc-navigation-side {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 90;
 }
 
-.nav-link {
-  display: block;
-  flex: 1;
-  padding: 16px 0;
+.nav-link-side {
+  position: absolute;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 16px;
   color: var(--color-text-muted);
   text-decoration: none;
   font-size: 14px;
   font-weight: 400;
-  transition: var(--transition-fast);
+  transition: var(--transition-smooth);
   cursor: pointer;
+  pointer-events: auto;
+  max-width: 200px;
+  opacity: 0.7;
 }
 
-.nav-link:hover {
+.nav-link-side:hover {
   color: var(--color-accent-purple);
+  opacity: 1;
 }
 
-.nav-prev {
-  text-align: left;
-  padding-right: 20px;
+.nav-prev-side {
+  left: 16px;
+  top: -40px;
+  flex-direction: row;
 }
 
-.nav-next {
+.nav-next-side {
+  right: 16px;
+  top: 40px;
+  flex-direction: row-reverse;
   text-align: right;
-  padding-left: 20px;
+}
+
+.nav-label {
+  display: block;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-arrow {
+  font-size: 18px;
+  font-weight: 300;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1024px) {
+  .nav-label {
+    display: none;
+  }
+  
+  .nav-link-side {
+    padding: 16px 12px;
+  }
+  
+  .nav-prev-side {
+    left: 8px;
+  }
+  
+  .nav-next-side {
+    right: 8px;
+  }
 }
 
 @media (max-width: 640px) {
-  .doc-navigation {
-    flex-direction: column;
-    gap: 8px;
-    align-items: stretch;
+  .doc-navigation-side {
+    top: auto;
+    bottom: 24px;
+    transform: none;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 16px;
   }
   
-  .nav-link {
-    padding: 12px 0;
+  .nav-link-side {
+    position: relative;
+    top: auto !important;
+    left: auto;
+    right: auto;
+    padding: 12px 8px;
   }
   
-  .nav-prev,
-  .nav-next {
-    padding: 0;
-    text-align: left;
+  .nav-label {
+    display: block;
+    max-width: 120px;
   }
 }
 

@@ -334,21 +334,26 @@
     if (!currentPath || !state.fileTreeData) return;
 
     const { prev, next } = window.MarkdownPreview.fileTree.getAdjacentFiles(currentPath);
-    if (!prev && !next) return;
+    
+    let oldNav = document.querySelector('.doc-navigation-side');
+    if (oldNav) oldNav.remove();
 
     const navHtml = `
-      <div class="doc-navigation">
-        ${prev ? `<a href="#/${prev.path}" data-path="${prev.path}" class="nav-link nav-prev">← ${prev.name}</a>` : '<span></span>'}
-        ${next ? `<a href="#/${next.path}" data-path="${next.path}" class="nav-link nav-next">${next.name} →</a>` : '<span></span>'}
+      <div class="doc-navigation-side">
+        ${prev ? `<a href="#/${prev.path}" data-path="${prev.path}" class="nav-link-side nav-prev-side" title="${prev.name}">
+          <span class="nav-arrow">←</span>
+          <span class="nav-label">${prev.name}</span>
+        </a>` : ''}
+        ${next ? `<a href="#/${next.path}" data-path="${next.path}" class="nav-link-side nav-next-side" title="${next.name}">
+          <span class="nav-label">${next.name}</span>
+          <span class="nav-arrow">→</span>
+        </a>` : ''}
       </div>
     `;
 
-    const existingNav = dom.markdownContent.querySelector('.doc-navigation');
-    if (existingNav) existingNav.remove();
+    document.body.insertAdjacentHTML('beforeend', navHtml);
 
-    dom.markdownContent.insertAdjacentHTML('beforeend', navHtml);
-
-    dom.markdownContent.querySelectorAll('.doc-navigation .nav-link').forEach(link => {
+    document.querySelectorAll('.doc-navigation-side .nav-link-side').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         const path = link.dataset.path;
