@@ -369,7 +369,9 @@
     const allPres = document.querySelectorAll('.markdown-body pre');
     console.log('[Plugins] Found pre elements:', allPres.length);
     
-    for (const pre of allPres) {
+    // 从后往前遍历，防止替换前面的元素后导致索引失效
+    for (let i = allPres.length - 1; i >= 0; i--) {
+      const pre = allPres[i];
       const codeElement = pre.querySelector('code');
       if (!codeElement) continue;
       

@@ -9,10 +9,11 @@
       return;
     }
     
+    // 从后往前遍历，防止替换前面的元素后导致索引失效
     const allPres = document.querySelectorAll('.markdown-body pre');
     console.log('[Mermaid] Found pre elements:', allPres.length);
     
-    for (let i = 0; i < allPres.length; i++) {
+    for (let i = allPres.length - 1; i >= 0; i--) {
       const pre = allPres[i];
       const codeElement = pre.querySelector('code');
       
