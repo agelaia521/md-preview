@@ -595,15 +595,29 @@
     const settings = window.MarkdownPreview.settings ? window.MarkdownPreview.settings.load() : { showComments: true };
     
     console.log('[Giscus] Loading comments for path:', path);
+    console.log('[Giscus] dom.commentsSection:', dom.commentsSection);
+    console.log('[Giscus] giscusConfig:', giscusConfig);
+    console.log('[Giscus] settings.showComments:', settings.showComments);
     
-    if (!giscusConfig || !giscusConfig.enabled || !giscusConfig.repo || !path || path.trim() === '' || !settings.showComments) {
+    if (!giscusConfig || !giscusConfig.enabled || !giscusConfig.repo || !path || path.trim() === '') {
       console.log('[Giscus] Conditions not met, hiding comments');
-      dom.commentsSection.classList.add('hidden');
+      if (dom.commentsSection) dom.commentsSection.classList.add('hidden');
+      return;
+    }
+    
+    if (!settings.showComments) {
+      console.log('[Giscus] Comments disabled in settings');
+      if (dom.commentsSection) dom.commentsSection.classList.add('hidden');
       return;
     }
     
     // 显示评论区
-    dom.commentsSection.classList.remove('hidden');
+    console.log('[Giscus] Showing comments section');
+    if (dom.commentsSection) {
+      dom.commentsSection.classList.remove('hidden');
+    } else {
+      console.error('[Giscus] commentsSection not found!');
+    }
     
     if (!giscusInitialized) {
       // 首次加载 giscus
