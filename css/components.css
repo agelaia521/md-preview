@@ -135,16 +135,13 @@
 }
 
 .comments-section {
-  display: none;
   max-width: 900px;
   margin: 48px auto 80px;
   padding: 0 24px;
 }
 
-.comments-section.comments-section-visible {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+.comments-section.hidden {
+  display: none !important;
 }
 
 .comments-section::before {

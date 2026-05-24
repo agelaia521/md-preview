@@ -598,15 +598,12 @@
     
     if (!giscusConfig || !giscusConfig.enabled || !giscusConfig.repo || !path || path.trim() === '' || !settings.showComments) {
       console.log('[Giscus] Conditions not met, hiding comments');
-      dom.commentsSection.style.display = 'none';
+      dom.commentsSection.classList.add('hidden');
       return;
     }
     
     // 显示评论区
-    dom.commentsSection.style.display = 'block';
-    dom.commentsSection.style.visibility = 'visible';
-    dom.commentsSection.style.opacity = '1';
-    dom.commentsSection.classList.add('comments-section-visible');
+    dom.commentsSection.classList.remove('hidden');
     
     if (!giscusInitialized) {
       // 首次加载 giscus
@@ -648,19 +645,6 @@
         }, 'https://giscus.app');
       }
     }
-    
-    // 多次确保可见
-    const ensureVisible = (ms) => {
-      setTimeout(() => {
-        dom.commentsSection.style.display = 'block';
-        dom.commentsSection.style.visibility = 'visible';
-        dom.commentsSection.style.opacity = '1';
-        dom.commentsSection.classList.add('comments-section-visible');
-      }, ms);
-    };
-    ensureVisible(100);
-    ensureVisible(500);
-    ensureVisible(1000);
   }
   
   window.MarkdownPreview.markdown = {
