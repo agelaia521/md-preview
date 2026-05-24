@@ -141,7 +141,7 @@
     }
   }
   
-  function downloadCurrentFile(format) {
+  function downloadCurrentFile() {
     const { state } = window.MarkdownPreview;
     const currentPath = state.currentFilePath;
     
@@ -151,12 +151,7 @@
     }
     
     const fileName = currentPath.split('/').pop().replace('.md', '');
-    
-    if (format === 'md') {
-      downloadMarkdown(currentPath, fileName);
-    } else if (format === 'pdf') {
-      downloadPDF(fileName);
-    }
+    downloadMarkdown(currentPath, fileName);
   }
   
   async function downloadMarkdown(path, fileName) {
@@ -181,47 +176,10 @@
     }
   }
   
-  function downloadPDF(fileName) {
-    const element = document.getElementById('markdownContent');
-    if (!element) {
-      alert('无法获取文档内容');
-      return;
-    }
-
-    const opt = {
-      margin: 0.5,
-      filename: `${fileName}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-        scale: 2, 
-        useCORS: true,
-        letterRendering: true,
-        onclone: function(clonedDoc) {
-          const clonedEl = clonedDoc.getElementById('markdownContent');
-          if (clonedEl) {
-            const nav = clonedEl.querySelector('.doc-navigation');
-            if (nav) nav.style.display = 'none';
-            const comments = clonedDoc.getElementById('commentsSection');
-            if (comments) comments.style.display = 'none';
-            const menu = clonedDoc.getElementById('floatingMenuBtn');
-            if (menu) menu.style.display = 'none';
-            const settings = clonedDoc.getElementById('settingsPanel');
-            if (settings) settings.style.display = 'none';
-          }
-        }
-      },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
-
-    html2pdf().set(opt).from(element).save();
-  }
-  
   function initDownloadButtons() {
     const downloadMdBtn = document.getElementById('downloadMdBtn');
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
     
-    downloadMdBtn?.addEventListener('click', () => downloadCurrentFile('md'));
-    downloadPdfBtn?.addEventListener('click', () => downloadCurrentFile('pdf'));
+    downloadMdBtn?.addEventListener('click', () => downloadCurrentFile());
   }
 
   function init() {
