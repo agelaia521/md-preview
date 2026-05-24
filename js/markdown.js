@@ -255,18 +255,39 @@
     container.innerHTML = tempDiv.innerHTML;
   }
   
-  function protectEmbedSyntax(markdownText) {
+  function protectCodeBlocksAndEmbeds(markdownText) {
+    const codeBlocks = [];
     const embedBlocks = [];
     let index = 0;
     
-    const processed = markdownText.replace(/@\[(\w+)\]\([\s\S]*?\)/g, (match) => {
+    let processed = markdownText.replace(/```[\s\S]*?```/g, (match) => {
+      const placeholder = `__CODEPROTECT_${index}__`;
+      codeBlocks.push(match);
+      index++;
+      return placeholder;
+    });
+    
+    index = 0;
+    processed = processed.replace(/@\[(\w+)\]\([\s\S]*?\)/g, (match) => {
       const placeholder = `__EMBEDPROTECT_${index}__`;
       embedBlocks.push(match);
       index++;
       return placeholder;
     });
     
-    return { processed, embedBlocks };
+    return { processed, codeBlocks, embedBlocks };
+  }
+  
+  function restoreCodeBlocksAndEmbeds(html, codeBlocks, embedBlocks) {
+    codeBlocks.forEach((block, idx) => {
+      html = html.replace(`__CODEPROTECT_${idx}__`, block);
+    });
+    
+    embedBlocks.forEach((embed, idx) => {
+      html = html.replace(`__EMBEDPROTECT_${idx}__`, embed);
+    });
+    
+    return html;
   }
 
   function renderMarkdown(markdown, currentPath = '') {
@@ -285,17 +306,15 @@
     
     state.currentFrontmatter = frontmatter;
     
-    const { processed: embedProtected, embedBlocks } = protectEmbedSyntax(content);
-    const { processed: alertProcessed, latexBlocks } = protectLaTeXBlocks(embedProtected);
+    const { processed: protectedContent, codeBlocks, embedBlocks } = protectCodeBlocksAndEmbeds(content);
+    const { processed: alertProcessed, latexBlocks } = protectLaTeXBlocks(protectedContent);
     const processedContent = processGitHubAlerts(alertProcessed);
     let html = marked.parse(processedContent, {
       breaks: true,
       gfm: true
     });
     
-    embedBlocks.forEach((embed, idx) => {
-      html = html.replace(`__EMBEDPROTECT_${idx}__`, embed);
-    });
+    html = restoreCodeBlocksAndEmbeds(html, codeBlocks, embedBlocks);
     
     html = html.replace(/LATEXPROTECT_(\d+)_/g, (match, idx) => {
       const latex = latexBlocks[parseInt(idx)];
