@@ -189,29 +189,31 @@
     }
 
     const opt = {
-      margin: 1,
+      margin: 0.5,
       filename: `${fileName}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true,
+        letterRendering: true,
+        onclone: function(clonedDoc) {
+          const clonedEl = clonedDoc.getElementById('markdownContent');
+          if (clonedEl) {
+            const nav = clonedEl.querySelector('.doc-navigation');
+            if (nav) nav.style.display = 'none';
+            const comments = clonedDoc.getElementById('commentsSection');
+            if (comments) comments.style.display = 'none';
+            const menu = clonedDoc.getElementById('floatingMenuBtn');
+            if (menu) menu.style.display = 'none';
+            const settings = clonedDoc.getElementById('settingsPanel');
+            if (settings) settings.style.display = 'none';
+          }
+        }
+      },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
 
-    const originalNav = element.querySelector('.doc-navigation');
-    const originalHeader = document.querySelector('.page-header');
-    const floatingMenu = document.getElementById('floatingMenuBtn');
-    const settingsPanel = document.getElementById('settingsPanel');
-    
-    if (originalNav) originalNav.style.display = 'none';
-    if (originalHeader) originalHeader.style.display = 'none';
-    if (floatingMenu) floatingMenu.style.display = 'none';
-    if (settingsPanel) settingsPanel.style.display = 'none';
-
-    html2pdf().set(opt).from(element).save().then(() => {
-      if (originalNav) originalNav.style.display = '';
-      if (originalHeader) originalHeader.style.display = '';
-      if (floatingMenu) floatingMenu.style.display = '';
-      if (settingsPanel) settingsPanel.style.display = '';
-    });
+    html2pdf().set(opt).from(element).save();
   }
   
   function initDownloadButtons() {
