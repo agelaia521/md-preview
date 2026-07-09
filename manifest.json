@@ -2,17 +2,24 @@
   "name": "Markdown Preview",
   "short_name": "MD Preview",
   "description": "一个简洁优雅的 Markdown 文档预览站点，支持多种渲染功能",
-  "start_url": "./",
+  "start_url": "./?source=pwa",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#d4a5c9",
-  "scope": "./",
   "icons": [
     {
       "src": "iris/icons/icon.svg",
-      "sizes": "any",
+      "sizes": "192x192 512x512",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "iris/icons/icon-maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }
