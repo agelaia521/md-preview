@@ -2,7 +2,7 @@
   "name": "Markdown Preview",
   "short_name": "MD Preview",
   "description": "一个简洁优雅的 Markdown 文档预览站点，支持多种渲染功能",
-  "start_url": "./",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "fullscreen", "minimal-ui"],
