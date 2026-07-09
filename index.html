@@ -17,6 +17,8 @@
   <meta name="twitter:title" content="Markdown Preview">
   <meta name="twitter:description" content="一个简洁优雅的 Markdown 文档预览站点，支持多种渲染功能">
   <meta name="twitter:creator" content="@theforeveriris">
+  <meta name="theme-color" content="#d4a5c9">
+  <link rel="manifest" href="manifest.json">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -281,5 +283,14 @@
   <!-- Main Entry -->
   <script src="iris/js/themes/theme-manager.js"></script>
   <script src="iris/app.js"></script>
+  
+  <!-- PWA Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
+        .catch(err => console.warn('[PWA] Service Worker registration failed:', err));
+    }
+  </script>
 </body>
 </html>
