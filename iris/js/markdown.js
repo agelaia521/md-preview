@@ -295,6 +295,18 @@
     container.innerHTML = tempDiv.innerHTML;
   }
 
+  function wrapTables(container) {
+    const tables = container.querySelectorAll('table');
+    tables.forEach(table => {
+      if (table.parentElement.classList.contains('table-wrapper')) return;
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'table-wrapper';
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+  }
+
   function renderMarkdown(markdown, currentPath = '') {
     const { frontmatter, content } = parseFrontmatter(markdown);
 
@@ -353,6 +365,8 @@
     interceptLinks(currentPath);
     
     processImages(dom.markdownContent, currentPath);
+    
+    wrapTables(dom.markdownContent);
     
     setTimeout(async () => {
       console.log('[Markdown] Starting render cycle');

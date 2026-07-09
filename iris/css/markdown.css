@@ -169,10 +169,17 @@
   margin: 2.5em 0;
 }
 
+.markdown-body table-wrapper {
+  overflow-x: auto;
+  margin: 1.5em 0;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
 .markdown-body table {
   width: 100%;
+  min-width: 100%;
   border-collapse: collapse;
-  margin: 1.5em 0;
   font-size: 0.9375rem;
 }
 
@@ -181,11 +188,23 @@
   border: 1px solid var(--color-border);
   padding: 0.75em 1em;
   text-align: left;
+  min-width: 80px;
+  max-width: 500px;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .markdown-body th {
   background: rgba(212, 165, 201, 0.08);
   font-weight: 500;
+  white-space: nowrap;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.markdown-body tr:nth-child(even) {
+  background: rgba(212, 165, 201, 0.02);
 }
 
 .markdown-body img {
