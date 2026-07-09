@@ -359,17 +359,54 @@
       showInstallButton();
     }
 
+    function showInstallProgress() {
+      const menuItems = document.querySelector('.menu-items');
+      if (menuItems) {
+        const progressDiv = document.createElement('div');
+        progressDiv.className = 'install-progress';
+        progressDiv.innerHTML = `
+          <div class="install-progress-spinner"></div>
+          <span>正在安装中...</span>
+        `;
+        menuItems.appendChild(progressDiv);
+      }
+    }
+
+    function hideInstallProgress() {
+      const progressDiv = document.querySelector('.install-progress');
+      if (progressDiv) {
+        progressDiv.remove();
+      }
+    }
+
     function handleInstallClick() {
       if (deferredPrompt) {
+        const installBtn = document.getElementById('installPwaBtn');
+        if (installBtn) {
+          installBtn.classList.add('loading');
+        }
+        showInstallProgress();
+
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(choiceResult => {
           console.log('[PWA] User choice:', choiceResult.outcome);
+          hideInstallProgress();
+
+          if (installBtn) {
+            installBtn.classList.remove('loading');
+          }
+
           deferredPrompt = null;
           if (choiceResult.outcome === 'accepted') {
             hideInstallButton();
           }
         }).catch(err => {
           console.error('[PWA] Install prompt error:', err);
+          hideInstallProgress();
+
+          if (installBtn) {
+            installBtn.classList.remove('loading');
+          }
           deferredPrompt = null;
         });
       } else {

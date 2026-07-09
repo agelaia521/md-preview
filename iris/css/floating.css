@@ -91,6 +91,41 @@
   stroke: var(--color-accent-pink);
 }
 
+.menu-item-btn.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.menu-item-btn.loading svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.install-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(212, 165, 201, 0.1);
+  border-radius: 16px;
+  font-size: 13px;
+  color: var(--color-accent-purple);
+  margin-top: 8px;
+}
+
+.install-progress-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-accent-purple);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
 .settings-overlay {
   position: fixed;
   top: 0;
