@@ -1,57 +1,69 @@
-# 5分钟快速开始
+# 快速开始
 
-本指南将帮助你在5分钟内快速上手 Markdown Preview。
+## 部署到 GitHub Pages
 
-## 前置要求
+### 1. Fork 仓库
 
-你需要：
-- 一个 GitHub 账号
-- 基本的 Git 知识
+点击右上角的 Fork 按钮，将仓库复制到你的账号下。
 
-## 步骤1: 使用模板创建仓库
+### 2. 开启 GitHub Pages
 
-1. 访问 [md-preview 仓库](https://github.com/theforeveriris/md-preview)
-2. 点击 "Use this template" 按钮创建你的仓库
-3. 给仓库起个名字，例如 `my-docs`
-4. 选择公开或私有
+1. 进入 Fork 后的仓库
+2. 点击 **Settings** → **Pages**
+3. 在 **Build and deployment** 中，Source 选择 **GitHub Actions**
 
-## 步骤2: 启用 GitHub Pages
+### 3. 修改配置
 
-1. 进入你的仓库 → Settings → Pages
-2. Source 选择 `Deploy from a branch`
-3. Branch 选择 `main`，文件夹选择 `/ (root)`
-4. 点击 Save
+编辑 `iris/config.json`，将 `owner` 和 `repo` 改为你的信息：
 
-## 步骤3: 添加文档
-
-在你的仓库 `docs` 目录下添加 Markdown 文件。例如，创建 `docs/hello.md`：
-
-```markdown
-# 我的第一篇文档
-
-这是我使用 Markdown Preview 发布的第一篇文档！
-
-## 简单列表
-
-- 苹果
-- 香蕉
-- 橙子
+```json
+{
+  "owner": "your-username",
+  "repo": "your-repo-name"
+}
 ```
 
-## 步骤4: 查看你的文档
+### 4. 推送并等待部署
 
-1. 等待 GitHub Pages 部署完成（通常需要1-2分钟）
-2. 访问 `https://你的用户名.github.io/你的仓库名/`
-3. 你应该能看到你的文档了！
+提交修改并推送到 `main` 分支，GitHub Actions 会自动构建并部署。部署完成后，访问 `https://your-username.github.io/your-repo-name/` 即可查看。
+
+## 添加文档
+
+在仓库的任意位置创建 `.md` 文件，系统会自动发现并显示在侧边栏。推荐放在 `docs/` 目录下。
+
+```
+你的仓库/
+├── README.md
+├── docs/
+│   ├── guide.md
+│   └── api/
+│       └── reference.md
+└── ...
+```
+
+### 文件命名建议
+
+- 使用小写字母和连字符：`my-document.md`
+- 文件名会作为侧边栏显示名称（自动去除扩展名和连字符）
+
+## 本地预览
+
+```bash
+# 克隆仓库
+git clone <your-repo-url>
+cd <repo-name>
+
+# 构建文件树（可选）
+node iris/scripts/build-file-tree.js
+
+# 直接用浏览器打开
+open index.html
+```
+
+> **注意**：直接打开 `index.html` 时，如果预构建文件不存在，会通过 GitHub API 加载文件树，可能受 API 限流影响。建议先构建文件树再预览。
 
 ## 下一步
 
-- 了解完整的 [Markdown 语法](examples/markdown-syntax.md)
-- 查看 [配置参考](configuration.md)
-- 学习如何 [开发插件](plugin-development.md)
-- 试试创建 [自定义主题](theme-customization.md)
-
-## 接下来去哪里？
-
-如果你是从其他工具迁移过来，查看 [迁移指南](migration.md)。
-遇到问题了？查看 [故障排查 FAQ](faq.md)。
+- 查看 [配置参考](configuration.md) 了解所有可配置项
+- 查看 [主题定制](theme-customization.md) 自定义外观
+- 浏览 [examples/](examples/) 目录查看所有支持的渲染功能
