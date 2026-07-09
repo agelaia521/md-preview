@@ -1,4 +1,4 @@
-const CACHE_NAME = 'md-preview-v1.1';
+const CACHE_NAME = 'md-preview-v2.0';
 const RUNTIME_CACHE = 'md-preview-runtime';
 
 const PRECACHE_URLS = [
@@ -50,28 +50,46 @@ const PRECACHE_URLS = [
   'iris/data/file-tree.json',
   'iris/data/search-index.json',
   'iris/config.json',
-  'iris/icons/icon.svg',
-  'iris/icons/icon-maskable.svg'
+  'iris/icons/icon-192.png',
+  'iris/icons/icon-512.png',
+  'iris/icons/icon-maskable-512.png'
 ];
 
 self.addEventListener('install', event => {
+  console.log('[SW] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(PRECACHE_URLS).catch(err => {
-        console.warn('[SW] Precache partial failure:', err);
-      }))
-      .then(() => self.skipWaiting())
+      .then(cache => {
+        console.log('[SW] Opening cache:', CACHE_NAME);
+        return cache.addAll(PRECACHE_URLS);
+      })
+      .then(() => {
+        console.log('[SW] Precache completed');
+        return self.skipWaiting();
+      })
+      .catch(err => {
+        console.error('[SW] Precache failed:', err);
+        return self.skipWaiting();
+      })
   );
 });
 
 self.addEventListener('activate', event => {
+  console.log('[SW] Activating...');
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
+    caches.keys().then(keys => {
+      console.log('[SW] Existing caches:', keys);
+      return Promise.all(
         keys.filter(key => key !== CACHE_NAME && key !== RUNTIME_CACHE)
-          .map(key => caches.delete(key))
-      )
-    ).then(() => self.clients.claim())
+          .map(key => {
+            console.log('[SW] Deleting old cache:', key);
+            return caches.delete(key);
+          })
+      );
+    }).then(() => {
+      console.log('[SW] Activated, claiming clients');
+      return self.clients.claim();
+    })
   );
 });
 
@@ -98,17 +116,22 @@ self.addEventListener('fetch', event => {
 
   event.respondWith(
     caches.match(request).then(cached => {
-      const networkFetch = fetch(request)
-        .then(response => {
-          if (response.ok && response.type === 'basic') {
-            const clone = response.clone();
-            caches.open(RUNTIME_CACHE).then(cache => cache.put(request, clone));
-          }
-          return response;
-        })
-        .catch(() => cached);
-
-      return cached || networkFetch;
+      if (cached) {
+        return cached;
+      }
+      return fetch(request).then(response => {
+        if (response.ok && response.type === 'basic') {
+          const clone = response.clone();
+          caches.open(RUNTIME_CACHE).then(cache => cache.put(request, clone));
+        }
+        return response;
+      });
     })
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

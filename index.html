@@ -288,23 +288,82 @@
   
   <!-- PWA Service Worker -->
   <script>
+    let deferredPrompt = null;
+    let pwaInstallButton = null;
+
+    function createInstallButton() {
+      if (pwaInstallButton) return;
+      if (window.matchMedia('(display-mode: standalone)').matches) return;
+
+      pwaInstallButton = document.createElement('button');
+      pwaInstallButton.id = 'pwa-install-btn';
+      pwaInstallButton.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 9999;
+        background: linear-gradient(135deg, #d4a5c9, #f2c4ce);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 12px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(212, 165, 201, 0.4);
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        gap: 8px;
+      `;
+      pwaInstallButton.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>安装到桌面`;
+      pwaInstallButton.onclick = () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(choiceResult => {
+            console.log('[PWA] User choice:', choiceResult.outcome);
+            deferredPrompt = null;
+            pwaInstallButton.style.display = 'none';
+          });
+        }
+      };
+      document.body.appendChild(pwaInstallButton);
+    }
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
+        createInstallButton();
+
         navigator.serviceWorker.register('sw.js', { scope: './' })
           .then(reg => {
             console.log('[PWA] Service Worker registered, scope:', reg.scope);
-            if (reg.waiting) {
-              reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-            }
+
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  newWorker.postMessage({ type: 'SKIP_WAITING' });
+                }
+              });
+            });
           })
           .catch(err => console.warn('[PWA] Service Worker registration failed:', err));
       });
 
-      let deferredPrompt = null;
       window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
         deferredPrompt = e;
         console.log('[PWA] Install prompt available');
+        if (pwaInstallButton) {
+          pwaInstallButton.style.display = 'flex';
+        }
+      });
+
+      window.addEventListener('appinstalled', () => {
+        console.log('[PWA] App installed successfully');
+        if (pwaInstallButton) {
+          pwaInstallButton.style.display = 'none';
+        }
+        deferredPrompt = null;
       });
     }
   </script>
