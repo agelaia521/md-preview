@@ -192,10 +192,10 @@
       styleEl.textContent = [
         ':host(.show-word-count) .word-count{opacity:1}',
         '.word-count{color:var(--hover-color);font-size:x-small;opacity:0;transition:opacity .2s;white-space:nowrap;margin-inline-start:auto;padding-inline-start:8px;flex-shrink:0}',
-        'li.file>button{display:flex;align-items:center}',
-        'li.file>button::after{display:none}',
-        'li.file>button>.file-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}',
-        'li.active>button{color:var(--color-accent-purple-deep);font-weight:500}',
+        'li.file>button,li.text>button{display:flex;align-items:center}',
+        'li.file>button::after,li.text>button::after{display:none}',
+        'li.file>button>.file-name,li.text>button>.file-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}',
+        'li.file.active>button,li.text.active>button{color:var(--color-accent-purple-deep);font-weight:500}',
         ':host li.folder>ul{overflow:hidden}'
       ].join('\n');
       shadow.appendChild(styleEl);
@@ -229,7 +229,7 @@
       // 建立路径 -> li 映射，并注入词数
       state.fileLiMap = new Map();
 
-      sh.querySelectorAll('li.file').forEach(li => {
+      sh.querySelectorAll('li.file, li.text').forEach(li => {
         var button = li.querySelector('button');
         if (!button) return;
 
