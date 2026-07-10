@@ -118,28 +118,25 @@
     return count + ' 词';
   }
 
-  function renderFileTree(files, container = dom.fileTree, level = 0, parentHasNextSibling = []) {
+  function renderFileTree(files, container = dom.fileTree, level = 0) {
+    const folderCount = files.filter(f => f.type === 'folder').length;
+    if (folderCount > 1) {
+      container.classList.add('has-tree-line');
+    }
+    
     files.forEach((item, index) => {
       const hasNextSibling = index < files.length - 1;
       
       if (item.type === 'folder') {
         const wrapperEl = document.createElement('div');
         wrapperEl.className = 'folder-wrapper';
-        wrapperEl.dataset.level = level;
-        wrapperEl.dataset.hasNextSibling = hasNextSibling;
         
         const folderEl = document.createElement('div');
         folderEl.className = 'folder-item';
         
-        let connectorHtml = '';
-        if (level > 0) {
-          connectorHtml += `<span class="tree-line tree-line-${hasNextSibling ? 'branch' : 'last'}"></span>`;
-        }
-        
         const wordCountText = item.wordCount ? `<span class="folder-word-count">${formatWordCount(item.wordCount)}</span>` : '';
         
         folderEl.innerHTML = `
-          ${connectorHtml}
           <svg class="folder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M9 18l6-6-6-6"/>
           </svg>
@@ -156,8 +153,7 @@
         });
         
         wrapperEl.appendChild(folderEl);
-        const newHasNextSibling = [...parentHasNextSibling, hasNextSibling];
-        renderFileTree(item.children || [], childrenEl, level + 1, newHasNextSibling);
+        renderFileTree(item.children || [], childrenEl, level + 1);
         wrapperEl.appendChild(childrenEl);
         container.appendChild(wrapperEl);
         
