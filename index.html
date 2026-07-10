@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Preview</title>
+  
+  <!-- Open Graph / Social Share Meta Tags -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Markdown Preview">
+  <meta property="og:title" content="Markdown Preview">
+  <meta property="og:description" content="一个简洁优雅的 Markdown 文档预览站点，支持多种渲染功能">
+  <meta property="og:url" content="https://theforeveriris.github.io/md-preview/">
+  
+  <!-- Twitter Specific -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Markdown Preview">
+  <meta name="twitter:description" content="一个简洁优雅的 Markdown 文档预览站点，支持多种渲染功能">
+  <meta name="twitter:creator" content="@theforeveriris">
+  <meta name="theme-color" content="#d4a5c9">
+  <link rel="manifest" href="manifest.json">
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="iris/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="iris/icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="iris/styles.css">
+  <link rel="stylesheet" href="iris/css/themes/themes.css">
+  <link rel="stylesheet" href="iris/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="iris/vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="iris/vendor/highlight.js/styles/github.css" id="hljs-theme">
+</head>
+<body>
+  <div class="progress-bar" id="progressBar"></div>
+  
+  <div class="app-container">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1 class="sidebar-title">
+          <span class="mode-toggle active" id="modeFiles" data-mode="files">Files</span>
+          <span class="mode-divider">/</span>
+          <span class="mode-toggle" id="modeIndex" data-mode="index">Index</span>
+        </h1>
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+      <div class="search-container">
+        <input type="search" id="searchInput" placeholder="搜索文档..." />
+      </div>
+      <div class="search-results" id="searchResults"></div>
+      <div class="file-tree" id="fileTree"></div>
+      <div class="index-tree hidden" id="indexTree"></div>
+    </aside>
+    
+    <main class="main-content">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      
+      <div class="page-header" id="pageHeader">
+        <div class="page-breadcrumbs" id="pageBreadcrumbs"></div>
+      </div>
+      
+      <!-- Floating Menu -->
+      <div class="floating-menu" id="floatingMenu">
+        <div class="menu-items">
+          <button class="menu-item-btn" id="backToTopBtn" title="回到顶部">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 15l-6-6-6 6"/>
+            </svg>
+            <span class="menu-item-label">回到顶部</span>
+          </button>
+          <button class="menu-item-btn" id="installPwaBtn" title="安装到桌面" style="display: none;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span class="menu-item-label">安装到桌面</span>
+          </button>
+          <a class="menu-item-btn" id="editPageBtn" title="编辑此页" target="_blank" rel="noopener noreferrer" href="#">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            <span class="menu-item-label">编辑此页</span>
+          </a>
+          <button class="menu-item-btn settings-btn" id="openSettingsBtn" title="设置">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+            </svg>
+            <span class="menu-item-label">设置</span>
+          </button>
+        </div>
+        <button class="menu-trigger" id="menuTrigger">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Settings Panel -->
+      <div class="settings-overlay" id="settingsOverlay">
+        <div class="settings-panel">
+          <div class="settings-header">
+            <h2 class="settings-title">设置</h2>
+            <button class="settings-close" id="closeSettingsBtn">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="settings-section">
+            <h3 class="settings-section-title">外观</h3>
+            
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">主题</div>
+                <div class="setting-description">选择界面主题</div>
+              </div>
+              <div class="setting-control">
+                <select id="themeSelect" class="theme-select">
+                  <option value="default">紫粉渐变</option>
+                  <option value="github-light">GitHub Light</option>
+                  <option value="github-dark">GitHub Dark</option>
+                  <option value="notion">Notion</option>
+                  <option value="arc">Arc Dark</option>
+                  <option value="dracula">Dracula</option>
+                  <option value="nord">Nord</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">自定义 CSS</div>
+                <div class="setting-description">加载外部 CSS 文件</div>
+              </div>
+              <div class="setting-control">
+                <input type="text" id="customCSSInput" class="custom-css-input" placeholder="CSS 文件 URL">
+              </div>
+            </div>
+            
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">代码高亮主题</div>
+                <div class="setting-description">选择代码块配色方案</div>
+              </div>
+              <div class="setting-control">
+                <select id="codeThemeSelect" class="theme-select">
+                  <option value="github">GitHub Light</option>
+                  <option value="github-dark">GitHub Dark</option>
+                  <option value="atom-one-light">Atom One Light</option>
+                  <option value="atom-one-dark">Atom One Dark</option>
+                  <option value="monokai">Monokai</option>
+                  <option value="dracula">Dracula</option>
+                  <option value="nord">Nord</option>
+                  <option value="vs2015">VS 2015</option>
+                  <option value="solarized-light">Solarized Light</option>
+                  <option value="solarized-dark">Solarized Dark</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div class="settings-section">
+            <h3 class="settings-section-title">功能</h3>
+            
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">显示阅读进度</div>
+                <div class="setting-description">显示页面阅读进度</div>
+              </div>
+              <div class="setting-control">
+                <label class="switch">
+                  <input type="checkbox" id="showReadingProgressToggle" checked>
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">显示词数统计</div>
+                <div class="setting-description">在文件列表中显示每个文件的词数</div>
+              </div>
+              <div class="setting-control">
+                <label class="switch">
+                  <input type="checkbox" id="showWordCountToggle">
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">下载此文章</div>
+                <div class="setting-description">下载当前文档为 MD 格式</div>
+              </div>
+              <div class="setting-control">
+                <button id="downloadMdBtn" class="download-btn">下载 MD</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <article class="markdown-body" id="markdownContent">
+        <div class="welcome-state">
+          <p class="welcome-text">选择一个文件开始阅读</p>
+        </div>
+      </article>
+      
+      <div class="reading-progress" id="readingProgress">
+        <div class="reading-progress-bar"></div>
+      </div>
+    </main>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  
+  <!-- Debug Panel (shown when ?debug=1) -->
+  <div class="debug-panel hidden" id="debugPanel">
+    <div class="debug-header">
+      <span class="debug-title">调试模式</span>
+      <button class="debug-close" id="debugClose">&times;</button>
+    </div>
+    <div class="debug-content">
+      <div class="debug-item">
+        <span class="debug-label">API 调用:</span>
+        <span class="debug-value" id="debugApiCalls">0 次</span>
+      </div>
+      <div class="debug-item">
+        <span class="debug-label">缓存命中:</span>
+        <span class="debug-value" id="debugCacheHits">0 / 0</span>
+      </div>
+      <div class="debug-item">
+        <span class="debug-label">首屏耗时:</span>
+        <span class="debug-value" id="debugRenderTime">-ms</span>
+      </div>
+      <div class="debug-item">
+        <span class="debug-label">渲染器:</span>
+        <span class="debug-value">Marked.js</span>
+      </div>
+    </div>
+  </div>
+  
+  <script src="iris/vendor/marked.js"></script>
+  <script src="iris/vendor/highlight.js/highlight.min.js"></script>
+  <script src="iris/vendor/flexsearch.bundle.js"></script>
+  <script src="iris/vendor/mermaid.min.js"></script>
+  <script src="iris/vendor/pako.min.js"></script>
+  <script src="iris/vendor/leaflet/leaflet.js"></script>
+  <script src="iris/vendor/apexcharts.min.js"></script>
+  <link rel="stylesheet" href="iris/vendor/diff2html/css/diff2html.min.css" />
+  <script src="iris/vendor/diff2html/js/diff2html.min.js"></script>
+  <script src="iris/vendor/diff2html/js/diff2html-ui.min.js"></script>
+  <script src="iris/vendor/katex/katex.min.js"></script>
+  <script src="iris/vendor/katex/auto-render.min.js"></script>
+  
+  <script async src="https://platform.twitter.com/widgets.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#d4a5c9',
+        primaryTextColor: '#333333',
+        primaryBorderColor: '#d4a5c9',
+        lineColor: '#888888',
+        secondaryColor: '#f2c4ce',
+        tertiaryColor: '#f8f8f8',
+        background: '#ffffff',
+        mainBkg: '#ffffff',
+        nodeBorder: '#d4a5c9',
+        clusterBkg: '#f8f8f8',
+        titleColor: '#333333',
+        edgeLabelBackground: '#ffffff'
+      },
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      },
+      sequence: {
+        useMaxWidth: true,
+        diagramMarginX: 20,
+        diagramMarginY: 20
+      }
+    });
+  </script>
+  <!-- App Modules -->
+  <script src="iris/js/config.js"></script>
+  <script src="iris/js/debug.js"></script>
+  <script src="iris/js/state.js"></script>
+  <script src="iris/js/dom.js"></script>
+  <script src="iris/js/ui.js"></script>
+  <script src="iris/js/search.js"></script>
+  <script src="iris/vendor/file-tree/prod.js"></script>
+  <script src="iris/js/file-tree.js"></script>
+  <script src="iris/js/markdown.js"></script>
+  <script src="iris/js/router.js"></script>
+  <script src="iris/js/settings.js"></script>
+  
+  <!-- Plugin System -->
+  <script src="iris/js/plugins/loader.js"></script>
+  
+  <!-- Built-in Plugins -->
+  <script src="iris/plugins/qrcode.js"></script>
+  
+  <!-- Renderers -->
+  <script src="iris/js/renderers/mermaid.js"></script>
+  <script src="iris/js/renderers/plantuml.js"></script>
+  <script src="iris/js/renderers/apexcharts.js"></script>
+  <script src="iris/js/renderers/diff.js"></script>
+  <script src="iris/js/renderers/geo.js"></script>
+  <script src="iris/js/renderers/embedded.js"></script>
+  <script src="iris/js/renderers/katex.js"></script>
+  
+  <!-- Main Entry -->
+  <script src="iris/js/themes/theme-manager.js"></script>
+  <script src="iris/app.js"></script>
+  
+  <script>
+    let deferredPrompt = null;
+    let swRegistration = null;
+
+    function showInstallButton() {
+      const installBtn = document.getElementById('installPwaBtn');
+      if (installBtn) {
+        installBtn.style.display = 'flex';
+        console.log('[PWA] Install button shown');
+      }
+    }
+
+    function hideInstallButton() {
+      const installBtn = document.getElementById('installPwaBtn');
+      if (installBtn) {
+        installBtn.style.display = 'none';
+        console.log('[PWA] Install button hidden');
+      }
+    }
+
+    function checkStandaloneMode() {
+      if (window.matchMedia('(display-mode: standalone)').matches || 
+          window.navigator.standalone ||
+          document.referrer.includes('android-app://')) {
+        console.log('[PWA] App is running in standalone mode');
+        hideInstallButton();
+        return true;
+      }
+      return false;
+    }
+
+    function registerServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js', { scope: './' })
+          .then(reg => {
+            swRegistration = reg;
+            console.log('[PWA] Service Worker registered, scope:', reg.scope);
+
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              newWorker.addEventListener('statechange', () => {
+                console.log('[PWA] Worker state:', newWorker.state);
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  newWorker.postMessage({ type: 'SKIP_WAITING' });
+                }
+              });
+            });
+
+            if (navigator.serviceWorker.controller) {
+              console.log('[PWA] Service Worker is active');
+            }
+          })
+          .catch(err => {
+            console.error('[PWA] Service Worker registration failed:', err);
+          });
+      }
+    }
+
+    function handleBeforeInstallPrompt(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      console.log('[PWA] beforeinstallprompt fired');
+      showInstallButton();
+    }
+
+    function showInstallProgress() {
+      const menuItems = document.querySelector('.menu-items');
+      if (menuItems) {
+        const progressDiv = document.createElement('div');
+        progressDiv.className = 'install-progress';
+        progressDiv.innerHTML = `
+          <div class="install-progress-spinner"></div>
+          <span>正在安装中...</span>
+        `;
+        menuItems.appendChild(progressDiv);
+      }
+    }
+
+    function hideInstallProgress() {
+      const progressDiv = document.querySelector('.install-progress');
+      if (progressDiv) {
+        progressDiv.remove();
+      }
+    }
+
+    function handleInstallClick() {
+      if (deferredPrompt) {
+        const installBtn = document.getElementById('installPwaBtn');
+        if (installBtn) {
+          installBtn.classList.add('loading');
+        }
+        showInstallProgress();
+
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(choiceResult => {
+          console.log('[PWA] User choice:', choiceResult.outcome);
+          hideInstallProgress();
+
+          if (installBtn) {
+            installBtn.classList.remove('loading');
+          }
+
+          deferredPrompt = null;
+          if (choiceResult.outcome === 'accepted') {
+            hideInstallButton();
+          }
+        }).catch(err => {
+          console.error('[PWA] Install prompt error:', err);
+          hideInstallProgress();
+
+          if (installBtn) {
+            installBtn.classList.remove('loading');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        console.log('[PWA] No install prompt available');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkStandaloneMode();
+
+      window.matchMedia('(display-mode: standalone)').addEventListener('change', () => {
+        checkStandaloneMode();
+      });
+
+      registerServiceWorker();
+
+      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+      window.addEventListener('appinstalled', () => {
+        console.log('[PWA] App installed successfully');
+        hideInstallButton();
+        deferredPrompt = null;
+      });
+
+      const installBtn = document.getElementById('installPwaBtn');
+      if (installBtn) {
+        installBtn.addEventListener('click', handleInstallClick);
+      }
+
+      setTimeout(() => {
+        if (!deferredPrompt && !checkStandaloneMode()) {
+          console.log('[PWA] Checking if installable after 5 seconds');
+        }
+      }, 5000);
+    });
+  </script>
+</body>
+</html>
