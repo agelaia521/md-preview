@@ -544,7 +544,7 @@
         e.preventDefault();
         const target = document.getElementById(heading.id);
         if (target) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          target.scrollIntoView({ behavior: 'auto', block: 'start' });
         }
         setActiveIndexItem(item);
       });
