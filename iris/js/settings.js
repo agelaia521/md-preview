@@ -4,7 +4,8 @@
   const STORAGE_KEY = 'md-preview-settings';
 
   const defaultSettings = {
-    showReadingProgress: true
+    showReadingProgress: true,
+    codeTheme: 'github'
   };
 
   function loadSettings() {
@@ -12,7 +13,11 @@
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        return { ...defaultSettings, showReadingProgress: parsed.showReadingProgress ?? defaultSettings.showReadingProgress };
+        return { 
+          ...defaultSettings, 
+          showReadingProgress: parsed.showReadingProgress ?? defaultSettings.showReadingProgress,
+          codeTheme: parsed.codeTheme ?? defaultSettings.codeTheme
+        };
       }
     } catch (e) {
       console.error('Failed to load settings:', e);
@@ -69,6 +74,7 @@
     const settingsOverlay = document.getElementById('settingsOverlay');
     const closeSettingsBtn = document.getElementById('closeSettingsBtn');
     const showReadingProgressToggle = document.getElementById('showReadingProgressToggle');
+    const codeThemeSelect = document.getElementById('codeThemeSelect');
 
     if (!settingsOverlay) {
       return;
@@ -90,6 +96,20 @@
       saveSettings(settings);
       toggleReadingProgress(settings.showReadingProgress);
     });
+
+    codeThemeSelect?.addEventListener('change', (e) => {
+      const settings = loadSettings();
+      settings.codeTheme = e.target.value;
+      saveSettings(settings);
+      applyCodeTheme(settings.codeTheme);
+    });
+  }
+
+  function applyCodeTheme(theme) {
+    const link = document.getElementById('hljs-theme');
+    if (link) {
+      link.href = `iris/vendor/highlight.js/styles/${theme}.css`;
+    }
   }
 
   function openSettingsPanel() {
@@ -162,10 +182,13 @@
     initSettingsPanel();
     initDownloadButtons();
     toggleReadingProgress(settings.showReadingProgress);
+    applyCodeTheme(settings.codeTheme);
 
     const showReadingProgressToggle = document.getElementById('showReadingProgressToggle');
+    const codeThemeSelect = document.getElementById('codeThemeSelect');
 
     if (showReadingProgressToggle) showReadingProgressToggle.checked = settings.showReadingProgress;
+    if (codeThemeSelect) codeThemeSelect.value = settings.codeTheme;
   }
 
   window.MarkdownPreview.settings = {

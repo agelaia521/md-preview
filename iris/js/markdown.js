@@ -325,9 +325,22 @@
 
     const { processed: alertProcessed, latexBlocks } = protectLaTeXBlocks(content);
     const processedContent = processGitHubAlerts(alertProcessed);
+    const renderer = new marked.Renderer();
+    renderer.code = function({ text, lang }) {
+      const language = lang || '';
+      const escapedText = text;
+      const languageClass = language ? ` class="language-${language}"` : '';
+      return `<pre class="code-block"><button class="copy-btn" aria-label="复制代码">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </button><code${languageClass}>${escapedText}</code></pre>`;
+    };
     let html = marked.parse(processedContent, {
       breaks: true,
-      gfm: true
+      gfm: true,
+      renderer
     });
 
     html = html.replace(/LATEXPROTECT_(\d+)_/g, (match, idx) => {
@@ -361,6 +374,9 @@
         window.MarkdownPreview.ui.copyCodeToClipboard(pre);
       });
     });
+
+    setupCopyButtons();
+    highlightCodeBlocks();
 
     interceptLinks(currentPath);
     
@@ -655,6 +671,36 @@
     });
   }
 
+  function highlightCodeBlocks() {
+    if (typeof hljs === 'undefined') return;
+    const blocks = dom.markdownContent.querySelectorAll('pre code');
+    blocks.forEach(block => {
+      try {
+        hljs.highlightElement(block);
+      } catch (e) {
+        console.warn('Highlight error:', e);
+      }
+    });
+  }
+
+  function setupCopyButtons() {
+    const buttons = dom.markdownContent.querySelectorAll('.copy-btn');
+    buttons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const pre = btn.closest('pre');
+        const code = pre.querySelector('code');
+        if (code) {
+          navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.classList.add('copied');
+            setTimeout(() => btn.classList.remove('copied'), 2000);
+          });
+        }
+      });
+    });
+  }
+
   window.MarkdownPreview.markdown = {
     loadMarkdownFile,
     renderMarkdown,
@@ -668,6 +714,7 @@
     updateBreadcrumbs,
     setupHeadingNavigation,
     calculateReadingTime,
-    renderWithPlugins
+    renderWithPlugins,
+    highlightCodeBlocks
   };
 })();
