@@ -153,6 +153,11 @@
         const childrenEl = document.createElement('div');
         childrenEl.className = 'folder-children';
         
+        const subFolderCount = (item.children || []).filter(c => c.type === 'folder').length;
+        if (subFolderCount > 0) {
+          childrenEl.classList.add('has-tree-line');
+        }
+        
         folderEl.addEventListener('click', () => {
           folderEl.classList.toggle('expanded');
           childrenEl.classList.toggle('expanded');
