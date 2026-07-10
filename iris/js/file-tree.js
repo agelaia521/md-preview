@@ -134,9 +134,15 @@
         const folderEl = document.createElement('div');
         folderEl.className = 'folder-item';
         
+        let connectorHtml = '';
+        if (level > 0) {
+          connectorHtml += `<span class="tree-line tree-line-${hasNextSibling ? 'branch' : 'last'}"></span>`;
+        }
+        
         const wordCountText = item.wordCount ? `<span class="folder-word-count">${formatWordCount(item.wordCount)}</span>` : '';
         
         folderEl.innerHTML = `
+          ${connectorHtml}
           <svg class="folder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M9 18l6-6-6-6"/>
           </svg>

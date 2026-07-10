@@ -219,6 +219,10 @@
   opacity: 1;
 }
 
+.file-tree {
+  position: relative;
+}
+
 .folder-wrapper {
   position: relative;
 }
@@ -251,6 +255,34 @@
   bottom: 0;
   width: 1px;
   background: var(--color-border);
+}
+
+.tree-line {
+  position: relative;
+  flex-shrink: 0;
+  width: 18px;
+  height: 100%;
+}
+
+.tree-line::before,
+.tree-line::after {
+  content: '';
+  position: absolute;
+  background: var(--color-border);
+}
+
+.tree-line-branch::after {
+  left: 8px;
+  top: 50%;
+  right: 2px;
+  height: 1px;
+}
+
+.tree-line-last::after {
+  left: 8px;
+  top: 50%;
+  right: 2px;
+  height: 1px;
 }
 
 .sidebar,
