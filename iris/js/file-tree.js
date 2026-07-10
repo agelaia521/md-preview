@@ -191,8 +191,9 @@
       var styleEl = document.createElement('style');
       styleEl.textContent = [
         ':host(.show-word-count) .word-count{opacity:1}',
-        '.word-count{color:var(--hover-color);font-size:x-small;opacity:0;transition:opacity .2s;white-space:nowrap;margin-inline-start:auto;padding-inline-start:8px;flex-shrink:0}',
-        'li.file>button,li.text>button{display:flex;align-items:center}',
+        '.word-count{color:rgb(from currentColor r g b / .4);font-size:x-small;opacity:0;transition:opacity .2s;white-space:nowrap;margin-left:auto;padding-left:12px;flex-shrink:0}',
+        'li.file,li.text{display:flex;align-items:center}',
+        'li.file>button,li.text>button{display:flex;align-items:center;flex:1;overflow:hidden}',
         'li.file>button::after,li.text>button::after{display:none}',
         'li.file>button>.file-name,li.text>button>.file-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}',
         'li.file.active>button,li.text.active>button{color:var(--color-accent-purple-deep);font-weight:500}',
