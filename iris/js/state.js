@@ -3,6 +3,7 @@
   
   window.MarkdownPreview.state = {
     fileTreeData: [],
+    fileLiMap: null,
     currentMode: 'files',
     currentFilePath: '',
     currentHeadings: [],

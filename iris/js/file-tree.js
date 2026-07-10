@@ -116,19 +116,57 @@
     return count + ' 词';
   }
 
+  function safeDecode(s) {
+    try { return decodeURIComponent(s); } catch { return s; }
+  }
+
+  function getDecodedPath(li) {
+    const segments = [];
+    let current = li;
+    while (current && current.tagName === 'LI') {
+      const btn = current.querySelector('button');
+      if (btn) {
+        let name = '';
+        for (const node of btn.childNodes) {
+          if (node.nodeType === Node.TEXT_NODE) {
+            name += node.textContent;
+          }
+        }
+        segments.unshift(safeDecode(name.trim()));
+      }
+      current = current.parentElement?.closest('li');
+    }
+    return segments.join('/');
+  }
+
   function renderFileTree(files) {
     if (!dom.fileTree) return;
     dom.fileTree.innerHTML = '';
-    
+
     const { Tree, Folder, File } = window.MarkdownPreview.FileTree || {};
     if (!Tree || !Folder || !File) {
       console.error('FileTree component not loaded');
       dom.fileTree.innerHTML = '<div style="color: var(--color-text-muted); padding: 16px;">文件树组件加载失败</div>';
       return;
     }
-    
+
     const tree = new Tree();
-    
+
+    // 构建词数映射表：解码后的完整路径 -> 词数
+    const wordCountMap = new Map();
+    function buildWordCountMap(items, parentPath) {
+      parentPath = parentPath || '';
+      items.forEach(function(item) {
+        var currentPath = parentPath ? parentPath + '/' + item.name : item.name;
+        if (item.type === 'file' && item.wordCount) {
+          wordCountMap.set(currentPath, item.wordCount);
+        } else if (item.type === 'folder' && item.children) {
+          buildWordCountMap(item.children, currentPath);
+        }
+      });
+    }
+    buildWordCountMap(files);
+
     function addItems(parent, items) {
       items.forEach(item => {
         if (item.type === 'folder') {
@@ -140,34 +178,91 @@
         } else if (item.type === 'file' && item.name.endsWith('.md')) {
           const file = new File([], item.name);
           file._path = item.path;
-          file._wordCount = item.wordCount;
           parent.append(file);
         }
       });
     }
-    
+
     addItems(tree, files);
-    
+
+    // 向 Shadow DOM 注入自定义样式（词数显示 + 选中高亮）
+    var shadow = tree.shadowRoot;
+    if (shadow) {
+      var styleEl = document.createElement('style');
+      styleEl.textContent = [
+        ':host(.show-word-count) .word-count{opacity:1}',
+        '.word-count{color:var(--hover-color);font-size:x-small;opacity:0;transition:opacity .2s;white-space:nowrap;margin-inline-start:auto;padding-inline-start:8px;flex-shrink:0}',
+        'li.file>button{display:flex;align-items:center}',
+        'li.file>button::after{display:none}',
+        'li.file>button>.file-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}',
+        'li.active>button{color:var(--color-accent-purple-deep);font-weight:500}',
+        ':host li.folder>ul{overflow:hidden}'
+      ].join('\n');
+      shadow.appendChild(styleEl);
+    }
+
     // Handle file clicks
     tree.addEventListener('click', (event) => {
       const { action, folder, target, path } = event.detail;
       if (action === 'click' && !folder) {
-        // Find the file's path from our data
         const filePath = target._path || findFilePath(target.name, state.fileTreeData);
         if (filePath) {
           window.MarkdownPreview.markdown.loadMarkdownFile(filePath);
+          highlightFileInSidebar(filePath);
           closeSidebarOnMobile();
         }
       }
     });
-    
+
     dom.fileTree.appendChild(tree);
-    
-    // Open all folders by default after a short delay
+
+    // 渲染后：展开文件夹、注入词数、建立路径映射
     requestAnimationFrame(() => {
-      tree.querySelectorAll('li.folder').forEach(folder => {
+      var sh = tree.shadowRoot;
+      if (!sh) return;
+
+      // 展开所有文件夹
+      sh.querySelectorAll('li.folder').forEach(folder => {
         folder.classList.add('opened');
       });
+
+      // 建立路径 -> li 映射，并注入词数
+      state.fileLiMap = new Map();
+
+      sh.querySelectorAll('li.file').forEach(li => {
+        var button = li.querySelector('button');
+        if (!button) return;
+
+        var decodedPath = getDecodedPath(li);
+        state.fileLiMap.set(decodedPath, li);
+
+        // 将文件名文本节点包裹在 span 中，实现截断
+        var textNode = null;
+        for (var i = 0; i < button.childNodes.length; i++) {
+          if (button.childNodes[i].nodeType === Node.TEXT_NODE) {
+            textNode = button.childNodes[i];
+            break;
+          }
+        }
+        if (textNode) {
+          var nameSpan = document.createElement('span');
+          nameSpan.className = 'file-name';
+          nameSpan.textContent = textNode.textContent;
+          button.replaceChild(nameSpan, textNode);
+        }
+
+        var wc = wordCountMap.get(decodedPath);
+        if (wc) {
+          var span = document.createElement('span');
+          span.className = 'word-count';
+          span.textContent = formatWordCount(wc);
+          button.appendChild(span);
+        }
+      });
+
+      // 应用当前词数显示设置
+      var settings = window.MarkdownPreview.settings && window.MarkdownPreview.settings.load ? window.MarkdownPreview.settings.load() : {};
+      setWordCountVisibility(settings.showWordCount === true);
     });
   }
   
@@ -184,17 +279,26 @@
   }
   
   function setWordCountVisibility(visible) {
-    if (dom.fileTree) {
-      dom.fileTree.classList.toggle('show-word-count', visible);
+    var tree = dom.fileTree.querySelector('file-tree');
+    if (tree) {
+      tree.classList.toggle('show-word-count', visible);
     }
   }
   
   function setActiveFile(path) {
-    // For the custom element tree, highlight by path
-    const tree = dom.fileTree.querySelector('file-tree');
-    if (tree) {
-      const { target } = tree.query(path) || {};
-      // The component handles selection internally
+    var tree = dom.fileTree.querySelector('file-tree');
+    if (!tree || !tree.shadowRoot) return;
+
+    var sh = tree.shadowRoot;
+
+    // 移除所有 active 状态
+    sh.querySelectorAll('li.active').forEach(function(li) {
+      li.classList.remove('active');
+    });
+
+    // 通过路径映射找到对应 li 并高亮
+    if (state.fileLiMap && state.fileLiMap.has(path)) {
+      state.fileLiMap.get(path).classList.add('active');
     }
   }
   
