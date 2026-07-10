@@ -111,9 +111,9 @@
   function formatWordCount(count) {
     if (!count && count !== 0) return '';
     if (count >= 10000) {
-      return (count / 10000).toFixed(1).replace(/\.0$/, '') + ' 万词';
+      return (count / 10000).toFixed(1).replace(/\.0$/, '') + 'w';
     }
-    return count + ' 词';
+    return count + ' words';
   }
 
   function safeDecode(s) {
@@ -232,6 +232,9 @@
       sh.querySelectorAll('li.file, li.text').forEach(li => {
         var button = li.querySelector('button');
         if (!button) return;
+
+        // 移除 data-bytes 属性，隐藏组件自带的 "0 bytes" 显示
+        button.removeAttribute('data-bytes');
 
         var decodedPath = getDecodedPath(li);
         state.fileLiMap.set(decodedPath, li);

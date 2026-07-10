@@ -107,6 +107,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: none;
 }
 
 .index-item:hover {
